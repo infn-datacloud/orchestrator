@@ -117,6 +117,12 @@ public class ToscaServiceImpl implements ToscaService {
   private static final String CLIENT_ID = "client_id";
   private static final String REGISTRATION_ACCESS_TOKEN = "registration_access_token";
 
+  private static final String S3_TOSCA_NODE_TYPE = "tosca.nodes.indigo.S3Bucket";
+  private static final String BUCKET_NAME = "bucket_name";
+  private static final String AWS_ACCESS_KEY = "aws_access_key";
+  private static final String AWS_SECRET_KEY = "aws_secret_key";
+  private static final String S3_URL = "s3_url";
+
   @Autowired
   private IndigoInputsPreProcessorService indigoInputsPreProcessorService;
 
@@ -1267,6 +1273,50 @@ public class ToscaServiceImpl implements ToscaService {
       innerMap.put(SCOPES, scopes);
       innerMap.put(OWNER, owner);
       String nodeName = iamNode.getName();
+      nodeProperties.put(nodeName, innerMap);
+    });
+    return nodeProperties;
+  }
+
+  @Override
+  public Map<String, Map<String, String>> getS3Properties(ArchiveRoot ar) {
+    Map<String, Map<String, String>> nodeProperties = new HashMap<>();
+    getNodesOfType(ar, S3_TOSCA_NODE_TYPE).stream().forEach(s3Node -> {
+      Map<String, AbstractPropertyValue> properties =
+          Optional.ofNullable(s3Node.getProperties()).orElseGet(() -> {
+            s3Node.setProperties(new HashMap<>());
+            return s3Node.getProperties();
+          });
+
+      String bucketName = null;
+      String awsAccessKey = null;
+      String awsSecretKey = null;
+      String s3Url = null;
+      if (properties.containsKey(BUCKET_NAME)) {
+        ScalarPropertyValue scalarPropertyValue = (ScalarPropertyValue) properties.get(BUCKET_NAME);
+        bucketName = scalarPropertyValue.getValue();
+      }
+      if (properties.containsKey(AWS_ACCESS_KEY)) {
+        ScalarPropertyValue scalarPropertyValue =
+            (ScalarPropertyValue) properties.get(AWS_ACCESS_KEY);
+        awsAccessKey = scalarPropertyValue.getValue();
+      }
+      if (properties.containsKey(AWS_SECRET_KEY)) {
+        ScalarPropertyValue scalarPropertyValue =
+            (ScalarPropertyValue) properties.get(AWS_SECRET_KEY);
+        awsSecretKey = scalarPropertyValue.getValue();
+      }
+      if (properties.containsKey(S3_URL)) {
+        ScalarPropertyValue scalarPropertyValue = (ScalarPropertyValue) properties.get(S3_URL);
+        s3Url = scalarPropertyValue.getValue();
+      }
+
+      Map<String, String> innerMap = new HashMap<>();
+      innerMap.put(BUCKET_NAME, bucketName);
+      innerMap.put(AWS_ACCESS_KEY, awsAccessKey);
+      innerMap.put(AWS_SECRET_KEY, awsSecretKey);
+      innerMap.put(S3_URL, s3Url);
+      String nodeName = s3Node.getName();
       nodeProperties.put(nodeName, innerMap);
     });
     return nodeProperties;

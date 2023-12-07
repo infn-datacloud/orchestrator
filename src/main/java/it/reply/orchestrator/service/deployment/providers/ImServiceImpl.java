@@ -70,6 +70,7 @@ import it.reply.orchestrator.utils.OneDataUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants.ErrorCode;
 import java.io.IOException;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -95,6 +96,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 
 @Service
 @DeploymentProviderQualifier(DeploymentProvider.IM)
@@ -143,6 +151,63 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   public static final String ISSUER = "issuer";
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
+
+  private static final String S3_TOSCA_NODE_TYPE = "tosca.nodes.indigo.S3Bucket";
+  private static final String BUCKET_NAME = "bucket_name";
+  private static final String AWS_ACCESS_KEY = "aws_access_key";
+  private static final String AWS_SECRET_KEY = "aws_secret_key";
+  private static final String S3_URL = "s3_url";
+  private static final String AWS_REGION = "us-east-1";
+
+  private static void createBucket(S3Client s3, String bucketName) {
+    CreateBucketRequest createBucketRequest =
+        CreateBucketRequest.builder().bucket(bucketName).build();
+    s3.createBucket(createBucketRequest);
+  }
+
+  private static void deleteBucket(S3Client s3, String bucketName) {
+    DeleteBucketRequest deleteBucketRequest =
+        DeleteBucketRequest.builder().bucket(bucketName).build();
+    s3.deleteBucket(deleteBucketRequest);
+  }
+
+  private void deleteAllBuckets(Map<Boolean, Set<Resource>> resources) {
+    for (Resource resource : resources.get(false)) {
+      if (resource.getToscaNodeType().equals(S3_TOSCA_NODE_TYPE)) {
+        Map<String, String> resourceMetadata = resource.getMetadata();
+        S3Client s3 = null;
+        if (resourceMetadata != null) {
+
+          // Configure S3 client with credentials
+          try {
+            s3 = S3Client.builder().endpointOverride(URI.create(resourceMetadata.get(S3_URL)))
+                .region(Region.of(AWS_REGION)).forcePathStyle(true)
+                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                    resourceMetadata.get(AWS_ACCESS_KEY), resourceMetadata.get(AWS_SECRET_KEY))))
+                .build();
+          } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw e;
+          }
+
+          // Delete S3 bucket
+          try {
+            LOG.info("Deleting bucket with name {}", resourceMetadata.get(BUCKET_NAME));
+            deleteBucket(s3, resourceMetadata.get(BUCKET_NAME));
+            LOG.info("Bucket {} successfully deleted", resourceMetadata.get(BUCKET_NAME));
+          } catch (NoSuchBucketException e) {
+            LOG.warn("Bucket {} was not found", resourceMetadata.get(BUCKET_NAME));
+          } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw e;
+          }
+        } else {
+          LOG.info("Found node of type {} but no bucket info is registered in metadata",
+              S3_TOSCA_NODE_TYPE);
+        }
+      }
+    }
+  }
 
   protected <R> R executeWithClientForResult(List<CloudProviderEndpoint> cloudProviderEndpoints,
       @Nullable OidcTokenId requestedWithToken,
@@ -256,11 +321,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
             .partitioningBy(resource -> resource.getIaasId() != null, Collectors.toSet()));
 
     // Define a map of properties of the TOSCA template related to the
-    // IAM_TOSCA_NODE_TYPE
-    // nodes as input of the orchestrator and a map of those to be submitted to the
-    // IM
+    // IAM_TOSCA_NODE_TYPE nodes as input of the orchestrator and a map
+    // of those to be submitted to the IM
     Map<String, Map<String, String>> iamTemplateInput = null;
     Map<String, Map<String, String>> iamTemplateOutput = new HashMap<>();
+
+    // Define a map of properties of the TOSCA template related to the
+    // S3_TOSCA_NODE_TYPE nodes as input of the orchestrator
+    Map<String, Map<String, String>> s3TemplateInput = null;
 
     // Loop over the deployment resources and create an IAM client for all the
     // IAM_TOSCA_NODE_TYPE nodes requested
@@ -389,6 +457,52 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
             // just do not set the owner of a problem customer
           }
         }
+      }
+
+      if (resource.getToscaNodeType().equals(S3_TOSCA_NODE_TYPE)) {
+        String nodeName = resource.getToscaNodeName();
+        LOG.info("Found node of type: {}. Node name: {}", S3_TOSCA_NODE_TYPE, nodeName);
+
+        if (s3TemplateInput == null) {
+          s3TemplateInput = toscaService.getS3Properties(ar);
+        }
+
+        String accessKeyId = s3TemplateInput.get(nodeName).get(AWS_ACCESS_KEY);
+        String secretKey = s3TemplateInput.get(nodeName).get(AWS_SECRET_KEY);
+        String bucketName = uuid + "-" + s3TemplateInput.get(nodeName).get(BUCKET_NAME);
+        String endpoint = s3TemplateInput.get(nodeName).get(S3_URL);
+        S3Client s3 = null;
+
+        // Configure S3 client with credentials
+        try {
+          s3 = S3Client.builder().endpointOverride(URI.create(endpoint))
+              .region(Region.of(AWS_REGION)).forcePathStyle(true)
+              .credentialsProvider(StaticCredentialsProvider
+                  .create(AwsBasicCredentials.create(accessKeyId, secretKey)))
+              .build();
+        } catch (Exception e) {
+          LOG.error(e.getMessage());
+          deleteAllBuckets(resources);
+          throw e;
+        }
+
+        try {
+          // Try to create a bucket
+          createBucket(s3, bucketName);
+          LOG.info("Bucket successfully created: {}", bucketName);
+        } catch (Exception e) {
+          LOG.error(e.getMessage());
+          deleteAllBuckets(resources);
+          throw e;
+        }
+
+        // Write info in resource metadata
+        Map<String, String> resourceMetadata = new HashMap<>();
+        resourceMetadata.put(AWS_ACCESS_KEY, accessKeyId);
+        resourceMetadata.put(AWS_SECRET_KEY, secretKey);
+        resourceMetadata.put(BUCKET_NAME, bucketName);
+        resourceMetadata.put(S3_URL, endpoint);
+        resource.setMetadata(resourceMetadata);
       }
     }
 
@@ -789,6 +903,9 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     // Delete all IAM clients if there are resources of type IAM_TOSCA_NODE_TYPE
     iamService.deleteAllClients(restTemplate, resources);
+
+    // Delete all buckets clients if there are resources of type S3_TOSCA_NODE_TYPE
+    deleteAllBuckets(resources);
 
     return true;
   }
