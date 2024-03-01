@@ -17,16 +17,11 @@
 
 package it.reply.orchestrator.service.deployment.providers.factory;
 
-import static org.mockito.Mockito.when;
-
 import alien4cloud.tosca.parser.ParsingException;
-
 import com.google.common.collect.Lists;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
-
 import es.upv.i3m.grycap.im.InfrastructureManager;
-
 import it.reply.orchestrator.config.properties.ImProperties;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.dal.entity.OidcEntity;
@@ -39,12 +34,10 @@ import it.reply.orchestrator.dto.security.GenericServiceCredentialWithTenant;
 import it.reply.orchestrator.exception.service.DeploymentException;
 import it.reply.orchestrator.service.deployment.providers.CredentialProviderService;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,7 +50,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
+import static org.mockito.Mockito.when;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.converters.Nullable;

@@ -18,9 +18,7 @@
 package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
@@ -55,7 +53,6 @@ import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,11 +62,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-
 import javax.annotation.Nullable;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.RelationshipTemplate;
 import org.apache.commons.lang3.StringUtils;
@@ -317,7 +311,7 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional
-  public void deleteDeployment(String uuid, OidcTokenId requestedWithToken) {
+  public void deleteDeployment(String uuid, OidcTokenId requestedWithToken, String force) {
     Deployment deployment = getDeployment(uuid);
     MdcUtils.setDeploymentId(deployment.getId());
     throwIfNotOwned(deployment);
@@ -353,6 +347,8 @@ public class DeploymentServiceImpl implements DeploymentService {
     // Build deployment message
     DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
         requestedWithToken);
+
+    deploymentMessage.setForce(Boolean.valueOf(force));
 
     ProcessInstance pi = wfService
         .createProcessInstanceBuilder()

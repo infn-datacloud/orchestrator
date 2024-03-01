@@ -22,10 +22,8 @@ import it.reply.monitoringpillar.domain.dsl.monitoring.pillar.wrapper.paas.Monit
 import it.reply.orchestrator.config.properties.MonitoringProperties;
 import it.reply.orchestrator.dto.monitoring.MonitoringResponse;
 import it.reply.orchestrator.exception.service.DeploymentException;
-
 import java.net.URI;
 import java.util.Optional;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;

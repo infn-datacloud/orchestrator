@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.deployment.providers.factory;
 
 import com.google.common.base.Preconditions;
-
 import es.upv.i3m.grycap.im.InfrastructureManager;
 import es.upv.i3m.grycap.im.auth.credentials.providers.AmazonEc2Credentials;
 import es.upv.i3m.grycap.im.auth.credentials.providers.AzureCredentials;
@@ -27,7 +26,6 @@ import es.upv.i3m.grycap.im.auth.credentials.providers.OpenNebulaCredentials;
 import es.upv.i3m.grycap.im.auth.credentials.providers.OpenStackAuthVersion;
 import es.upv.i3m.grycap.im.auth.credentials.providers.OpenStackCredentials;
 import es.upv.i3m.grycap.im.exceptions.ImClientException;
-
 import it.reply.orchestrator.config.properties.ImProperties;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.dal.entity.OidcEntity;
@@ -42,17 +40,14 @@ import it.reply.orchestrator.exception.OrchestratorException;
 import it.reply.orchestrator.exception.service.DeploymentException;
 import it.reply.orchestrator.service.deployment.providers.CredentialProviderService;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;

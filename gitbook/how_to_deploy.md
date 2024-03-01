@@ -143,6 +143,7 @@ By default the REST APIs are not authenticated; if you want to enable the IAM in
      * **Description**: The CLUES OAuth2 client secret
 
 Please make reference to the [IAM guide](https://indigo-dc.gitbooks.io/iam/content) for further information on how to register the Orchestrator as protected resource server.
+To allow orchestrator to create IAM clients, the IAM client of the orchestrator should also have `client_credentials` as grant type, and `iam:admin.read` and `iam:admin.write` as scopes (starting with IAM v1.8.2).
 
 :warning: Even if the authentication is optional and disabled by default, you are highly encouraged to enable it, otherwise you will not be able to create deployments neither on OpenStack nor on OpenNebula.
 

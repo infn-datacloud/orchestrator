@@ -81,8 +81,10 @@ public interface IamService {
    *
    * @param restTemplate object used to make HTTP requests
    * @param resources resources linked to a given deployment
+   * @param force flag to force the deletion of a deployment skipping the deletion of IAM clients
    */
-  public void deleteAllClients(RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources);
+  public void deleteAllClients(RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources,
+      Boolean force);
 
   /**
    * Assign the ownership of a client.

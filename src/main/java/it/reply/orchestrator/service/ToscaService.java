@@ -274,7 +274,7 @@ public interface ToscaService {
   boolean isScalable(NodeTemplate nodeTemplate);
 
   public ArchiveRoot setDeploymentTags(ArchiveRoot ar, String orchestratorUrl,
-      String deplymentId, String userEmail);
+      String deplymentId, String userEmail, String preferredUsername);
 
   public ArchiveRoot setDeploymentClientIam(ArchiveRoot ar,
       Map<String,Map<String,String>> iamTemplateOutput);

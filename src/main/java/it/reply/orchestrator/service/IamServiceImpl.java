@@ -318,7 +318,12 @@ public class IamServiceImpl implements IamService {
   }
 
   @Override
-  public void deleteAllClients(RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources) {
+  public void deleteAllClients(RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources,
+      Boolean force) {
+    if (Boolean.TRUE.equals(force)) {
+      LOG.info("Skipping deletion of IAM clients");
+      return;
+    }
     for (Resource resource : resources.get(false)) {
       if (resource.getToscaNodeType().equals(IAM_TOSCA_NODE_TYPE)) {
         Map<String, String> resourceMetadata = resource.getMetadata();

@@ -239,6 +239,11 @@ include::{snippets}/reset-deployment/http-response.adoc[]
 
 A `DELETE` request is used to delete the deployment from the id.
 
+=== Request parameters
+
+[cols=",a"]
+include::{snippets}/delete-deployment/request-parameters.adoc[]
+
 ==== Example request
 
 include::{snippets}/delete-deployment/curl-request.adoc[]

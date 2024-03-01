@@ -18,10 +18,8 @@
 package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.controller.ControllerTestUtils;
 import it.reply.orchestrator.dal.entity.Deployment;
@@ -39,14 +37,11 @@ import it.reply.orchestrator.exception.http.NotFoundException;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderServiceRegistry;
 import it.reply.orchestrator.service.deployment.providers.ImServiceImpl;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import javax.annotation.Nullable;
-
 import org.alien4cloud.tosca.model.definitions.ScalarPropertyValue;
 import org.alien4cloud.tosca.model.templates.Capability;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
@@ -74,13 +69,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 
 @JsonTest
 @RunWith(JUnitParamsRunner.class)
@@ -470,7 +463,8 @@ public class DeploymentServiceTest {
   public void deleteDeploymentNotFound() throws Exception {
     Mockito.when(deploymentRepository.findOne("id")).thenReturn(null);
 
-    assertThatThrownBy(() -> deploymentService.deleteDeployment("id", null))
+    String force = "false";
+    assertThatThrownBy(() -> deploymentService.deleteDeployment("id", null, force))
         .isInstanceOf(NotFoundException.class);
   }
 
@@ -481,10 +475,11 @@ public class DeploymentServiceTest {
   public void deleteDeploymentFailForConflict(Status status) throws Exception {
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
+    String force = "false";
 
     Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
 
-    assertThatThrownBy(() -> deploymentService.deleteDeployment(deployment.getId(), null))
+    assertThatThrownBy(() -> deploymentService.deleteDeployment(deployment.getId(), null, force))
         .isInstanceOf(ConflictException.class);
   }
 
@@ -502,13 +497,14 @@ public class DeploymentServiceTest {
 
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
+    String force = "false";
     Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
 
     ExecutionQueryImpl executionQueryImpl = Mockito.spy(new ExecutionQueryImpl());
     Mockito.when(wfService.createExecutionQuery()).thenReturn(executionQueryImpl);
     Mockito.doReturn(Lists.emptyList()).when(executionQueryImpl).list();
 
-    deploymentService.deleteDeployment(deployment.getId(), null);
+    deploymentService.deleteDeployment(deployment.getId(), null, force);
 
     Mockito.verify(wfService, Mockito.never()).startProcessInstance(Mockito.any());
     Mockito.verify(deploymentRepository, Mockito.times(1)).delete(deployment);
@@ -529,6 +525,7 @@ public class DeploymentServiceTest {
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
     deployment.setDeploymentProvider(DeploymentProvider.IM);
+    String force = "false";
     Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
 
     ProcessInstanceBuilderImpl builder = Mockito.spy(new ProcessInstanceBuilderImpl(wfService));
@@ -541,7 +538,7 @@ public class DeploymentServiceTest {
     Mockito.when(wfService.createExecutionQuery()).thenReturn(executionQueryImpl);
     Mockito.doReturn(Lists.emptyList()).when(executionQueryImpl).list();
 
-    deploymentService.deleteDeployment(deployment.getId(), null);
+    deploymentService.deleteDeployment(deployment.getId(), null, force);
 
     Mockito.verify(wfService, Mockito.times(1)).startProcessInstance(Mockito.eq(builder));
     Mockito.verify(deploymentRepository, Mockito.times(0)).delete(deployment);

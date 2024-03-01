@@ -23,7 +23,6 @@ import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.request.DeploymentRequest;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.enums.DeploymentType;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,7 +63,7 @@ public interface DeploymentService {
   public void resetDeployment(String id, String status,
       OidcTokenId requestedWithToken);
 
-  public void deleteDeployment(String id, OidcTokenId requestedWithToken);
+  public void deleteDeployment(String id, OidcTokenId requestedWithToken, String force);
 
   public String getDeploymentLog(String id, OidcTokenId requestedWithToken);
 

@@ -283,7 +283,7 @@ public class ImServiceTest extends ToscaParserAwareTest {
 
     imService.cleanFailedDeploy(dm);
     Mockito.verify(infrastructureManager, Mockito.times(deleteExpectedToBeCalled ? 1 : 0))
-        .destroyInfrastructureAsync("endpoint");
+        .destroyInfrastructureAsync(Mockito.any(String.class), eq(false));
   }
 
   @Test
@@ -667,7 +667,7 @@ public class ImServiceTest extends ToscaParserAwareTest {
         .build(Mockito.anyListOf(CloudProviderEndpoint.class), Mockito.any());
     ResponseError responseError = new ResponseError(null, 405);
     Mockito.doThrow(new ImClientErrorException(responseError)).when(infrastructureManager)
-        .destroyInfrastructureAsync(Mockito.any(String.class));
+        .destroyInfrastructureAsync(Mockito.any(String.class), eq(false));
     Mockito.doNothing().when(deploymentStatusHelper).updateOnError(Mockito.anyString(), Mockito.anyString());
 
     assertThatThrownBy(() -> imService.doUndeploy(dm)).isInstanceOf(DeploymentException.class);
@@ -691,7 +691,7 @@ public class ImServiceTest extends ToscaParserAwareTest {
     Mockito.doNothing().when(deploymentStatusHelper).updateOnError(Mockito.anyString(), Mockito.anyString());
 
     Mockito.doThrow(new NullPointerException()).when(infrastructureManager)
-        .destroyInfrastructureAsync(Mockito.any(String.class));
+        .destroyInfrastructureAsync(Mockito.any(String.class), eq(false));
 
     assertThatThrownBy(() -> imService.doUndeploy(dm)).isInstanceOf(NullPointerException.class);
   }

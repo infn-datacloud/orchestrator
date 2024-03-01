@@ -1190,7 +1190,8 @@ public class ToscaServiceImpl implements ToscaService {
   public ArchiveRoot setDeploymentTags(ArchiveRoot ar,
       String orchestratorUrl,
       String deplymentId,
-      String userEmail) {
+      String userEmail,
+      String preferredUsername) {
 
     getNodesOfType(ar, ToscaConstants.Nodes.Types.COMPUTE).stream()
         .forEach(computeNode -> {
@@ -1210,6 +1211,9 @@ public class ToscaServiceImpl implements ToscaService {
           tagsProperty.getValue().put("PAAS_DEP_UUID", deplymentId);
           if (!StringUtil.isNullOrEmpty(userEmail)) {
             tagsProperty.getValue().put("PAAS_DEP_USER_EMAIL", userEmail);
+          }
+          if (!StringUtil.isNullOrEmpty(preferredUsername)) {
+            tagsProperty.getValue().put("PAAS_DEP_USER", preferredUsername);
           }
         });
     return ar;

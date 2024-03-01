@@ -18,12 +18,9 @@
 package it.reply.orchestrator.config.properties;
 
 import java.net.URI;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -34,8 +31,6 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class MonitoringProperties {
 
-  @NotNull
-  @NonNull
   private URI url;
 
   @NotNull

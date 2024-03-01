@@ -75,7 +75,7 @@
     <elasticsearch.version>1.7.5</elasticsearch.version>
     <assertj.version>3.8.0</assertj.version>
     <openid-connect.version>1.3.3</openid-connect.version>
-    <im-java-api.version>0.4.15</im-java-api.version>
+    <im-java-api.version>0.4.17</im-java-api.version>
     <monitoring-pillar-domain.version>1.8.1-FINAL</monitoring-pillar-domain.version>
     <flowable.version>6.5.0</flowable.version>
     <alien4cloud.version>2.1.0-DEEP-1.3.1</alien4cloud.version>
@@ -117,6 +117,12 @@
       <id>indigo-dc-nexus-repository</id>
       <name>INDIGO-DC repository</name>
       <url>https://repository.indigo-datacloud.eu/repository/maven-public</url>
+    </repository>
+
+    <repository>
+      <id>cnaf-sd-nexus-repository</id>
+      <name>CNAF SD Nexus repository</name>
+      <url>https://repo.cloud.cnaf.infn.it/repository/maven-public/</url>
     </repository>
 
   </repositories>
@@ -208,6 +214,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
+      <version>2.8.11</version>
     </dependency>
 
     <!-- Ignite -->

@@ -22,14 +22,17 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.request.DeploymentRequest;
+import it.reply.orchestrator.exception.http.ForbiddenException;
 import it.reply.orchestrator.resource.DeploymentResource;
 import it.reply.orchestrator.resource.DeploymentResourceAssembler;
 import it.reply.orchestrator.service.DeploymentService;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
+import it.reply.orchestrator.utils.JwtUtils;
 import it.reply.orchestrator.utils.MdcUtils;
-
+import java.text.ParseException;
+import java.util.List;
 import javax.validation.Valid;
-
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -52,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class DeploymentController {
 
@@ -71,6 +75,42 @@ public class DeploymentController {
   private OidcProperties oidcProperties;
 
   /**
+   * Check if there is a group claim in user's token and verify that the group requested by the user
+   * is in the user's allowed groups.
+   *
+   * @param userToken user's token
+   * @param requestedGroup group requested by the user
+   * @throws ParseException if the claim value is not of required type when parsing user's token
+   * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
+   *         or the requested group is not in the user's allowed groups
+   */
+  public void authorizeRequestedGroup(String userToken, String requestedGroup)
+      throws ParseException, ForbiddenException {
+    List<String> groups = null;
+    List<String> wlcgGroups = null;
+    try {
+      groups = JwtUtils.getJwtClaimsSet(JwtUtils.parseJwt(userToken)).getStringListClaim("groups");
+      wlcgGroups =
+          JwtUtils.getJwtClaimsSet(JwtUtils.parseJwt(userToken)).getStringListClaim("wlcg.groups");
+    } catch (ParseException e) {
+      LOG.error(e.getMessage());
+      throw e;
+    }
+    if ((groups == null || groups.isEmpty()) && (wlcgGroups == null || wlcgGroups.isEmpty())) {
+      String errorMessage = "User's token does not contain a group claim or it is empty";
+      LOG.error(errorMessage);
+      throw new ForbiddenException(errorMessage);
+    }
+    if ((groups != null && !groups.contains(requestedGroup))
+        || (wlcgGroups != null && !wlcgGroups.contains("/" + requestedGroup))) {
+      String errorMessage =
+          String.format("The group %s is not in the user's authorized groups", requestedGroup);
+      LOG.error(errorMessage);
+      throw new ForbiddenException(errorMessage);
+    }
+  }
+
+  /**
    * Get all deployments.
    *
    * @param createdBy
@@ -81,6 +121,9 @@ public class DeploymentController {
    *          {@link Pageable}
    * @param pagedAssembler
    *          {@link PagedResourcesAssembler}
+   * @throws ParseException if the claim value is not of required type when parsing user's token
+   * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
+   *         or the requested group is not in the user's allowed groups
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
@@ -90,7 +133,13 @@ public class DeploymentController {
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
       @RequestParam(name = "userGroup", required = false) @Nullable String userGroup,
       @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
-      PagedResourcesAssembler<Deployment> pagedAssembler) {
+      PagedResourcesAssembler<Deployment> pagedAssembler)
+      throws ParseException, ForbiddenException {
+
+    if (oidcProperties.isEnabled() && userGroup != null) {
+      String userToken = oauth2Tokenservice.getOAuth2TokenFromCurrentAuth();
+      authorizeRequestedGroup(userToken, userGroup);
+    }
 
     Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, userGroup);
 
@@ -107,24 +156,31 @@ public class DeploymentController {
   /**
    * Create a deployment.
    *
-   * @param request
-   *          {@link DeploymentRequest}
+   * @param request {@link DeploymentRequest}
    * @return {@link DeploymentResource}
+   * @throws ParseException if the claim value is not of required type when parsing user's token
+   * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
+   *         or the requested group is not in the user's allowed groups
    */
   @ResponseStatus(HttpStatus.CREATED)
   @RequestMapping(value = "/deployments", method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public DeploymentResource createDeployment(@Valid @RequestBody DeploymentRequest request) {
+  public DeploymentResource createDeployment(@Valid @RequestBody DeploymentRequest request)
+      throws ParseException, ForbiddenException {
     OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
+      String userToken = null;
+      String requestedGroup = null;
+      userToken = oauth2Tokenservice.getOAuth2TokenFromCurrentAuth();
+      requestedGroup = request.getUserGroup();
       owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
+      authorizeRequestedGroup(userToken, requestedGroup);
     }
     Deployment deployment = deploymentService.createDeployment(request, owner, requestedWithToken);
     return deploymentResourceAssembler.toResource(deployment);
-
   }
 
   /**
@@ -252,13 +308,14 @@ public class DeploymentController {
   @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void deleteDeployment(@PathVariable("deploymentId") String id) {
+  public void deleteDeployment(@PathVariable("deploymentId") String id,
+      @RequestParam(name = "force", required = false) @Nullable String force) {
     OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    deploymentService.deleteDeployment(id, requestedWithToken);
+    deploymentService.deleteDeployment(id, requestedWithToken, force);
   }
 }

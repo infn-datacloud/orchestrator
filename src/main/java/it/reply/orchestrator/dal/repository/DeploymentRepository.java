@@ -20,7 +20,6 @@ package it.reply.orchestrator.dal.repository;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcEntityId;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,8 +34,7 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
 
   public static final String IN_SAME_ORGANIZATION =
       "(d.owner is null "
-          + "or (d.owner.organization = ?#{#requester.organization} "
-          + "and d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer}))";
+          + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
 
   @Query("select d "
       + "from #{#entityName} d "

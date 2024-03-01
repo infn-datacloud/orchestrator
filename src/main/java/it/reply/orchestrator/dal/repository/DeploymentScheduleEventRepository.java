@@ -35,8 +35,7 @@ public interface DeploymentScheduleEventRepository
 
   String IN_SAME_ORGANIZATION =
       "(d.owner is null "
-          + "or (d.owner.organization = ?#{#requester.organization} "
-          + "and d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer}))";
+          + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
 
   @Query("select d "
       + "from #{#entityName} d "

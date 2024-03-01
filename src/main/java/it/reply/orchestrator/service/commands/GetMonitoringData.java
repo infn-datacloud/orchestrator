@@ -19,17 +19,16 @@ package it.reply.orchestrator.service.commands;
 
 import it.reply.monitoringpillar.domain.dsl.monitoring.pillar.wrapper.paas.Group;
 import it.reply.monitoringpillar.domain.dsl.monitoring.pillar.wrapper.paas.PaasMachine;
+import it.reply.orchestrator.config.properties.MonitoringProperties;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.service.MonitoringService;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,27 +40,36 @@ public class GetMonitoringData extends BaseRankCloudProvidersCommand {
   @Autowired
   private MonitoringService monitoringService;
 
+  @Autowired
+  private MonitoringProperties monitoringProperties;
+
   @Override
   public void execute(DelegateExecution execution,
       RankCloudProvidersMessage rankCloudProvidersMessage) {
 
-    // Get monitoring data for each Cloud Provider
-    Map<String, List<PaasMachine>> metrics = rankCloudProvidersMessage
-        .getCloudProviders()
-        .keySet()
-        .stream()
-        .map(providerId -> {
-          try {
-            return monitoringService.getProviderData(providerId);
-          } catch (RuntimeException ex) {
-            LOG.warn("Error retrieving monitoring data for provider <{}>", providerId, ex);
-            return null;
-          }
-        })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toMap(Group::getGroupName, Group::getPaasMachines));
+    if (isValid(monitoringProperties.getUrl())) {
+      // Get monitoring data for each Cloud Provider
+      Map<String, List<PaasMachine>> metrics =
+          rankCloudProvidersMessage.getCloudProviders().keySet().stream().map(providerId -> {
+            try {
+              return monitoringService.getProviderData(providerId);
+            } catch (RuntimeException ex) {
+              LOG.warn("Error retrieving monitoring data for provider <{}>", providerId, ex);
+              return null;
+            }
+          }).filter(Objects::nonNull)
+              .collect(Collectors.toMap(Group::getGroupName, Group::getPaasMachines));
 
-    rankCloudProvidersMessage.setCloudProvidersMonitoringData(metrics);
+      rankCloudProvidersMessage.setCloudProvidersMonitoringData(metrics);
+    }
+  }
+
+  private boolean isValid(URI url) {
+
+    if (url == null) {
+      return false;
+    }
+    return !url.toString().trim().isEmpty();
   }
 
   @Override

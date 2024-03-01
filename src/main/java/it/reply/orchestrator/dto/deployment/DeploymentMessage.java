@@ -20,20 +20,16 @@ package it.reply.orchestrator.dto.deployment;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.dto.onedata.OneData;
 import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -108,6 +104,8 @@ public class DeploymentMessage extends BaseWorkflowMessage {
   private Integer maxProvidersRetry;
 
   private boolean keepLastAttempt = false;
+
+  private boolean force = false;
 
   private String  mainReplicationRuleId;
 
