@@ -18,7 +18,9 @@
 package it.reply.orchestrator.service.deployment.providers;
 
 import alien4cloud.tosca.model.ArchiveRoot;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -503,6 +505,22 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     toscaService.setDeploymentS3Buckets(ar, s3TemplateOutput);
 
     String imCustomizedTemplate = toscaService.serialize(ar);
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    ObjectNode logData = objectMapper.createObjectNode();
+    logData.put("uuid", uuid);
+    logData.put("provider_name", deployment.getCloudProviderName());
+    logData.put("user_group", deployment.getUserGroup());
+
+    // Print information about the submission of the deployment
+    String jsonString = null;
+    try {
+      jsonString = objectMapper.writeValueAsString(logData);
+      LOG.info("Submission of deployment request to the IM. {}", jsonString);
+    } catch (JsonProcessingException e) {
+      LOG.error(e.getMessage());
+    }
 
     // Deploy on IM
     try {
