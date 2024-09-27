@@ -23,12 +23,9 @@ import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.slam.SlamPreferences;
 import it.reply.orchestrator.exception.service.DeploymentException;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-
 import java.net.URI;
 import java.util.Optional;
-
 import javax.annotation.Nullable;
-
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;

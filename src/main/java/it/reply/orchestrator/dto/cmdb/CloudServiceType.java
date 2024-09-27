@@ -24,6 +24,8 @@ public enum CloudServiceType {
 
   @JsonProperty("compute") COMPUTE,
   @JsonProperty("storage") STORAGE,
+  @JsonProperty("block-storage") BLOCK_STORAGE,
+  @JsonProperty("network") NETWORK,
   @JsonEnumDefaultValue @JsonProperty("unknown") UNKNOWN;
 
 }

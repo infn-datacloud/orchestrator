@@ -15,40 +15,59 @@
  * limitations under the License.
  */
 
-package it.reply.orchestrator.dto.slam;
+package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-public class Preference {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class Network {
 
-  @JsonProperty("customer")
-  @Nullable
-  private String customer;
+  @JsonProperty("description")
+  private String description;
 
-  @JsonProperty("preferences")
-  @NonNull
+  @JsonProperty("name")
   @NotNull
+  private String name;
+
+  @JsonProperty("uuid")
+  @NotNull
+  private String uuid;
+
+  @JsonProperty("is_shared")
+  private Boolean isShared;
+
+  @JsonProperty("is_router_external")
+  private Boolean isRouterExternal;
+
+  @JsonProperty("is_default")
+  private Boolean isDefault;
+
+  @JsonProperty("mtu")
+  private Integer mtu;
+
+  @JsonProperty("proxy_host")
+  private String proxyHost;
+
+  @JsonProperty("proxy_user")
+  private String proxyUser;
+
+  @JsonProperty("tags")
   @Builder.Default
-  private List<PreferenceCustomer> preferences = new ArrayList<>();
+  private List<String> tags = new ArrayList<>();
 
-  @JsonProperty("id")
-  @Nullable
-  private String id;
-
-  @Deprecated
-  protected Preference() {
-    preferences = new ArrayList<>();
-  }
+  @JsonProperty("uid")
+  @NotNull
+  private String uid;
 
 }

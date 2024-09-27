@@ -20,6 +20,7 @@ package it.reply.orchestrator.service.commands;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
+import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.onedata.OneData;
@@ -33,14 +34,11 @@ import it.reply.orchestrator.service.CloudProviderEndpointServiceImpl;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.WorkflowConstants;
 import it.reply.orchestrator.utils.WorkflowConstants.ErrorCode;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -99,9 +97,14 @@ public class UpdateDeployment extends BaseDeployCommand {
 
     boolean isUpdate = Status.UPDATE_IN_PROGRESS == deployment.getStatus();
 
+    Optional<CloudProvider> currentCloudProvider =
+        rankCloudProvidersMessage.getCloudProviders().values().stream()
+            .filter(provider -> provider.getId().equals(currentCloudService.getProviderId()))
+            .findFirst();
+
     // Update Deployment
     if (!isUpdate) {
-      deployment.setCloudProviderName(currentCloudService.getProviderId());
+      deployment.setCloudProviderName(currentCloudProvider.get().getName());
     }
     // FIXME Set/update all required selected CP data
 

@@ -17,6 +17,7 @@
 
 package it.reply.orchestrator.service;
 
+import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.cmdb.CloudServiceType;
@@ -37,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractCmdbServiceImpl implements CmdbService {
 
   @Override
-  public CloudProvider fillCloudProviderInfo(String providerId,
-      Set<String> servicesWithSla, String organisation) {
+  public CloudProvider fillCloudProviderInfo(String providerId, Set<String> servicesWithSla,
+      String organisation, RankCloudProvidersMessage rankCloudProvidersMessage) {
     // Get provider's data
     CloudProvider provider = getProviderById(providerId);
     Map<String, CloudService> services = getServicesByProvider(providerId)

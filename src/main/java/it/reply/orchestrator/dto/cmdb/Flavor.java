@@ -18,22 +18,19 @@
 package it.reply.orchestrator.dto.cmdb;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Comparator;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 @Data
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Flavor implements CmdbIdentifiable, Comparable<Flavor> {
 
   private static final Comparator<Flavor> COMPARATOR = Comparator

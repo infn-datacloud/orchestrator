@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.commands;
 
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
@@ -48,7 +47,6 @@ import it.reply.orchestrator.service.ToscaService;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,9 +56,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.Topology;
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +79,16 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
 
     Set<CloudProvider> providersToDiscard = new HashSet<>();
     Set<CloudService> servicesToDiscard = new HashSet<>();
+
+    rankCloudProvidersMessage.getCloudProviders().forEach((name, cloudProvider) -> {
+      cloudProvider.getServices().forEach((serviceName, cloudService) -> {
+        if (!cloudService.getType().equals(CloudServiceType.COMPUTE)) {
+          addServiceToDiscard(servicesToDiscard, cloudService);
+        }
+      });
+    });
+
+    discardProvidersAndServices(providersToDiscard, servicesToDiscard, rankCloudProvidersMessage);
 
     OidcTokenId requestedWithToken = rankCloudProvidersMessage.getRequestedWithToken();
     if (requestedWithToken != null) {
@@ -440,17 +446,13 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
   }
 
   protected void discardProvidersAndServices(Set<CloudProvider> providersToDiscard,
-      Set<CloudService> servicesToDiscard,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+      Set<CloudService> servicesToDiscard, RankCloudProvidersMessage rankCloudProvidersMessage) {
     // Add providers that doesn't have any compute service anymore
     for (CloudProvider cloudProvider : rankCloudProvidersMessage.getCloudProviders().values()) {
-      cloudProvider
-          .getServicesOfType(CloudServiceType.COMPUTE)
-          .stream()
-          .filter(servicesToDiscard::contains)
-          .forEach(computeServiceToDiscard -> cloudProvider
-              .getServices()
-              .remove(computeServiceToDiscard.getId()));
+      List<CloudService> listOfCloudServices = cloudProvider.getServices().values().stream()
+          .filter(servicesToDiscard::contains).collect(Collectors.toList());
+      listOfCloudServices.forEach(computeServiceToDiscard -> cloudProvider.getServices()
+          .remove(computeServiceToDiscard.getId()));
       if (cloudProvider.getServicesOfType(CloudServiceType.COMPUTE).isEmpty()) {
         LOG.debug("Discarded provider {} {}", cloudProvider.getId(),
             "because it doesn't have any compute service matching the deployment requirements");
