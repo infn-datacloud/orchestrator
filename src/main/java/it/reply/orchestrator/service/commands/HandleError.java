@@ -19,9 +19,7 @@ package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.service.deployment.providers.DeploymentStatusHelper;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import lombok.AllArgsConstructor;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
