@@ -19,7 +19,6 @@ package it.reply.orchestrator.service;
 
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.slam.SlamPreferences;
-
 import javax.annotation.Nullable;
 
 public interface SlamService {

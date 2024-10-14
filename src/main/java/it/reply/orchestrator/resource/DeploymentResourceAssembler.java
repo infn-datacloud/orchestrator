@@ -24,12 +24,10 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -61,6 +59,7 @@ public class DeploymentResourceAssembler
             getCloudProviderEndpointResource((CloudProviderEndpoint)pair.getValue()));
       }
       return new CloudProviderEndpointResource(endpoint.getCpEndpoint(),
+          endpoint.getRegion().orElse(null),
           endpoint.getCpComputeServiceId(),
           endpoint.getVaultEndpoint(),
           endpoint.getIaasType(),

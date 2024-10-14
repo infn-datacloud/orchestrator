@@ -15,51 +15,61 @@
  * limitations under the License.
  */
 
-package it.reply.orchestrator.dto.slam;
+package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-public class Sla {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class Project {
 
-  @JsonProperty("customer")
-  @Nullable
-  private String customer;
+  @JsonProperty("description")
+  private String description;
+
+  @JsonProperty("name")
+  @NotNull
+  private String name;
+
+  @JsonProperty("uuid")
+  @NotNull
+  private String uuid;
+
+  @JsonProperty("uid")
+  @NotNull
+  private String uid;
 
   @JsonProperty("provider")
-  @Nullable
-  private String cloudProviderId;
-
-  @JsonProperty("start_date")
-  @Nullable
-  private String startDate;
-
-  @JsonProperty("end_date")
-  @Nullable
-  private String endDate;
-
-  @JsonProperty("services")
-  @NonNull
   @NotNull
+  private Provider provider;
+
+  @JsonProperty("quotas")
   @Builder.Default
-  private List<Service> services = new ArrayList<>();
+  @NotNull
+  private List<Quota> quotas = new ArrayList<>();
 
-  @JsonProperty("id")
-  @Nullable
-  private String id;
+  @JsonProperty("sla")
+  private Sla sla;
 
-  @Deprecated
-  protected Sla() {
-    services = new ArrayList<>();
-  }
+  @JsonProperty("flavors")
+  @Builder.Default
+  private List<Flavor> flavors = new ArrayList<>();
+
+  @JsonProperty("images")
+  @Builder.Default
+  private List<Image> images = new ArrayList<>();
+
+  @JsonProperty("networks")
+  @Builder.Default
+  private List<Network> networks = new ArrayList<>();
+
 }
