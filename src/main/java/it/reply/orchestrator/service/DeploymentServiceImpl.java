@@ -18,6 +18,7 @@
 package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.dal.entity.Deployment;
@@ -240,7 +241,16 @@ public class DeploymentServiceImpl implements DeploymentService {
     deployment.setUserGroup(request.getUserGroup());
     deployment = deploymentRepository.save(deployment);
     MdcUtils.setDeploymentId(deployment.getId());
-    LOG.debug("Creating deployment with template\n{}", request.getTemplate());
+
+    // Print the submitted template and the parameters requested by the user for the deployment
+    LOG.info("Creating deployment with template\n{}", request.getTemplate());
+    try {
+      String json = objectMapper.writeValueAsString(request.getParameters());
+      LOG.info("Parameters requested by the user: {}", json);
+    } catch (JsonProcessingException e) {
+      LOG.error(e.getMessage());
+    }
+
     // Parse once, validate structure and user's inputs, replace user's input
     ArchiveRoot parsingResult =
         toscaService.prepareTemplate(request.getTemplate(), request.getParameters());

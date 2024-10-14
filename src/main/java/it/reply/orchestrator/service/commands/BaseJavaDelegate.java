@@ -20,17 +20,14 @@ package it.reply.orchestrator.service.commands;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.reply.orchestrator.exception.service.BusinessWorkflowException;
 import it.reply.orchestrator.exception.service.WorkflowException;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.WorkflowConstants.ErrorCode;
 import it.reply.orchestrator.utils.WorkflowUtil;
-
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.common.engine.api.FlowableException;
 import org.flowable.engine.delegate.DelegateExecution;
@@ -46,7 +43,10 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
   @Override
   public final void execute(DelegateExecution execution) {
     String businessKey = execution.getProcessInstanceBusinessKey();
+    String deploymentId = businessKey.substring(0, businessKey.indexOf(':'));
     MdcUtils.fromBusinessKey(businessKey);
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode logData = objectMapper.createObjectNode();
 
     String taskName = Optional
         .ofNullable(execution.getCurrentFlowElement())
@@ -60,12 +60,15 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
     } catch (BusinessWorkflowException ex) {
       LOG.error("Task {} - ENDED WITH ERROR:\n{}", taskName, getErrorMessagePrefix(), ex);
       WorkflowUtil.persistAndPropagateError(execution, ex);
+      logErrors(logData, ex, deploymentId);
     } catch (FlowableException | WorkflowException ex) {
       LOG.error("Task {} - ENDED WITH ERROR:\n{}", taskName, getErrorMessagePrefix(), ex);
+      logErrors(logData, ex, deploymentId);
       // Re-throw
       throw ex;
     } catch (RuntimeException ex) {
       LOG.error("Task {} - ENDED WITH ERROR:\n{}", taskName, getErrorMessagePrefix(), ex);
+      logErrors(logData, ex, deploymentId);
       throw new WorkflowException(ErrorCode.RUNTIME_ERROR, getErrorMessagePrefix(), ex);
     } finally {
       MdcUtils.clean();
@@ -104,6 +107,20 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
         .<C>getOptionalParameter(execution, parameterName, clazz)
         .orElseThrow(() -> new IllegalArgumentException(
             "WF parameter with name <" + parameterName + "> not found"));
+  }
 
+  private void logErrors(ObjectNode logData, Exception ex, String deploymentId) {
+    logData.put("uuid", deploymentId);
+    logData.put("status", "CREATE_FAILED");
+    logData.put("status_reason", ex.toString());
+
+    // Print information about the submission of the deployment
+    String jsonString = null;
+    try {
+      jsonString = objectMapper.writeValueAsString(logData);
+      LOG.info("Deployment in error. {}", jsonString);
+    } catch (JsonProcessingException e) {
+      LOG.error(e.getMessage());
+    }
   }
 }
