@@ -17,18 +17,35 @@
 
 package it.reply.orchestrator.service.commands;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
+import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
 @Component(WorkflowConstants.Delegate.FINALIZE_DEPLOY)
+@Slf4j
 public class FinalizeDeploy extends BaseDeployCommand {
 
   @Override
   public void execute(DelegateExecution execution, DeploymentMessage deploymentMessage) {
     getDeploymentProviderService(deploymentMessage).finalizeDeploy(deploymentMessage);
+    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectNode logData = objectMapper.createObjectNode();
+    logData.put("uuid", deploymentMessage.getDeploymentId());
+    logData.put("status", "CREATE_COMPLETE");
+
+    // Print information about the submission of the deployment
+    String jsonString = null;
+    try {
+      jsonString = objectMapper.writeValueAsString(logData);
+      LOG.info("Deployment completed successfully. {}", jsonString);
+    } catch (JsonProcessingException e) {
+      LOG.error(e.getMessage());
+    }
   }
 
   @Override

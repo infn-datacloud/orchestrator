@@ -19,6 +19,8 @@ package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
@@ -53,6 +55,7 @@ import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +85,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeploymentServiceImpl implements DeploymentService {
 
   private static final Pattern OWNER_PATTERN = Pattern.compile("([^@]+)@([^@]+)");
+
+  private ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
 
   @Autowired
   private DeploymentRepository deploymentRepository;
@@ -240,7 +245,21 @@ public class DeploymentServiceImpl implements DeploymentService {
     deployment.setUserGroup(request.getUserGroup());
     deployment = deploymentRepository.save(deployment);
     MdcUtils.setDeploymentId(deployment.getId());
-    LOG.debug("Creating deployment with template\n{}", request.getTemplate());
+
+    // Print the submitted template and the parameters requested by the user for the deployment
+    LOG.info("Creating deployment with template\n{}", request.getTemplate());
+    try {
+      Map<String, Object> templateMap = yamlReader.readValue(request.getTemplate(), Map.class);
+      ObjectNode mergedJson = objectMapper.createObjectNode();
+      mergedJson.putPOJO("Creating deployment with template", templateMap);
+      mergedJson.putPOJO("Parameters requested by the user", request.getParameters());
+      //objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+      String mergedString = objectMapper.writeValueAsString(mergedJson);
+      LOG.info(mergedString);
+    } catch (IOException e) {
+      e.getMessage();
+    }
+
     // Parse once, validate structure and user's inputs, replace user's input
     ArchiveRoot parsingResult =
         toscaService.prepareTemplate(request.getTemplate(), request.getParameters());

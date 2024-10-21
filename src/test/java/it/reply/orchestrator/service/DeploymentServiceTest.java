@@ -19,6 +19,7 @@ package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.Maps;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.controller.ControllerTestUtils;
@@ -115,6 +116,9 @@ public class DeploymentServiceTest {
   @Spy
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Mock
+  private ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
 
   private static final String nodeTypeCompute = "tosca.nodes.indigo.Compute";
 
