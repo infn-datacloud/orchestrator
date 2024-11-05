@@ -15,40 +15,41 @@
  * limitations under the License.
  */
 
-package it.reply.orchestrator.dto.slam;
+package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-public class Preference {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class Service {
 
-  @JsonProperty("customer")
-  @Nullable
-  private String customer;
+  @JsonProperty("description")
+  private String description;
 
-  @JsonProperty("preferences")
-  @NonNull
+  @JsonProperty("endpoint")
   @NotNull
-  @Builder.Default
-  private List<PreferenceCustomer> preferences = new ArrayList<>();
+  private String endpoint;
 
-  @JsonProperty("id")
-  @Nullable
-  private String id;
+  @JsonProperty("type")
+  private String type;
 
-  @Deprecated
-  protected Preference() {
-    preferences = new ArrayList<>();
-  }
+  @JsonProperty("name")
+  @NotNull
+  private String name;
+
+  @JsonProperty("uid")
+  @NotNull
+  private String uid;
+
+  @JsonProperty("region")
+  private Region region;
 
 }

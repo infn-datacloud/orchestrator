@@ -15,40 +15,33 @@
  * limitations under the License.
  */
 
-package it.reply.orchestrator.dto.slam;
+package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@AllArgsConstructor
-public class Preference {
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class NetworkQuota extends Quota {
 
-  @JsonProperty("customer")
-  @Nullable
-  private String customer;
+  @JsonProperty("public_ips")
+  private Integer publicIps;
 
-  @JsonProperty("preferences")
-  @NonNull
-  @NotNull
-  @Builder.Default
-  private List<PreferenceCustomer> preferences = new ArrayList<>();
+  @JsonProperty("networks")
+  private Integer networks;
 
-  @JsonProperty("id")
-  @Nullable
-  private String id;
+  @JsonProperty("ports")
+  private Integer ports;
 
-  @Deprecated
-  protected Preference() {
-    preferences = new ArrayList<>();
-  }
+  @JsonProperty("security_groups")
+  private Integer securityGroups;
 
+  @JsonProperty("security_group_rules")
+  private Integer securityGroupsRules;
 }

@@ -18,19 +18,15 @@
 package it.reply.orchestrator.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import it.reply.orchestrator.dto.CloudProviderEndpoint.IaaSType;
-
 import java.util.HashMap;
 import java.util.Map;
-
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -42,6 +38,9 @@ public class CloudProviderEndpointResource {
   @NonNull
   @NotNull
   private String cpEndpoint;
+
+  @Nullable
+  private String region;
 
   @NonNull
   @NotNull

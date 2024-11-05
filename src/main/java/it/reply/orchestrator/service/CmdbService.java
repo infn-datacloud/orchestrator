@@ -17,12 +17,12 @@
 
 package it.reply.orchestrator.service;
 
+import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.cmdb.Flavor;
 import it.reply.orchestrator.dto.cmdb.Image;
 import it.reply.orchestrator.dto.cmdb.Tenant;
-
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +48,7 @@ public interface CmdbService {
 
   public Flavor getFlavorById(String flavorId);
 
-  public CloudProvider fillCloudProviderInfo(String providerId,
-      Set<String> servicesWithSla, String organisation);
+  public CloudProvider fillCloudProviderInfo(String providerId, Set<String> servicesWithSla,
+      String organisation, RankCloudProvidersMessage rankCloudProvidersMessage);
 
 }
