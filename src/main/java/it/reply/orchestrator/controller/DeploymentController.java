@@ -143,7 +143,8 @@ public class DeploymentController {
       authorizeRequestedGroup(userToken, userGroup);
     }
 
-    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, userGroup, excludedStatus);
+    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, 
+    userGroup, excludedStatus);
 
     return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
         ControllerLinkBuilder
@@ -303,8 +304,8 @@ public class DeploymentController {
   /**
    * Delete the deployment.
    *
-   * @param id
-   *          the deployment id
+   * @param uuid
+   *          the uuid of the deployment
    */
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,

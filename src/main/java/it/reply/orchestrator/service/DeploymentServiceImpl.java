@@ -50,7 +50,10 @@ import it.reply.orchestrator.exception.http.NotFoundException;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderService;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderServiceRegistry;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-import it.reply.orchestrator.utils.*;
+import it.reply.orchestrator.utils.CommonUtils;
+import it.reply.orchestrator.utils.MdcUtils;
+import it.reply.orchestrator.utils.ToscaConstants;
+import it.reply.orchestrator.utils.WorkflowConstants;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -109,7 +112,8 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup, Status[] excludedStatus) {
+  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup, 
+    Status[] excludedStatus) {
     if (StringUtils.isEmpty(owner)) {
       if (isAdmin()) {
         OidcEntity requester = oauth2TokenService.generateOidcEntityFromCurrentAuth();
@@ -157,7 +161,8 @@ public class DeploymentServiceImpl implements DeploymentService {
         if (excludedStatus == null) {
           return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, pageable);
         } else {
-          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, excludedStatus, pageable);
+          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, 
+            excludedStatus, pageable);
         }
       }
     } else {

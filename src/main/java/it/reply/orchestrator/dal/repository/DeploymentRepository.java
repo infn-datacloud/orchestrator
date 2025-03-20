@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2021 I.N.F.N.
+ * Copyright © 2015-2025 I.N.F.N.
  * Copyright © 2015-2020 Santer Reply S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +47,7 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
       + "where d.owner.oidcEntityId = ?#{#ownerId} "
       + " and d.status not in ?#{#excludedStatus}")
   public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId,
-    @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
+      @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
 
   @Query("select d "
         + "from #{#entityName} d "
@@ -61,8 +61,7 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
       + "where d.owner.oidcEntityId = ?#{#ownerId} "
       + "and " + IN_SAME_ORGANIZATION)
   public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId,
-      Pageable pageable);
+      @Param("ownerId") OidcEntityId ownerId, Pageable pageable);
 
   @Query("select d "
       + "from #{#entityName} d "
@@ -125,6 +124,5 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
   public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
         @Param("userGroup") String userGroup, @Param("excludedStatus") Status[] excludedStatus, 
         Pageable pageable);
-
 
 }
