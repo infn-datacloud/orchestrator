@@ -126,7 +126,7 @@ public class DeploymentServiceTest {
         .when(deploymentRepository.findAllByOwner((OidcEntityId)null, (Pageable) null))
         .thenReturn(new PageImpl<Deployment>(deployments));
 
-    Page<Deployment> pagedDeployment = deploymentService.getDeployments(null, null, null);
+    Page<Deployment> pagedDeployment = deploymentService.getDeployments(null, null, null, null);
 
     assertThat(pagedDeployment.getContent()).isEqualTo(deployments);
 
@@ -141,7 +141,7 @@ public class DeploymentServiceTest {
         .when(deploymentRepository.findAllByOwner((OidcEntityId)null,pageable))
         .thenReturn(new PageImpl<Deployment>(deployments));
 
-    Page<Deployment> pagedDeployment = deploymentService.getDeployments(pageable, null, null);
+    Page<Deployment> pagedDeployment = deploymentService.getDeployments(pageable, null, null, null);
 
     assertThat(pagedDeployment.getContent()).isEqualTo(deployments);
     assertThat(pagedDeployment.getNumberOfElements()).isEqualTo(10);

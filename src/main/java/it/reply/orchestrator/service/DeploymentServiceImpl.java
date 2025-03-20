@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2021 I.N.F.N.
+ * Copyright © 2015-2025 I.N.F.N.
  * Copyright © 2015-2020 Santer Reply S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,10 +50,8 @@ import it.reply.orchestrator.exception.http.NotFoundException;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderService;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderServiceRegistry;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-import it.reply.orchestrator.utils.CommonUtils;
-import it.reply.orchestrator.utils.MdcUtils;
-import it.reply.orchestrator.utils.ToscaConstants;
-import it.reply.orchestrator.utils.WorkflowConstants;
+import it.reply.orchestrator.utils.*;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -111,14 +109,22 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup) {
+  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup, Status[] excludedStatus) {
     if (StringUtils.isEmpty(owner)) {
       if (isAdmin()) {
         OidcEntity requester = oauth2TokenService.generateOidcEntityFromCurrentAuth();
         if (StringUtils.isEmpty(userGroup)) {
-          return deploymentRepository.findAll(requester, pageable);
+          if (excludedStatus == null) {
+            return deploymentRepository.findAll(requester, pageable);
+          } else {
+            return deploymentRepository.findAll(requester, excludedStatus, pageable);
+          }
         } else {
-          return deploymentRepository.findAll(requester, userGroup, pageable);
+          if (excludedStatus == null) {
+            return deploymentRepository.findAll(requester, userGroup, pageable);
+          } else {
+            return deploymentRepository.findAll(requester, userGroup, excludedStatus, pageable);
+          }
         }
       }
       owner = "me";
@@ -142,12 +148,24 @@ public class DeploymentServiceImpl implements DeploymentService {
     if (oidcProperties.isEnabled()) {
       OidcEntity requester = oauth2TokenService.generateOidcEntityFromCurrentAuth();
       if (StringUtils.isEmpty(userGroup)) {
-        return deploymentRepository.findAllByOwner(requester, ownerId, pageable);
+        if (excludedStatus == null) {
+          return deploymentRepository.findAllByOwner(requester, ownerId, pageable);
+        } else {
+          return deploymentRepository.findAllByOwner(requester, ownerId, excludedStatus, pageable);
+        }
       } else {
-        return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, pageable);
+        if (excludedStatus == null) {
+          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, pageable);
+        } else {
+          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, excludedStatus, pageable);
+        }
       }
     } else {
-      return deploymentRepository.findAllByOwner(ownerId, pageable);
+      if (excludedStatus == null) {
+        return deploymentRepository.findAllByOwner(ownerId, pageable);
+      } else {
+        return deploymentRepository.findAllByOwner(ownerId, excludedStatus, pageable);
+      }
     }
   }
 

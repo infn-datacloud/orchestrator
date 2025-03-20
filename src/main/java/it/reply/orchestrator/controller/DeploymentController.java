@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2021 I.N.F.N.
+ * Copyright © 2015-2025 I.N.F.N.
  * Copyright © 2015-2020 Santer Reply S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.request.DeploymentRequest;
+import it.reply.orchestrator.enums.Status;
 import it.reply.orchestrator.exception.http.ForbiddenException;
 import it.reply.orchestrator.resource.DeploymentResource;
 import it.reply.orchestrator.resource.DeploymentResourceAssembler;
@@ -132,6 +133,7 @@ public class DeploymentController {
   public PagedResources<DeploymentResource> getDeployments(
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
       @RequestParam(name = "userGroup", required = false) @Nullable String userGroup,
+      @RequestParam(name = "excludedStatus", required = false) @Nullable Status[] excludedStatus,
       @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Deployment> pagedAssembler)
       throws ParseException, ForbiddenException {
@@ -141,14 +143,14 @@ public class DeploymentController {
       authorizeRequestedGroup(userToken, userGroup);
     }
 
-    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, userGroup);
+    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, userGroup, excludedStatus);
 
     return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
         ControllerLinkBuilder
             .linkTo(
                 DummyInvocationUtils
                     .methodOn(DeploymentController.class)
-                    .getDeployments(createdBy, userGroup, pageable, pagedAssembler))
+                    .getDeployments(createdBy, userGroup, excludedStatus, pageable, pagedAssembler))
             .withSelfRel());
 
   }
@@ -308,7 +310,7 @@ public class DeploymentController {
   @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void deleteDeployment(@PathVariable("deploymentId") String id,
+  public void deleteDeployment(@PathVariable("deploymentId") String uuid,
       @RequestParam(name = "force", required = false) @Nullable String force) {
     //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
@@ -316,6 +318,6 @@ public class DeploymentController {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    deploymentService.deleteDeployment(id, requestedWithToken, force);
+    deploymentService.deleteDeployment(uuid, requestedWithToken, force);
   }
 }

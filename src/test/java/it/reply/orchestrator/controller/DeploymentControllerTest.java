@@ -131,19 +131,24 @@ public class DeploymentControllerTest {
     OidcEntity owner = new OidcEntity();
     owner.setOidcEntityId(ownerId);
     String userGroup = "beta-testers";
-    List<Deployment> deployments = ControllerTestUtils.createDeployments(2);
+    List<Deployment> deployments = ControllerTestUtils.createDeployments(3);
     deployments.forEach(deployment -> deployment.setOwner(owner));
     deployments.get(0).setStatus(Status.CREATE_FAILED);
     deployments.get(0).setStatusReason("Some reason");
     deployments.get(0).setUserGroup(userGroup);
     deployments.get(1).setStatus(Status.CREATE_COMPLETE);
     deployments.get(1).setUserGroup(userGroup);
+    deployments.get(2).setStatus(Status.DELETE_COMPLETE);
+    deployments.get(2).setUserGroup(userGroup);
+    Status[] excludedStatus = {Status.DELETE_COMPLETE};
+    String excludedStatusString = "DELETE_COMPLETE";
     Pageable pageable = ControllerTestUtils.createDefaultPageable();
-    Mockito.when(deploymentService.getDeployments(pageable, ownerIdString, userGroup))
+    Mockito.when(deploymentService.getDeployments(pageable, ownerIdString, userGroup, excludedStatus))
         .thenReturn(new PageImpl<Deployment>(deployments, pageable, deployments.size()));
 
     mockMvc
-        .perform(get("/deployments?createdBy=" + ownerIdString + "&userGroup=" + userGroup).accept(MediaType.APPLICATION_JSON)
+        .perform(get("/deployments?createdBy=" + ownerIdString + "&userGroup=" + userGroup + "&excludedStatus=" + excludedStatusString)
+            .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, OAuth2AccessToken.BEARER_TYPE + " <access token>"))
         .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isOk())
@@ -154,7 +159,9 @@ public class DeploymentControllerTest {
             requestParameters(parameterWithName("createdBy").description(
                 "Optional parameter to filter the deployments based on who created them. The following values can be used:\n\n* `*OIDC_subject@OIDC_issuer*`: to ask for the deployments of a generic user\n* `*me*`: shortcut to ask for the deployments created by the user making the request"),
                 parameterWithName("userGroup").description(
-                "Optional parameter to filter the deployments based on the user group")),
+                "Optional parameter to filter the deployments based on the user group"),
+                parameterWithName("excludedStatus").description(
+                "Optional parameter to filter the deployments based on the status")),
 
             responseFields(fieldWithPath("links[]").ignored(),
 
@@ -184,7 +191,7 @@ public class DeploymentControllerTest {
     List<Deployment> deployments = ControllerTestUtils.createDeployments(5);
     Pageable pageable =
         new PageRequest(1, 2, new Sort(Direction.DESC, "createdAt"));
-    Mockito.when(deploymentService.getDeployments(pageable, null, null))
+    Mockito.when(deploymentService.getDeployments(pageable, null, null, null))
         .thenReturn(new PageImpl<Deployment>(deployments, pageable, deployments.size()));
 
     mockMvc
@@ -209,7 +216,7 @@ public class DeploymentControllerTest {
 
     List<Deployment> deployments = ControllerTestUtils.createDeployments(5);
     Pageable pageable = ControllerTestUtils.createDefaultPageable();
-    Mockito.when(deploymentService.getDeployments(pageable, null, null))
+    Mockito.when(deploymentService.getDeployments(pageable, null, null, null))
         .thenReturn(new PageImpl<Deployment>(deployments, pageable, deployments.size()));
 
     mockMvc

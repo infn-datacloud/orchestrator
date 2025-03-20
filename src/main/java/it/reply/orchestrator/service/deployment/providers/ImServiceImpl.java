@@ -1,5 +1,5 @@
 /*
- * Copyright © 2015-2021 I.N.F.N.
+ * Copyright © 2015-2025 I.N.F.N.
  * Copyright © 2015-2020 Santer Reply S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,6 @@ import it.reply.orchestrator.service.IndigoInputsPreProcessorService.RuntimeProp
 import it.reply.orchestrator.service.S3Service;
 import it.reply.orchestrator.service.ToscaService;
 import it.reply.orchestrator.service.deployment.providers.factory.ImClientFactory;
-//import it.reply.orchestrator.service.security.CustomOAuth2TemplateFactory;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.JwtUtils;
@@ -118,9 +117,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
   @Autowired
   private S3Service s3Service;
-
-  //@Autowired
-  //private CustomOAuth2TemplateFactory templateFactory;
 
   @Autowired
   private ClientConfigurationService staticClientConfigurationService;
@@ -1144,11 +1140,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
 
-    //String accessToken = null;
-    //if (oidcProperties.isEnabled()) {
-    //  accessToken = oauth2TokenService.getAccessToken(requestedWithToken);
-    //}
-
     Resource resource = resourceRepository
         .findByIdAndDeployment_id(deploymentMessage.getResourceId(),
             deploymentMessage.getDeploymentId())
@@ -1274,7 +1265,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         }
         break;
       case "stop":
-        LOG.info("Validating request to stio VM of deployment <{}>",
+        LOG.info("Validating request to stop VM of deployment <{}>",
             deploymentMessage.getDeploymentId());
         if (!resource.getState().equals(NodeStates.STARTED)) {
           throw new BadRequestException(
