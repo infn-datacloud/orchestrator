@@ -113,7 +113,7 @@ public class DeploymentServiceImpl implements DeploymentService {
   @Override
   @Transactional(readOnly = true)
   public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup,
-    Status[] excludedStatus) {
+      Status[] excludedStatus) {
     if (StringUtils.isEmpty(owner)) {
       if (isAdmin()) {
         OidcEntity requester = oauth2TokenService.generateOidcEntityFromCurrentAuth();
