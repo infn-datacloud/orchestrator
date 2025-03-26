@@ -112,7 +112,7 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup, 
+  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup,
     Status[] excludedStatus) {
     if (StringUtils.isEmpty(owner)) {
       if (isAdmin()) {
@@ -161,7 +161,7 @@ public class DeploymentServiceImpl implements DeploymentService {
         if (excludedStatus == null) {
           return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, pageable);
         } else {
-          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, 
+          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup,
             excludedStatus, pageable);
         }
       }

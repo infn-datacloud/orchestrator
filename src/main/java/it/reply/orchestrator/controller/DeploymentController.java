@@ -143,7 +143,7 @@ public class DeploymentController {
       authorizeRequestedGroup(userToken, userGroup);
     }
 
-    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, 
+    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy,
     userGroup, excludedStatus);
 
     return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
