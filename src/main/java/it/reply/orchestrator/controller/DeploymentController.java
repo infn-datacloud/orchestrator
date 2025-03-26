@@ -144,7 +144,7 @@ public class DeploymentController {
     }
 
     Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy,
-      userGroup, excludedStatus);
+        userGroup, excludedStatus);
 
     return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
         ControllerLinkBuilder
