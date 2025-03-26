@@ -21,8 +21,6 @@ import com.nimbusds.jwt.JWT;
 
 import it.reply.orchestrator.utils.JwtUtils;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
@@ -39,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Embeddable
-public class OidcEntityId extends OidcIssuerAwareId implements Serializable {
+public class OidcEntityId extends OidcIssuerAwareId {
 
   private static final long serialVersionUID = 1L;
 

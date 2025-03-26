@@ -70,4 +70,7 @@ public class Network {
   @NotNull
   private String uid;
 
+  @JsonProperty("service")
+  @NotNull
+  private Service service;
 }

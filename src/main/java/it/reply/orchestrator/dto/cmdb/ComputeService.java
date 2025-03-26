@@ -18,18 +18,13 @@
 package it.reply.orchestrator.dto.cmdb;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -151,9 +146,10 @@ public class ComputeService extends CloudService {
     this.privateNetworkName = privateNetworkName;
     this.privateNetworkCidr = privateNetworkCidr;
     this.privateNetworkProxyHost = privateNetworkProxyHost;
-    this.privateNetworkProxyUser = privateNetworkProxyHost;
+    this.privateNetworkProxyUser = privateNetworkProxyUser;
   }
 
+  @SuppressWarnings("unused")
   @Deprecated
   private ComputeService() {
     images = new ArrayList<>();

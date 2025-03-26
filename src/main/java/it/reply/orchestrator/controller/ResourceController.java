@@ -18,7 +18,7 @@
 package it.reply.orchestrator.controller;
 
 import it.reply.orchestrator.config.properties.OidcProperties;
-import it.reply.orchestrator.dal.entity.OidcEntity;
+//import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dto.request.ActionRequest;
@@ -162,10 +162,10 @@ public class ResourceController {
   public void performAction(@PathVariable("deploymentId") String deploymentId,
       @PathVariable("resourceId") String resourceId,
       @Valid @RequestBody ActionRequest request) {
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     resourceService.doAction(deploymentId, resourceId, request.getType(), requestedWithToken);

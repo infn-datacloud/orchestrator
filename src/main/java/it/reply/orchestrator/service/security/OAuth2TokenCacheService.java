@@ -84,6 +84,7 @@ public class OAuth2TokenCacheService {
    */
   public OAuth2TokenCacheService(@NonNull Ignite ignite) {
 
+    @SuppressWarnings("deprecation")
     CacheConfiguration<OidcTokenId, AccessGrant> oauth2CacheCfg =
         new CacheConfiguration<OidcTokenId, AccessGrant>(CACHE_NAME)
             .setEvictionFilter(new TokenEvictionFilter())

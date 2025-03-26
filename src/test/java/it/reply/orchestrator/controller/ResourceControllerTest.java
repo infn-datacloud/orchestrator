@@ -127,7 +127,7 @@ public class ResourceControllerTest {
 
   @Test
   public void getFilteredResources() throws Exception {
-    Pageable pageable = ControllerTestUtils.createDefaultPageable();
+    //Pageable pageable = ControllerTestUtils.createDefaultPageable();
     Deployment deployment = ControllerTestUtils.createDeployment();
     List<Resource> resources = new ArrayList<>();
     resources.add(ControllerTestUtils.createComputeResource(deployment));

@@ -39,6 +39,7 @@ import it.reply.orchestrator.dto.mesos.MesosContainer.Type;
 import it.reply.orchestrator.dto.mesos.MesosPortMapping;
 import it.reply.orchestrator.dto.mesos.marathon.MarathonApp;
 import it.reply.orchestrator.dto.vault.VaultSecret;
+import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.exception.VaultServiceNotAvailableException;
 import it.reply.orchestrator.exception.service.BusinessWorkflowException;
@@ -235,11 +236,15 @@ public class MarathonServiceImpl extends AbstractMesosDeploymentService<Marathon
 
     String groupId = deployment.getId();
 
-    MarathonServiceProperties marathonProperties = deploymentMessage
-        .getCloudServicesOrderedIterator()
+    CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
+    MarathonServiceProperties marathonProperties = null;
+    if (csIterator != null) {
+      marathonProperties = csIterator
         .currentService(MarathonService.class)
         .getProperties();
-
+    }
+    String hostPath = (marathonProperties != null
+        ? marathonProperties.generateLocalVolumesHostPath(groupId) : null);
     CommonUtils
         .nullableCollectionToStream(group.getApps())
         .filter(Objects::nonNull)
@@ -261,8 +266,7 @@ public class MarathonServiceImpl extends AbstractMesosDeploymentService<Marathon
             externalVolume.setName(nameWithGroupId);
           } else if (volume instanceof LocalVolume) {
             // set as /basePath/groupId
-            ((LocalVolume) volume)
-                .setHostPath(marathonProperties.generateLocalVolumesHostPath(groupId));
+            ((LocalVolume) volume).setHostPath(hostPath);
           }
         });
 
@@ -670,15 +674,20 @@ public class MarathonServiceImpl extends AbstractMesosDeploymentService<Marathon
           .filter(node -> toscaService.isOfToscaType(node, ToscaConstants.Nodes.Types.MARATHON))
           .collect(Collectors.toList());
 
-      MarathonServiceProperties marathonProperties = deploymentMessage
-          .getCloudServicesOrderedIterator()
+      CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
+      MarathonServiceProperties marathonProperties = null;
+      if (csIterator != null) {
+        marathonProperties = csIterator
           .currentService(MarathonService.class)
           .getProperties();
+      }
+      List<String> balancerIPs = (marathonProperties != null
+          ? marathonProperties.getLoadBalancerIps() : new ArrayList<String>());
+
       RuntimeProperties runtimeProperties = new RuntimeProperties();
       for (NodeTemplate marathonNode : orderedMarathonApps) {
 
-        runtimeProperties.put(marathonProperties.getLoadBalancerIps(), marathonNode.getName(),
-            "load_balancer_ips");
+        runtimeProperties.put(balancerIPs, marathonNode.getName(), "load_balancer_ips");
 
         List<Integer> ports = group
             .getApps()

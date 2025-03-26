@@ -61,26 +61,16 @@ public class DeploymentStatusHelperTest {
       "CREATE_IN_PROGRESS, CREATE_COMPLETE",
       "DELETE_COMPLETE, DELETE_COMPLETE",
       "DELETE_FAILED, UNKNOWN",
-      // we dont set it DELETE_COMPLETE because we're going to delete it so hibernate will complain
-      // "DELETE_IN_PROGRESS, DELETE_COMPLETE"
+      "DELETE_IN_PROGRESS, DELETE_COMPLETE",
       "UPDATE_COMPLETE, UPDATE_COMPLETE",
       "UPDATE_FAILED, UNKNOWN",
       "UPDATE_IN_PROGRESS, UPDATE_COMPLETE",
       "UNKNOWN, UNKNOWN" })
   @Test
   public void updateOnSuccess(Status initialStatus, Status expectedStatus) {
-
     deployment.setStatus(initialStatus);
     deploymentStatusHelper.updateOnSuccess(deployment.getId());
     Assertions.assertThat(deployment.getStatus()).isEqualTo(expectedStatus);
-  }
-
-  @Test
-  public void updateOnSuccessDeleteInProgress() {
-    deployment.setStatus(Status.DELETE_IN_PROGRESS);
-    deploymentStatusHelper.updateOnSuccess(deployment.getId());
-    Assertions.assertThat(deployment.getStatus()).isEqualTo(Status.DELETE_IN_PROGRESS);
-    Mockito.verify(deploymentRepository, Mockito.times(1)).delete(deployment);
   }
 
   @Test
@@ -137,6 +127,7 @@ public class DeploymentStatusHelperTest {
   @Parameters({ "CREATE_COMPLETE, STARTED, 2",
       "CREATE_FAILED, ERROR, 2",
       "CREATE_IN_PROGRESS, CREATING, 2",
+      "DELETE_COMPLETE, DELETED, 2",
       "DELETE_FAILED, ERROR, 2",
       "DELETE_IN_PROGRESS, DELETING, 2",
       "UNKNOWN, ERROR, 2" })
@@ -158,7 +149,8 @@ public class DeploymentStatusHelperTest {
       "STARTING, STARTED, 2",
       "STARTED, STARTED, 2",
       "STOPPING, STARTED, 2",
-      "DELETING, DELETING, 0",
+      "DELETING, DELETING, 2",
+      "DELETED, DELETED, 2",
       "ERROR, STARTED, 2"
   })
   @Test
@@ -169,9 +161,6 @@ public class DeploymentStatusHelperTest {
     deploymentStatusHelper.updateResources(deployment, deployment.getStatus());
     Assertions.assertThat(deployment.getResources()).allMatch(
         resource -> resource.getState() == expectedResourceStatus);
-    // deleting node must have been removed from the Set
-    Assertions.assertThat(deployment.getResources()).allMatch(
-        resource -> resource.getState() != NodeStates.DELETING);
     Assertions.assertThat(deployment.getResources()).hasSize(expectedSize);
   }
 
@@ -184,6 +173,7 @@ public class DeploymentStatusHelperTest {
       "STARTED, STARTED, 2",
       "STOPPING, CONFIGURING, 2",
       "DELETING, DELETING, 2",
+      "DELETED, DELETED, 2",
       "ERROR, CONFIGURING, 2"
   })
   @Test
@@ -206,6 +196,7 @@ public class DeploymentStatusHelperTest {
       "STARTED, STARTED, 2",
       "STOPPING, ERROR, 2",
       "DELETING, ERROR, 2",
+      "DELETED, ERROR, 2",
       "ERROR, ERROR, 2"
   })
   @Test
@@ -217,12 +208,5 @@ public class DeploymentStatusHelperTest {
     Assertions.assertThat(deployment.getResources()).allMatch(
         resource -> resource.getState() == expectedResourceStatus);
     Assertions.assertThat(deployment.getResources()).hasSize(expectedSizie);
-  }
-
-  @Test
-  public void updateResourcesDeleteComplete() {
-    deployment.setStatus(Status.DELETE_COMPLETE);
-    deploymentStatusHelper.updateResources(deployment, deployment.getStatus());
-    Assertions.assertThat(deployment.getResources()).isEmpty();
   }
 }

@@ -75,10 +75,14 @@ public enum NodeStates {
   STOPPED(false),
 
   /**
-   * Node is transitioning from its current state to one where it is deleted and its state is no
-   * longer tracked by the instance model.
+   * Node is transitioning from its current state to one where it is deleted.
    */
   DELETING(true),
+
+  /**
+   * Node is deleted.
+   */
+  DELETED(false),
 
   /**
    * Node is in an error state.

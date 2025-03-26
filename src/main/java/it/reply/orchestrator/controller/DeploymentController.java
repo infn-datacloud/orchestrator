@@ -22,6 +22,7 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.request.DeploymentRequest;
+import it.reply.orchestrator.enums.Status;
 import it.reply.orchestrator.exception.http.ForbiddenException;
 import it.reply.orchestrator.resource.DeploymentResource;
 import it.reply.orchestrator.resource.DeploymentResourceAssembler;
@@ -132,6 +133,7 @@ public class DeploymentController {
   public PagedResources<DeploymentResource> getDeployments(
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
       @RequestParam(name = "userGroup", required = false) @Nullable String userGroup,
+      @RequestParam(name = "excludedStatus", required = false) @Nullable Status[] excludedStatus,
       @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Deployment> pagedAssembler)
       throws ParseException, ForbiddenException {
@@ -141,14 +143,15 @@ public class DeploymentController {
       authorizeRequestedGroup(userToken, userGroup);
     }
 
-    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy, userGroup);
+    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy,
+        userGroup, excludedStatus);
 
     return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
         ControllerLinkBuilder
             .linkTo(
                 DummyInvocationUtils
                     .methodOn(DeploymentController.class)
-                    .getDeployments(createdBy, userGroup, pageable, pagedAssembler))
+                    .getDeployments(createdBy, userGroup, excludedStatus, pageable, pagedAssembler))
             .withSelfRel());
 
   }
@@ -197,10 +200,10 @@ public class DeploymentController {
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
   public void updateDeployment(@PathVariable("deploymentId") String id,
       @Valid @RequestBody DeploymentRequest request) {
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     deploymentService.updateDeployment(id, request, requestedWithToken);
@@ -232,10 +235,10 @@ public class DeploymentController {
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
   public void resetDeployment(@PathVariable("deploymentId") String id,
       @Valid @RequestBody DeploymentStatus status) {
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     deploymentService.resetDeployment(id, status.getStatus(), requestedWithToken);
@@ -269,10 +272,10 @@ public class DeploymentController {
   @ResponseStatus(HttpStatus.OK)
   public CharSequence getDeploymentLog(@PathVariable("deploymentId") String uuid) {
     MdcUtils.setDeploymentId(uuid);
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     return deploymentService.getDeploymentLog(uuid, requestedWithToken);
@@ -289,10 +292,10 @@ public class DeploymentController {
   @ResponseStatus(HttpStatus.OK)
   public CharSequence getDeploymentExtraInfo(@PathVariable("deploymentId") String uuid) {
     MdcUtils.setDeploymentId(uuid);
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     return deploymentService.getDeploymentExtendedInfo(uuid, requestedWithToken);
@@ -301,21 +304,21 @@ public class DeploymentController {
   /**
    * Delete the deployment.
    *
-   * @param id
-   *          the deployment id
+   * @param uuid
+   *          the uuid of the deployment
    */
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void deleteDeployment(@PathVariable("deploymentId") String id,
+  public void deleteDeployment(@PathVariable("deploymentId") String uuid,
       @RequestParam(name = "force", required = false) @Nullable String force) {
-    OidcEntity owner = null;
+    //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
-      owner = oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
+      /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    deploymentService.deleteDeployment(id, requestedWithToken, force);
+    deploymentService.deleteDeployment(uuid, requestedWithToken, force);
   }
 }

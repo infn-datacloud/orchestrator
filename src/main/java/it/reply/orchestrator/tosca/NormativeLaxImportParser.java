@@ -42,6 +42,7 @@ public class NormativeLaxImportParser extends LaxImportParser {
 
   @Override
   public CSARDependency parse(Node node, ParsingContextExecution context) {
+    @SuppressWarnings("unchecked")
     MapParser<String> mapParser = baseParserFactory.<String>getMapParser(scalarParser, "string");
     return mapParser
         .parse(node, context)

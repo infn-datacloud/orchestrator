@@ -155,8 +155,11 @@ public class UpdateDeploymentTest extends BaseDeployCommandTest<UpdateDeployment
   @Test
   public void testCustomExecuteSuccess() {
     DeploymentMessage dm = baseTestCustomExecuteSuccess(new HashMap<>());
-    assertThat(dm.getCloudServicesOrderedIterator().getSize())
-        .isEqualTo(1);
+    CloudServicesOrderedIterator csIterator = dm.getCloudServicesOrderedIterator();
+    assertThat(csIterator).isNotNull();
+    if (csIterator != null) {
+        assertThat(csIterator.getSize()).isEqualTo(1);
+    }
     assertThat(dm.getChosenCloudProviderEndpoint()).isNotNull();
   }
 
