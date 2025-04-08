@@ -65,7 +65,7 @@ public class Image {
   @JsonProperty("gpu_driver")
   private Boolean gpuDriver;
 
-  @JsonProperty("is_public")
+  @JsonProperty("is_shared")
   private Boolean isPublic;
 
   @JsonProperty("tags")
