@@ -14,6 +14,8 @@ it.reply.orchestrator.dto.cmdb.wrappers
 it.reply.orchestrator.dto.common
 it.reply.orchestrator.dto.deployment
 it.reply.orchestrator.dto.dynafed
+it.reply.orchestrator.dto.fedreg
+it.reply.orchestrator.dto.iam
 it.reply.orchestrator.dto.kubernetes.fluxcd
 it.reply.orchestrator.dto.mesos
 it.reply.orchestrator.dto.mesos.chronos
