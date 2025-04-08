@@ -45,7 +45,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 @Service
-@ServiceVersion(SlamServiceLocalImpl.SERVICE_VERSION)
+@ServiceVersion(CmdbServiceLocalImpl.SERVICE_VERSION)
 public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   public static final String SERVICE_VERSION = "local";
@@ -56,6 +56,7 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   /**
    * Creates a new CmdbServiceLocalImpl.
+   *
    * @param cmdbProperties the cmdbProperties
    * @param objectMapper the objectMapper
    * @param resourceLoader the ResourceLoader

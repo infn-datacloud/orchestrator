@@ -32,6 +32,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * This integration test makes real request to the CMDB APIs.
@@ -49,6 +50,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   private final String recasProviderName = "provider-RECAS-BARI";
 
   @Autowired
+  @Qualifier(value = "cmdbServiceLocalImpl")
   private CmdbService service;
 
   @Test
@@ -56,7 +58,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   public void getServiceTest() throws Exception {
 
     CloudService serviceRecas = service.getServiceById(recasId);
-    CloudService service = CloudService.builder()
+    CloudService serviceMock = CloudService.builder()
         .serviceType("eu.egi.cloud.vm-management.openstack")
         .endpoint("https://cloud.recas.ba.infn.it:5000/v3")
         .providerId("provider-RECAS-BARI")
@@ -64,7 +66,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
         .region("recas-cloud")
         .build();
 
-    assertEquals(service, serviceRecas);
+    assertEquals(serviceMock, serviceRecas);
   }
 
   @Test

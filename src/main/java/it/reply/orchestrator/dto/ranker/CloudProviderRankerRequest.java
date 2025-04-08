@@ -17,13 +17,17 @@
 
 package it.reply.orchestrator.dto.ranker;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.slam.PreferenceCustomer;
 import it.reply.orchestrator.dto.slam.Sla;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -47,10 +51,20 @@ public class CloudProviderRankerRequest {
   @Builder.Default
   private List<Monitoring> monitoring = new ArrayList<>();
 
+  @JsonProperty("deploymentId")
+  @Builder.Default
+  private String deploymentId = "";
+
+  @JsonIgnore
+  @Builder.Default
+  private Map<String, CloudProvider> cloudProviders = new HashMap<>();
+
   @Deprecated
   protected CloudProviderRankerRequest() {
     preferences = new ArrayList<>();
     sla = new ArrayList<>();
     monitoring = new ArrayList<>();
+    cloudProviders = new HashMap<>();
+    deploymentId = "";
   }
 }

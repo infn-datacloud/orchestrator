@@ -122,10 +122,10 @@ public class DeploymentController {
    *          {@link Pageable}
    * @param pagedAssembler
    *          {@link PagedResourcesAssembler}
+   * @return {@link DeploymentResource}
    * @throws ParseException if the claim value is not of required type when parsing user's token
    * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
    *         or the requested group is not in the user's allowed groups
-   * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
   @RequestMapping(value = "/deployments", method = RequestMethod.GET,
@@ -264,54 +264,54 @@ public class DeploymentController {
   /**
    * Get the infrastructure log by deploymentId.
    *
-   * @param uuid
-   *          the uuid of the deployment
+   * @param id
+   *          the deployment id
    * @return the log
    */
   @GetMapping(path = "/deployments/{deploymentId}/log")
   @ResponseStatus(HttpStatus.OK)
-  public CharSequence getDeploymentLog(@PathVariable("deploymentId") String uuid) {
-    MdcUtils.setDeploymentId(uuid);
+  public CharSequence getDeploymentLog(@PathVariable("deploymentId") String id) {
+    MdcUtils.setDeploymentId(id);
     //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    return deploymentService.getDeploymentLog(uuid, requestedWithToken);
+    return deploymentService.getDeploymentLog(id, requestedWithToken);
   }
 
   /**
    * Get the infrastructure info for deploymentId.
    *
-   * @param uuid
-   *          the uuid of the deployment
+   * @param id
+   *          the deployment id
    * @return the extra info
    */
   @GetMapping(path = "/deployments/{deploymentId}/extrainfo")
   @ResponseStatus(HttpStatus.OK)
-  public CharSequence getDeploymentExtraInfo(@PathVariable("deploymentId") String uuid) {
-    MdcUtils.setDeploymentId(uuid);
+  public CharSequence getDeploymentExtraInfo(@PathVariable("deploymentId") String id) {
+    MdcUtils.setDeploymentId(id);
     //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    return deploymentService.getDeploymentExtendedInfo(uuid, requestedWithToken);
+    return deploymentService.getDeploymentExtendedInfo(id, requestedWithToken);
   }
 
   /**
    * Delete the deployment.
    *
-   * @param uuid
-   *          the uuid of the deployment
+   * @param id
+   *          the deployment id
    */
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void deleteDeployment(@PathVariable("deploymentId") String uuid,
+  public void deleteDeployment(@PathVariable("deploymentId") String id,
       @RequestParam(name = "force", required = false) @Nullable String force) {
     //OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
@@ -319,6 +319,6 @@ public class DeploymentController {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
-    deploymentService.deleteDeployment(uuid, requestedWithToken, force);
+    deploymentService.deleteDeployment(id, requestedWithToken, force);
   }
 }

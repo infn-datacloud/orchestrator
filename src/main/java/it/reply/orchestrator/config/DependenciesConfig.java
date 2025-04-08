@@ -19,7 +19,9 @@ package it.reply.orchestrator.config;
 
 import it.reply.orchestrator.annotation.ServiceVersion;
 import it.reply.orchestrator.config.properties.CmdbProperties;
+import it.reply.orchestrator.config.properties.CprProperties;
 import it.reply.orchestrator.config.properties.SlamProperties;
+import it.reply.orchestrator.service.CloudProviderRankerService;
 import it.reply.orchestrator.service.CmdbService;
 import it.reply.orchestrator.service.SlamService;
 import java.util.Arrays;
@@ -33,7 +35,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties({
     SlamProperties.class,
-    CmdbProperties.class
+    CmdbProperties.class,
+    CprProperties.class
 })
 public class DependenciesConfig {
 
@@ -63,6 +66,11 @@ public class DependenciesConfig {
   @Bean
   public CmdbService cmdbService(CmdbProperties cmdbProperties) {
     return this.findVersion(CmdbService.class, cmdbProperties.getServiceVersion());
+  }
+
+  @Bean
+  public CloudProviderRankerService cprService(CprProperties cprProperties) {
+    return this.findVersion(CloudProviderRankerService.class, cprProperties.getServiceVersion());
   }
 
 }
