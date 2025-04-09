@@ -32,7 +32,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @ServiceVersion(CloudProviderRankerServiceLocalImpl.SERVICE_VERSION)
 public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerService {

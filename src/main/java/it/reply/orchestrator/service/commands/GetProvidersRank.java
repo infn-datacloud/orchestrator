@@ -38,7 +38,6 @@ import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 @Component(WorkflowConstants.Delegate.GET_PROVIDERS_RANK)
 public class GetProvidersRank extends BaseRankCloudProvidersCommand {
 
