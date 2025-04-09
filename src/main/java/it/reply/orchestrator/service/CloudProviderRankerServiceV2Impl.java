@@ -22,7 +22,7 @@ import it.reply.orchestrator.config.properties.CprProperties;
 import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.cmdb.CloudServiceType;
-import it.reply.orchestrator.dto.ranker.AIRankedCloudService;
+import it.reply.orchestrator.dto.ranker.AiRankedCloudService;
 import it.reply.orchestrator.dto.ranker.CloudProviderRankerRequest;
 import it.reply.orchestrator.dto.ranker.RankedCloudService;
 import it.reply.orchestrator.exception.service.DeploymentException;
@@ -48,8 +48,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @ServiceVersion("v2")
 public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerService {
  
-  private static final ParameterizedTypeReference<List<AIRankedCloudService>> RESPONSE_TYPE =
-      new ParameterizedTypeReference<List<AIRankedCloudService>>() {};
+  private static final ParameterizedTypeReference<List<AiRankedCloudService>> RESPONSE_TYPE =
+      new ParameterizedTypeReference<List<AiRankedCloudService>>() {};
  
   private CprProperties cprProperties;
  
@@ -81,11 +81,11 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
     List<RankedCloudService> result = new ArrayList<RankedCloudService>();
  
     try {
-      List<AIRankedCloudService> airanking = restTemplate.exchange(requestUri, HttpMethod.POST,
+      List<AiRankedCloudService> airanking = restTemplate.exchange(requestUri, HttpMethod.POST,
           entity, RESPONSE_TYPE).getBody();
       if (airanking.size() > 0) {
         Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
-        for (AIRankedCloudService aiservice : airanking) {
+        for (AiRankedCloudService aiservice : airanking) {
           for (CloudProvider provider : cloudProviders.values()) {
             if (provider.getName().equalsIgnoreCase(aiservice.getProvider())) {
               for (CloudService service : provider.getServices().values()) {

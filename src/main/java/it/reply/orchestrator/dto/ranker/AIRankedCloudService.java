@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AIRankedCloudService {
+public class AiRankedCloudService {
 
   private float classification;
 
