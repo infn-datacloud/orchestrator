@@ -20,10 +20,9 @@ package it.reply.orchestrator.service;
 import alien4cloud.tosca.context.ToscaContext;
 import alien4cloud.tosca.context.ToscaContextual;
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.reply.orchestrator.dal.entity.Deployment;
+import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dal.entity.WorkflowReference;
@@ -36,15 +35,13 @@ import it.reply.orchestrator.enums.Status;
 import it.reply.orchestrator.exception.http.BadRequestException;
 import it.reply.orchestrator.exception.http.ConflictException;
 import it.reply.orchestrator.exception.http.NotFoundException;
+import it.reply.orchestrator.service.security.OAuth2TokenService;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.types.NodeType;
 import org.alien4cloud.tosca.utils.ToscaTypeUtils;
 import org.flowable.engine.RuntimeService;
@@ -66,6 +63,9 @@ public class ResourceServiceImpl implements ResourceService {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Autowired
+  private OAuth2TokenService oauth2TokenService;
 
   @Autowired
   private RuntimeService wfService;
@@ -95,7 +95,7 @@ public class ResourceServiceImpl implements ResourceService {
     // get the list of template nodes that match or derive from the specified tosca type
     List<String> nodeNames = ar.getTopology().getNodeTemplates().entrySet().stream()
                                .filter(n -> ToscaTypeUtils.isOfType(ToscaContext.get(
-                                      NodeType.class, n.getValue().getType()),type))
+                                      NodeType.class, n.getValue().getType()), type))
                                .map(n -> n.getKey()).collect(Collectors.toList());
     // filter the deployment resources that match with the names computed above
     return resources.stream().filter(r -> nodeNames.contains(r.getToscaNodeName()))
@@ -161,8 +161,9 @@ public class ResourceServiceImpl implements ResourceService {
         .businessKey(MdcUtils.toBusinessKey())
         .start();
 
+    OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();        
     deployment.addWorkflowReferences(
-        new WorkflowReference(pi.getId(), requestId, Action.EXECUTE));
+        new WorkflowReference(pi.getId(), requestId, requester, Action.EXECUTE));
 
     return true;
 

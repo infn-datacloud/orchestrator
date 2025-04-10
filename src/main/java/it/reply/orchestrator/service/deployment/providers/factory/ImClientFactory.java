@@ -91,7 +91,7 @@ public class ImClientFactory {
         OidcEntity oidcEntity = oidcEntityRepository.findByOidcEntityId(oidcEntityId).orElse(null);
         String organization;
         if (oidcEntity == null) {
-          IamUserInfo userInfo = (IamUserInfo)oauth2TokenService.getCurrentAuthentication()
+          IamUserInfo userInfo = (IamUserInfo) oauth2TokenService.getCurrentAuthentication()
               .getUserInfo();
           if (userInfo != null) {
             organization = Preconditions.checkNotNull(userInfo.getOrganizationName(),

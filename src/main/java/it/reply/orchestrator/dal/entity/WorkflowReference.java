@@ -17,18 +17,23 @@
 
 package it.reply.orchestrator.dal.entity;
 
+import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
+import javax.persistence.PrePersist;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
 @Getter
@@ -59,6 +64,25 @@ public class WorkflowReference extends UuidIdentifiable {
   @JoinColumn(name = "deployment_id", nullable = false, updatable = false)
   private Deployment deployment;
 
+  @ManyToOne(cascade = {
+      CascadeType.DETACH,
+      CascadeType.MERGE,
+      CascadeType.PERSIST,
+      CascadeType.REFRESH
+  })
+  @JoinColumn(name = "actor_id")
+  @Nullable
+  private OidcEntity actor;
+
+  @Column(nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdAt;
+
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = new Date();
+  }
+
   /**
    * Generate a WorkflowReference.
    *
@@ -66,12 +90,15 @@ public class WorkflowReference extends UuidIdentifiable {
    *     the processId
    * @param requestId
    *     the requestId
+   * @param actor
+   *     the OidcEntity of actor that start the process
    * @param action
    *     the action
    */
-  public WorkflowReference(String processId, String requestId, Action action) {
+  public WorkflowReference(String processId, String requestId, OidcEntity actor, Action action) {
     this.processId = processId;
     this.requestId = requestId;
+    this.actor = actor;
     this.action = action;
   }
 

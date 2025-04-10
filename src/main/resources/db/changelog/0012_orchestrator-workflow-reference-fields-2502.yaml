@@ -1,0 +1,39 @@
+databaseChangeLog:
+- changeSet:
+    id: 0012_orchestrator-workflow-reference-fields-2502
+    author: m.perniola
+    comment: >
+      Add fields created_at and actor_id to table workflow_reference
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: actor_id
+            type: VARCHAR(36)
+        - column:
+            constraints:
+              nullable: false
+            name: created_at
+            type: TIMESTAMP(6)            
+        tableName: workflow_reference
+    - sql:
+        dbms: mysql
+        sql: >
+          ALTER TABLE `workflow_reference`
+          CHANGE COLUMN `created_at` `created_at` TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+    - createIndex:
+        columns:
+        - column:
+            name: actor_id
+        indexName: IDXl6r39kamf1ob0utr5fglkjdbs
+        tableName: workflow_reference
+    - addForeignKeyConstraint:
+        baseColumnNames: actor_id
+        baseTableName: workflow_reference
+        constraintName: FKpfgtg455fretj1e026lfrtw9w
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: oidc_entity

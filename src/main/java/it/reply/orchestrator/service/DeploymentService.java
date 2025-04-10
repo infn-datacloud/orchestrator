@@ -24,7 +24,6 @@ import it.reply.orchestrator.dto.request.DeploymentRequest;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.enums.DeploymentType;
 import it.reply.orchestrator.enums.Status;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +37,7 @@ public interface DeploymentService {
 
   /**
    * Infer deployment type from provider.
+   *
    * @param deploymentProvider the provider
   */
   public static DeploymentType inferDeploymentType(

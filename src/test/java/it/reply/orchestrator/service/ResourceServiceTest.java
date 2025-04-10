@@ -19,13 +19,17 @@ package it.reply.orchestrator.service;
 
 import static org.junit.Assert.assertEquals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.reply.orchestrator.controller.ControllerTestUtils;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.dal.repository.ResourceRepository;
 import it.reply.orchestrator.exception.http.NotFoundException;
-
+import it.reply.orchestrator.service.security.OAuth2TokenService;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.flowable.engine.impl.RuntimeServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +43,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 public class ResourceServiceTest {
 
   @Mock
@@ -55,6 +53,9 @@ public class ResourceServiceTest {
 
   @Mock
   private DeploymentService deploymentService;
+
+  @Mock
+  private OAuth2TokenService oauth2TokenService;
 
   @Mock
   private RuntimeServiceImpl wfService;
@@ -71,7 +72,8 @@ public class ResourceServiceTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    service = new ResourceServiceImpl(resourceRepository, deploymentService, objectMapper, wfService, toscaService);
+    service = new ResourceServiceImpl(resourceRepository, deploymentService, objectMapper,
+      oauth2TokenService, wfService, toscaService);
   }
 
   @Test(expected = NotFoundException.class)

@@ -30,6 +30,7 @@ import it.reply.orchestrator.dal.entity.WorkflowReference;
 import it.reply.orchestrator.dal.entity.WorkflowReference.Action;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.dal.repository.ResourceRepository;
+import it.reply.orchestrator.dal.repository.WorkflowReferenceRepository;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.dynafed.Dynafed;
 import it.reply.orchestrator.dto.onedata.OneData;
@@ -54,7 +55,6 @@ import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +88,9 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Autowired
   private DeploymentRepository deploymentRepository;
+
+  @Autowired
+  private WorkflowReferenceRepository workflowReferenceRepository;
 
   @Autowired
   private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
@@ -221,12 +224,13 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   /**
    * Throw exception if the access to the deployment is not authorized.
+   *
    * @param  deployment the deployment object
   */
   public void throwIfNotOwned(Deployment deployment) {
     if (!isAdmin() && !isOwned(deployment)) {
       throw new ForbiddenException(
-        "Only the owner of the deployment can perform this operation");
+        "Only admin or the owner of the deployment can perform this operation");
     }
   }
 
@@ -324,7 +328,7 @@ public class DeploymentServiceImpl implements DeploymentService {
         .start();
 
     deployment.addWorkflowReferences(
-        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), Action.CREATE));
+        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(),  owner, Action.CREATE));
     deployment = deploymentRepository.save(deployment);
     return deployment;
 
@@ -372,7 +376,9 @@ public class DeploymentServiceImpl implements DeploymentService {
     deployment.setStatus(Status.DELETE_IN_PROGRESS);
     deployment.setStatusReason(null);
     deployment.setTask(Task.NONE);
+    deployment = deploymentRepository.save(deployment);
 
+    // delete running workflow instances for the deployment
     wfService
         .createExecutionQuery()
         .onlyProcessInstanceExecutions()
@@ -381,33 +387,39 @@ public class DeploymentServiceImpl implements DeploymentService {
         .forEach(execution -> wfService.deleteProcessInstance(execution.getProcessInstanceId(),
             "Process deleted by user with request " + MdcUtils.getRequestId()));
 
-    if (deployment.getDeploymentProvider() == null) {
-      // no deployment provider -> no resources created
-      // TODO handle it in a better way (e.g. a stub provider)
-      deploymentRepository.delete(deployment);
-      return;
+    String pid;
+
+    if (deployment.getDeploymentProvider() != null) {
+      DeploymentType deploymentType = DeploymentService.inferDeploymentType(
+          deployment.getDeploymentProvider());
+
+      // Build deployment message
+      DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
+          requestedWithToken);
+
+      deploymentMessage.setForce(Boolean.valueOf(force));
+
+      pid = wfService
+          .createProcessInstanceBuilder()
+          .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
+          .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
+          .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
+              objectMapper.valueToTree(deploymentMessage))
+          .processDefinitionKey(WorkflowConstants.Process.UNDEPLOY)
+          .businessKey(MdcUtils.toBusinessKey())
+          .start().getId();
+    } else {
+      // no deployment provider -> no resources created -> no need for undeployment workflow
+      // deploymentRepository.delete(deployment); // old behaviour,delete deployment entry from db
+      deployment.setStatus(Status.DELETE_COMPLETE);
+      deployment = deploymentRepository.save(deployment);
+      // TODO define application wide uuid for fake process id
+      pid = "00000000-0000-0000-0000-000000000000";
     }
-    DeploymentType deploymentType = DeploymentService.inferDeploymentType(
-        deployment.getDeploymentProvider());
 
-    // Build deployment message
-    DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-        requestedWithToken);
-
-    deploymentMessage.setForce(Boolean.valueOf(force));
-
-    ProcessInstance pi = wfService
-        .createProcessInstanceBuilder()
-        .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
-        .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
-        .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-            objectMapper.valueToTree(deploymentMessage))
-        .processDefinitionKey(WorkflowConstants.Process.UNDEPLOY)
-        .businessKey(MdcUtils.toBusinessKey())
-        .start();
-
+    OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
     deployment.addWorkflowReferences(
-        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), Action.DELETE));
+        new WorkflowReference(pid, MdcUtils.getRequestId(), requester, Action.DELETE));
   }
 
   @Override
@@ -473,8 +485,9 @@ public class DeploymentServiceImpl implements DeploymentService {
         .businessKey(MdcUtils.toBusinessKey())
         .start();
 
+    OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
     deployment.addWorkflowReferences(
-        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), Action.UPDATE));
+        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), requester, Action.UPDATE));
 
   }
 
