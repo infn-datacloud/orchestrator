@@ -17,7 +17,6 @@
 
 package it.reply.orchestrator.dal.entity;
 
-import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,9 +24,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"processId", "requestId"}, callSuper = true)
 @ToString(of = {"processId", "requestId"}, callSuper = true)
-public class WorkflowReference extends UuidIdentifiable {
+public class WorkflowReference extends AbstractResourceEntity {
 
   public enum Action {
     CREATE,
@@ -73,15 +69,6 @@ public class WorkflowReference extends UuidIdentifiable {
   @JoinColumn(name = "actor_id")
   @Nullable
   private OidcEntity actor;
-
-  @Column(nullable = false, updatable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date createdAt;
-
-  @PrePersist
-  protected void onCreate() {
-    this.createdAt = new Date();
-  }
 
   /**
    * Generate a WorkflowReference.

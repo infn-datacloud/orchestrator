@@ -328,7 +328,7 @@ public class DeploymentServiceImpl implements DeploymentService {
         .start();
 
     deployment.addWorkflowReferences(
-        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(),  owner, Action.CREATE));
+        new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), owner, Action.CREATE));
     deployment = deploymentRepository.save(deployment);
     return deployment;
 
