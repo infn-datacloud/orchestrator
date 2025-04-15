@@ -123,6 +123,7 @@ public class DeploymentScheduleServiceImpl {
 
   /**
    * Create a new Deployment schedule event.
+   *
    * @param schedule the Deployment schedule
    * @param fileName the name of the file that triggered the event
    * @param fileScope the scope of the file that triggered the event

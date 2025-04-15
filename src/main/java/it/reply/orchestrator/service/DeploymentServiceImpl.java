@@ -30,7 +30,6 @@ import it.reply.orchestrator.dal.entity.WorkflowReference;
 import it.reply.orchestrator.dal.entity.WorkflowReference.Action;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.dal.repository.ResourceRepository;
-import it.reply.orchestrator.dal.repository.WorkflowReferenceRepository;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.dynafed.Dynafed;
 import it.reply.orchestrator.dto.onedata.OneData;
@@ -61,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -88,9 +88,6 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Autowired
   private DeploymentRepository deploymentRepository;
-
-  @Autowired
-  private WorkflowReferenceRepository workflowReferenceRepository;
 
   @Autowired
   private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
@@ -413,8 +410,7 @@ public class DeploymentServiceImpl implements DeploymentService {
       // deploymentRepository.delete(deployment); // old behaviour,delete deployment entry from db
       deployment.setStatus(Status.DELETE_COMPLETE);
       deployment = deploymentRepository.save(deployment);
-      // TODO define application wide uuid for fake process id
-      pid = "00000000-0000-0000-0000-000000000000";
+      pid = UUID.randomUUID().toString();
     }
 
     OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
