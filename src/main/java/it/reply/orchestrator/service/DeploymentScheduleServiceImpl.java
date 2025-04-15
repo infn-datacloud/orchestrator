@@ -92,6 +92,7 @@ public class DeploymentScheduleServiceImpl {
 
   /**
    * Create a new Deployment schedule.
+   *
    * @param request the request
    * @return the deployment schedule
    */
@@ -159,6 +160,7 @@ public class DeploymentScheduleServiceImpl {
 
   /**
    * Create a DeploymentScheduleEvent for each DeploymentSchedule listening for the file.
+   *
    * @param scope the scope of the file
    * @param name the name of the file
    */
@@ -179,6 +181,7 @@ public class DeploymentScheduleServiceImpl {
 
   /**
    * Get all the deployment schedules of a user.
+   *
    * @param pageable the page information
    * @param owner the owner
    * @return the deployment schedules
@@ -215,8 +218,9 @@ public class DeploymentScheduleServiceImpl {
 
   /**
    * Returns the DeploymentSchedule with that id.
-   * @param id the id
-   * @return the
+   *
+   * @param id the deployment id
+   * @return the DeploymentSchedule
    */
   @Transactional(readOnly = true)
   public DeploymentSchedule getDeploymentSchedule(String id) {
@@ -231,6 +235,13 @@ public class DeploymentScheduleServiceImpl {
         .orElseThrow(() -> new NotFoundException("The deployment <" + id + "> doesn't exist"));
   }
 
+  /**
+   * Returns the DeploymentScheduleEvents.
+   *
+   * @param id the deployment id
+   * @param pageable the pageable object
+   * @return the DeploymentScheduleEvents
+   */
   public Page<DeploymentScheduleEvent> getDeploymentScheduleEvents(String id, Pageable pageable) {
     return deploymentScheduleEventRepository.findByDeploymentSchedule_Id(id, pageable);
   }
