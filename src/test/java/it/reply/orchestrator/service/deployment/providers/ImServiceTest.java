@@ -130,7 +130,8 @@ public class ImServiceTest extends ToscaParserAwareTest {
   @Autowired
   private ToscaServiceImpl toscaService;
 
-  @Before
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+@Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
     Mockito

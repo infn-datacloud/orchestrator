@@ -389,6 +389,8 @@ public class CmdbServiceV2Impl implements CmdbService {
         url = new URL(serviceEndpoint);
       } catch (MalformedURLException e) {
         LOG.error(e.getMessage());
+        // url cannot be null
+        continue;
       }
 
       // If the service is of type COMPUTE creates a ComputeService otherwise create a CloudService
@@ -417,7 +419,7 @@ public class CmdbServiceV2Impl implements CmdbService {
         for (Network network : project.getNetworks()) {
           if (Boolean.TRUE.equals(network.getIsDefault())
               && network.getService().getRegion().getName().equals(regionName)) {
-            if (Boolean.TRUE.equals(network.getIsShared())) {
+            if (Boolean.TRUE.equals(network.getIsRouterExternal())) {
               publicNetworkName = network.getName();
             } else {
               privateNetworkName = network.getName();

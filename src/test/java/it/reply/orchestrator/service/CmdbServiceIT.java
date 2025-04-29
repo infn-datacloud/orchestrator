@@ -84,6 +84,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getTenantsByServiceTest() throws Exception {
 
+    @SuppressWarnings("unused")
     List<Tenant> tenants = service.getTenantsByService(recasId);
   }
 
@@ -91,6 +92,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getTenantsByOrganisationTest() throws Exception {
 
+    @SuppressWarnings("unused")
     List<Tenant> tenants = service.getTenantsByOrganisation(organisationId);
   }
 
@@ -98,6 +100,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getTenantByIdTest() throws Exception {
 
+    @SuppressWarnings("unused")
     Tenant tenant = service.getTenantById(tenantId);
   }
 
@@ -105,6 +108,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getImageForTenantTest() throws Exception {
 
+    @SuppressWarnings("unused")
     List<Image> images = service.getImagesByTenant(tenantId);
 
     // ProviderData data =
@@ -123,6 +127,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getImageByIdTest() throws Exception {
 
+    @SuppressWarnings("unused")
     Image image = service.getImageById(imageId);
   }
 
@@ -130,6 +135,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getFlavorForTenantTest() throws Exception {
 
+    @SuppressWarnings("unused")
     List<Flavor> flavors = service.getFlavorsByTenant(tenantId);
   }
 
@@ -137,6 +143,7 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getFlavorByIdTest() throws Exception {
 
+    @SuppressWarnings("unused")
     Flavor flavor = service.getFlavorById(flavorId);
   }
 

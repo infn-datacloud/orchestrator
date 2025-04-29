@@ -66,7 +66,6 @@ import it.reply.orchestrator.service.IndigoInputsPreProcessorService.RuntimeProp
 import it.reply.orchestrator.service.S3Service;
 import it.reply.orchestrator.service.ToscaService;
 import it.reply.orchestrator.service.deployment.providers.factory.ImClientFactory;
-import it.reply.orchestrator.service.security.CustomOAuth2TemplateFactory;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.JwtUtils;
@@ -118,9 +117,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
   @Autowired
   private S3Service s3Service;
-
-  @Autowired
-  private CustomOAuth2TemplateFactory templateFactory;
 
   @Autowired
   private ClientConfigurationService staticClientConfigurationService;
@@ -251,8 +247,16 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     }
 
     toscaService.addElasticClusterParameters(ar, deployment.getId(), accessToken);
-    ComputeService computeService =
-        deploymentMessage.getCloudServicesOrderedIterator().currentService(ComputeService.class);
+    CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
+    if (csIterator == null) {
+      String errorMessage =
+          String.format("Cannot instantiate CloudServicesOrderedIterator for deployment id %s",
+            deploymentMessage.getDeploymentId());
+      LOG.error(errorMessage);
+      throw new IamServiceException(errorMessage);
+    }
+    ComputeService computeService = csIterator.currentService(ComputeService.class);
+
     toscaService.contextualizeAndReplaceImages(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceFlavors(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceVolumeTypes(ar, computeService, DeploymentProvider.IM);
@@ -698,7 +702,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   @Override
   public void cleanFailedDeploy(DeploymentMessage deploymentMessage) {
     CloudServicesOrderedIterator iterator = deploymentMessage.getCloudServicesOrderedIterator();
-    boolean isLastProvider = !iterator.hasNext();
+    boolean isLastProvider = iterator != null ? !iterator.hasNext() : true;
     boolean isKeepLastAttempt = deploymentMessage.isKeepLastAttempt();
     LOG.info("isLastProvider: {} and isKeepLastAttempt: {}", isLastProvider, isKeepLastAttempt);
 
@@ -778,11 +782,17 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     updateResources(deployment, deployment.getStatus());
 
-    boolean newResourcesOnDifferentService = !chosenCloudProviderEndpoint.getCpComputeServiceId()
-        .equals(deployment.getCloudProviderEndpoint().getCpComputeServiceId());
+    boolean newResourcesOnDifferentService = chosenCloudProviderEndpoint != null
+        ? !chosenCloudProviderEndpoint.getCpComputeServiceId()
+          .equals(deployment.getCloudProviderEndpoint().getCpComputeServiceId()) : false;
 
-    ComputeService computeService =
-        deploymentMessage.getCloudServicesOrderedIterator().firstService(ComputeService.class);
+    CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
+    if (csIterator == null) {
+      String errorMessage = "Cannot instantiate CloudServicesOrderedIterator";
+      LOG.error(errorMessage);
+      throw new IamServiceException(errorMessage);
+    }
+    ComputeService computeService = csIterator.firstService(ComputeService.class);
 
     if (deploymentMessage.isHybrid()) {
       toscaService.setHybridUpdateDeployment(newAr, newResourcesOnDifferentService,
@@ -1130,11 +1140,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
 
-    String accessToken = null;
-    if (oidcProperties.isEnabled()) {
-      accessToken = oauth2TokenService.getAccessToken(requestedWithToken);
-    }
-
     Resource resource = resourceRepository
         .findByIdAndDeployment_id(deploymentMessage.getResourceId(),
             deploymentMessage.getDeploymentId())
@@ -1260,7 +1265,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         }
         break;
       case "stop":
-        LOG.info("Validating request to stio VM of deployment <{}>",
+        LOG.info("Validating request to stop VM of deployment <{}>",
             deploymentMessage.getDeploymentId());
         if (!resource.getState().equals(NodeStates.STARTED)) {
           throw new BadRequestException(

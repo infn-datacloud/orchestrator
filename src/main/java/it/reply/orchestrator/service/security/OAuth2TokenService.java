@@ -139,7 +139,7 @@ public class OAuth2TokenService {
   }
 
   /**
-   * Generate a OidcEntity from he current authentication.
+   * Generate a OidcEntity from the current authentication.
    *
    * @return the OidcEntity
    */

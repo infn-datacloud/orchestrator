@@ -88,19 +88,13 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
   @Override
   public void updateOnSuccess(String deploymentUuid) {
     Deployment deployment = deploymentRepository.findOne(deploymentUuid);
-    //// TODO will it be ever removed?
     if (deployment == null) {
       return;
     }
-    if (deployment.getStatus() == Status.DELETE_IN_PROGRESS) {
-      deploymentRepository.delete(deployment);
-      return;
-    }
-    ///////////////////////////////
     switch (deployment.getStatus()) {
       case CREATE_COMPLETE:
-      case DELETE_COMPLETE:
       case UPDATE_COMPLETE:
+      case DELETE_COMPLETE:
         LOG.warn("Deployment < {} > was already in {} state.", deploymentUuid,
             deployment.getStatus());
         break;
@@ -109,6 +103,9 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
         break;
       case UPDATE_IN_PROGRESS:
         deployment.setStatus(Status.UPDATE_COMPLETE);
+        break;
+      case DELETE_IN_PROGRESS:
+        deployment.setStatus(Status.DELETE_COMPLETE);
         break;
       default:
         LOG.error("updateOnSuccess: unsupported deployment status: {}. Setting status to {}",
@@ -132,14 +129,13 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
           resource.setState(NodeStates.STARTED);
           break;
         case UPDATE_COMPLETE:
-          if (resource.getState() == NodeStates.DELETING) {
-            resourceIt.remove();
-          } else {
+          if (resource.getState() != NodeStates.DELETING
+              && resource.getState() != NodeStates.DELETED) {
             resource.setState(NodeStates.STARTED);
           }
           break;
         case DELETE_COMPLETE:
-          resourceIt.remove();
+          resource.setState(NodeStates.DELETED);
           break;
         case CREATE_FAILED:
         case DELETE_FAILED:
@@ -157,6 +153,7 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
           switch (resource.getState()) {
             case CREATING:
             case DELETING:
+            case DELETED:
             case STARTED:
               break;
             default:

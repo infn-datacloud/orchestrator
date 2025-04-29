@@ -210,6 +210,9 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     deploymentMessage.setSkipPollInterval(true);
 
     QcgJobsOrderedIterator topologyIterator = deploymentMessage.getQcgJobsIterator();
+    if (topologyIterator == null) {
+      throw new DeploymentException("Topology Iterator is null.");
+    }
     if (!topologyIterator.hasCurrent() && topologyIterator.hasNext()) {
       topologyIterator.next(); // first job
     }

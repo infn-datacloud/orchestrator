@@ -46,6 +46,7 @@ import it.reply.orchestrator.dto.mesos.MesosContainer;
 import it.reply.orchestrator.dto.mesos.chronos.ChronosJob;
 import it.reply.orchestrator.dto.onedata.OneData;
 import it.reply.orchestrator.dto.workflow.CloudServiceWf;
+import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
 import it.reply.orchestrator.dto.workflow.WorkflowListIterator;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.enums.NodeStates;
@@ -220,6 +221,9 @@ public class ChronosServiceImpl extends AbstractMesosDeploymentService<ChronosJo
     deploymentMessage.setSkipPollInterval(true);
 
     ChronosJobsOrderedIterator topologyIterator = deploymentMessage.getChronosJobsIterator();
+    if (topologyIterator == null) {
+      return false;
+    }
     if (!topologyIterator.hasCurrent() && topologyIterator.hasNext()) {
       topologyIterator.next(); // first job
     }
@@ -485,16 +489,13 @@ public class ChronosServiceImpl extends AbstractMesosDeploymentService<ChronosJo
             resource -> toscaService.isOfToscaType(resource, ToscaConstants.Nodes.Types.CHRONOS))
         .collect(Collectors.toMap(Resource::getToscaNodeName, res -> res));
 
-    ChronosServiceProperties chronosProperties = deploymentMessage
-        .getCloudServicesOrderedIterator()
-        .currentService(ChronosService.class)
-        .getProperties();
+    CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
     Optional<String> localReplicaPfn = Optional
         .of(deployment)
         .map(Deployment::getDeploymentScheduleEvent)
         .map(DeploymentScheduleEvent::getTempReplicationRule)
         .flatMap(replicationRule -> Optional
-            .ofNullable(deploymentMessage.getCloudServicesOrderedIterator())
+            .ofNullable(csIterator)
             .map(WorkflowListIterator::current)
             .map(CloudServiceWf::getRucioRse)
             .flatMap(selectedRse -> {
@@ -506,6 +507,12 @@ public class ChronosServiceImpl extends AbstractMesosDeploymentService<ChronosJo
             }));
     LinkedHashMap<String, ChronosJob> jobs = new LinkedHashMap<>();
     List<IndigoJob> indigoJobs = new ArrayList<>();
+    ChronosServiceProperties chronosProperties = null;
+    if (csIterator != null) {
+      chronosProperties = csIterator
+        .currentService(ChronosService.class)
+        .getProperties();
+    }
     for (NodeTemplate chronosNode : orderedChronosJobs) {
       Resource jobResource = resources.get(chronosNode.getName());
       String id = Optional
@@ -531,11 +538,13 @@ public class ChronosServiceImpl extends AbstractMesosDeploymentService<ChronosJo
             + ">: 'schedule' parameter and job depencency are both specified");
       }
       Job chronosJob = generateExternalTaskRepresentation(mesosTask);
+      String hostPath = chronosProperties != null
+          ? chronosProperties.generateLocalVolumesHostPath(id) : null;
       CommonUtils
           .nullableCollectionToStream(chronosJob.getContainer().getVolumes())
           .forEach(volume -> {
             // set as /basePath/groupId
-            volume.setHostPath(chronosProperties.generateLocalVolumesHostPath(id));
+            volume.setHostPath(hostPath);
           });
       IndigoJob indigoJob = new IndigoJob(chronosJob, chronosNode.getName());
       indigoJobs.add(indigoJob);

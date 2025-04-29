@@ -23,6 +23,8 @@ import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.request.DeploymentRequest;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.enums.DeploymentType;
+import it.reply.orchestrator.enums.Status;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +32,7 @@ import org.springframework.data.domain.Pageable;
 public interface DeploymentService {
 
   public Page<Deployment> getDeployments(Pageable pageable, @Nullable String owner,
-      @Nullable String userGroup);
+      @Nullable String userGroup, @Nullable Status[] excludedStatus);
 
   public Deployment getDeployment(String id);
 

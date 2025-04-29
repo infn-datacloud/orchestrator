@@ -116,7 +116,8 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
 
   private static final String defaultVaultEndpoint = "https://default.vault.com:8200";
 
-  @Before
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+@Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
     Mockito

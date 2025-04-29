@@ -18,7 +18,7 @@
 package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.dal.entity.OidcTokenId;
-import it.reply.orchestrator.dal.repository.OidcTokenRepository;
+//import it.reply.orchestrator.dal.repository.OidcTokenRepository;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.service.SlamService;
 import it.reply.orchestrator.utils.WorkflowConstants;
@@ -32,8 +32,8 @@ public class GetSlam extends BaseRankCloudProvidersCommand {
   @Autowired
   private SlamService slamService;
 
-  @Autowired
-  private OidcTokenRepository tokenRepository;
+  //@Autowired
+  //private OidcTokenRepository tokenRepository;
 
   @Override
   public void execute(DelegateExecution execution,

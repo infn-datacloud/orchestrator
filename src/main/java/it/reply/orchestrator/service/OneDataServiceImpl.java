@@ -281,8 +281,7 @@ public class OneDataServiceImpl implements OneDataService {
           .id(providerId);
 
       CloudService cloudService = oneProviderCloudServices.get(providerId);
-      boolean cloudServiceFound = cloudService != null;
-      if (cloudServiceFound) {
+      if (cloudService != null) {
         oneDataProviderInfobuilder
             .cloudProviderId(cloudService.getProviderId())
             .cloudServiceId(cloudService.getId());
@@ -296,7 +295,7 @@ public class OneDataServiceImpl implements OneDataService {
         continue;
       }
 
-      if (!cloudServiceFound && oneDataParameter.isSmartScheduling()) {
+      if (cloudService == null && oneDataParameter.isSmartScheduling()) {
         if (useRequestedProviders) {
           throw new DeploymentException("Requested OneProvider " + oneProviderEndpoint
               + " not registered in CMDB hence not eligible for smart scheduling");

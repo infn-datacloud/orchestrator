@@ -59,6 +59,7 @@ public class ControllerTestUtils {
     deployment.setStatus(Status.CREATE_IN_PROGRESS);
     deployment.setCallback("http://localhost");
     deployment.setTemplate("tosca_definitions_version: tosca_simple_yaml_1_0\ntopology_template:\n");
+    deployment.setStatusReason("deployment error");
     createResources(deployment, resourceNumber, false);
     return deployment;
   }

@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+@SuppressWarnings("rawtypes")
 @Service
 @AllArgsConstructor
 public abstract class MesosFrameworkClientFactory<V extends MesosFrameworkService, T> {

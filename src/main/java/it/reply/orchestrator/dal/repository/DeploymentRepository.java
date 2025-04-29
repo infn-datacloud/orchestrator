@@ -20,6 +20,7 @@ package it.reply.orchestrator.dal.repository;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcEntityId;
+import it.reply.orchestrator.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,6 +43,13 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
   public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId, Pageable pageable);
 
   @Query("select d "
+      + "from #{#entityName} d "
+      + "where d.owner.oidcEntityId = ?#{#ownerId} "
+      + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId,
+      @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
+
+  @Query("select d "
         + "from #{#entityName} d "
         + "where d.owner.oidcEntityId = ?#{#ownerId} "
         + "and d.userGroup = ?#{#userGroup}")
@@ -53,17 +61,35 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
       + "where d.owner.oidcEntityId = ?#{#ownerId} "
       + "and " + IN_SAME_ORGANIZATION)
   public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId,
+      @Param("ownerId") OidcEntityId ownerId, Pageable pageable);
+
+  @Query("select d "
+      + "from #{#entityName} d "
+      + "where d.owner.oidcEntityId = ?#{#ownerId} "
+      + "and " + IN_SAME_ORGANIZATION
+      + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId, @Param("excludedStatus") Status[] excludedStatus,
       Pageable pageable);
 
   @Query("select d "
       + "from #{#entityName} d "
       + "where d.owner.oidcEntityId = ?#{#ownerId} "
       + "and " + IN_SAME_ORGANIZATION
-      + "and d.userGroup = ?#{#userGroup}")
+      + " and d.userGroup = ?#{#userGroup}")
   public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
       @Param("ownerId") OidcEntityId ownerId, @Param("userGroup") String userGroup,
       Pageable pageable);
+
+  @Query("select d "
+      + "from #{#entityName} d "
+      + "where d.owner.oidcEntityId = ?#{#ownerId} "
+      + "and " + IN_SAME_ORGANIZATION
+      + " and d.userGroup = ?#{#userGroup}"
+      + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId, @Param("userGroup") String userGroup,
+      @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
 
   @Query("select d "
       + "from #{#entityName} d "
@@ -77,10 +103,26 @@ public interface DeploymentRepository extends JpaRepository<Deployment, String> 
   public Page<Deployment> findAll(@Param("requester") OidcEntity requester, Pageable pageable);
 
   @Query("select d "
-          + "from #{#entityName} d "
-          + "where " + IN_SAME_ORGANIZATION
-          + "and d.userGroup = ?#{#userGroup}")
+       + "from #{#entityName} d "
+       + "where " + IN_SAME_ORGANIZATION
+       + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
+       @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
+
+  @Query("select d "
+       + "from #{#entityName} d "
+       + "where " + IN_SAME_ORGANIZATION
+       + " and d.userGroup = ?#{#userGroup}")
    public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
        @Param("userGroup") String userGroup, Pageable pageable);
+
+  @Query("select d "
+       + "from #{#entityName} d "
+       + "where " + IN_SAME_ORGANIZATION
+       + " and d.userGroup = ?#{#userGroup}"
+       + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
+        @Param("userGroup") String userGroup, @Param("excludedStatus") Status[] excludedStatus,
+        Pageable pageable);
 
 }

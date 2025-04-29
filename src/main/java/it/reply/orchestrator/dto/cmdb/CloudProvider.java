@@ -50,6 +50,7 @@ public class CloudProvider implements CmdbIdentifiable {
   @Builder.Default
   Map<String, CloudService> services = new HashMap<>();
 
+  @SuppressWarnings("unused")
   @Deprecated
   private CloudProvider() {
     services = new HashMap<>();

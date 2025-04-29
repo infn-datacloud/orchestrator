@@ -149,6 +149,7 @@ public class ComputeService extends CloudService {
     this.privateNetworkProxyUser = privateNetworkProxyUser;
   }
 
+  @SuppressWarnings("unused")
   @Deprecated
   private ComputeService() {
     images = new ArrayList<>();
