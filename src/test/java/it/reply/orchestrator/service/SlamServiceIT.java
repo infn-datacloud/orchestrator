@@ -35,7 +35,7 @@ public class SlamServiceIT extends WebAppConfigurationAwareIT {
 
   @Autowired
   private SlamService service;
-  
+
   @Test
   @Ignore
   public void getPreferencesTest() throws Exception {

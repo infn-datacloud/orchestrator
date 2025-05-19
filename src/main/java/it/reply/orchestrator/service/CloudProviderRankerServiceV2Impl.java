@@ -47,39 +47,39 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @ServiceVersion("v2")
 public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerService {
- 
+
   private static final ParameterizedTypeReference<List<AiRankedCloudService>> RESPONSE_TYPE =
       new ParameterizedTypeReference<List<AiRankedCloudService>>() {};
- 
+
   private CprProperties cprProperties;
- 
+
   private RestTemplate restTemplate;
- 
+
   /**
   * Creates a new CloudProviderRankerServiceV2Impl.
   *
   * @param cprProperties the CprProperties
   * @param restTemplateBuilder the RestTemplateBuilder
-  */  
+  */
   public CloudProviderRankerServiceV2Impl(CprProperties cprProperties,
       RestTemplateBuilder restTemplateBuilder) {
     this.cprProperties = cprProperties;
     this.restTemplate = restTemplateBuilder.build();
   }
- 
+
   @Override
   public List<RankedCloudService> getProviderServicesRanking(
       CloudProviderRankerRequest cloudProviderRankerRequest) {
- 
+
     URI requestUri = UriComponentsBuilder
         .fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
         .build()
         .normalize()
         .toUri();
- 
+
     HttpEntity<String> entity = new HttpEntity<>(cloudProviderRankerRequest.getDeploymentId());
     List<RankedCloudService> result = new ArrayList<RankedCloudService>();
- 
+
     try {
       List<AiRankedCloudService> airanking = restTemplate.exchange(requestUri, HttpMethod.POST,
           entity, RESPONSE_TYPE).getBody();
@@ -89,8 +89,8 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
           for (CloudProvider provider : cloudProviders.values()) {
             if (provider.getName().equalsIgnoreCase(aiservice.getProvider())) {
               for (CloudService service : provider.getServices().values()) {
-                if (service.getType() == CloudServiceType.COMPUTE 
-                    && (StringUtils.isEmpty(service.getRegion()) 
+                if (service.getType() == CloudServiceType.COMPUTE
+                    && (StringUtils.isEmpty(service.getRegion())
                     || service.getRegion().equalsIgnoreCase(aiservice.getRegion()))) {
                   result.add(RankedCloudService
                       .builder()
@@ -116,7 +116,7 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
           result.add(rank);
           count++;
         }
-        
+
       }
       return result;
     } catch (RestClientException ex) {
@@ -124,4 +124,3 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
     }
   }
 }
- 

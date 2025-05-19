@@ -161,7 +161,7 @@ public class ResourceServiceImpl implements ResourceService {
         .businessKey(MdcUtils.toBusinessKey())
         .start();
 
-    OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();        
+    OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
     deployment.addWorkflowReferences(
         new WorkflowReference(pi.getId(), requestId, requester, Action.EXECUTE));
 

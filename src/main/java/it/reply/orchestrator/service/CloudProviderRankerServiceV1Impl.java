@@ -50,7 +50,7 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
   *
   * @param cprProperties the CprProperties
   * @param restTemplateBuilder the RestTemplateBuilder
-  */  
+  */
   public CloudProviderRankerServiceV1Impl(CprProperties cprProperties,
       RestTemplateBuilder restTemplateBuilder) {
     this.cprProperties = cprProperties;
