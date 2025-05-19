@@ -45,7 +45,7 @@ public class Flavor {
   @JsonProperty("disk")
   private Integer disk;
 
-  @JsonProperty("is_public")
+  @JsonProperty("is_shared")
   private Boolean isPublic;
 
   @JsonProperty("ram")
