@@ -85,6 +85,7 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
           entity, RESPONSE_TYPE).getBody();
       if (airanking.size() > 0) {
         Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
+        int count = 1;
         for (AiRankedCloudService aiservice : airanking) {
           for (CloudProvider provider : cloudProviders.values()) {
             if (provider.getName().equalsIgnoreCase(aiservice.getProvider())) {
@@ -96,27 +97,16 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
                       .builder()
                       .provider(provider.getId())
                       .serviceId(service.getId())
-                      .totalScore(aiservice.getClassification())
-                      .ranked(false)
+                      .totalScore(aiservice.getClassification() + aiservice.getRegression())
+                      .rank(count)
+                      .ranked(true)
                       .build());
+                  count++;
                 }
               }
             }
           }
         }
-        // sort results
-        List<RankedCloudService> sortedResult = result.stream()
-            .sorted(Comparator.comparing(RankedCloudService::getTotalScore).reversed())
-            .collect(Collectors.toList());
-        result.clear();
-        int count = 1;
-        for (RankedCloudService rank : sortedResult) {
-          rank.setRank(count);
-          rank.setRanked(true);
-          result.add(rank);
-          count++;
-        }
-        
       }
       return result;
     } catch (RestClientException ex) {
