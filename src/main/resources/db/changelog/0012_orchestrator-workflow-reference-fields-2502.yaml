@@ -14,7 +14,7 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: created_at
-            type: TIMESTAMP(6)          
+            type: TIMESTAMP(6)
         - column:
             name: updated_at
             type: TIMESTAMP(6)
@@ -22,7 +22,7 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: version
-            type: BIGINT              
+            type: BIGINT
         tableName: workflow_reference
     - sql:
         dbms: mysql

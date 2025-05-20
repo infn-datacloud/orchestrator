@@ -49,13 +49,13 @@ public class SlamServiceLocalImpl implements SlamService {
   /**
    * Creates a new SlamServiceLocalImpl.
    *
-   * @param slamProperties 
+   * @param slamProperties
    *          the slamProperties
-   * @param oauth2TokenService 
+   * @param oauth2TokenService
    *          the oauth2TokenService
-   * @param objectMapper 
+   * @param objectMapper
    *          the objectMapper
-   * @param resourceLoader 
+   * @param resourceLoader
    *          the ResourceLoader
    */
   public SlamServiceLocalImpl(SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,

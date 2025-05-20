@@ -70,11 +70,11 @@ public class SlamServiceV2Impl implements SlamService {
   /**
    * Creates a new SlamServiceV2Impl.
    *
-   * @param slamProperties 
+   * @param slamProperties
    *          the SlamProperties to use
-   * @param oauth2TokenService 
+   * @param oauth2TokenService
    *          the OAuth2TokenService to use
-   * @param restTemplateBuilder 
+   * @param restTemplateBuilder
    *          the RestTemplateBuilder to use
    */
   public SlamServiceV2Impl(SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,

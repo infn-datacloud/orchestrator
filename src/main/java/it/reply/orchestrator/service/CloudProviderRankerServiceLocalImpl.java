@@ -41,7 +41,7 @@ public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerS
   private final CprProperties cprProperties;
   private final ObjectMapper objectMapper;
   private final ResourceLoader resourceLoader;
-  
+
   /**
   * Creates a new CloudProviderRankerServiceLocalImpl.
   *
@@ -50,8 +50,8 @@ public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerS
   * @param objectMapper the objectMapper
   * @param resourceLoader the ResourceLoader
   */
-  public CloudProviderRankerServiceLocalImpl(CprProperties cprProperties, 
-      RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper, 
+  public CloudProviderRankerServiceLocalImpl(CprProperties cprProperties,
+      RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
       ResourceLoader resourceLoader) {
     this.cprProperties = cprProperties;
     this.objectMapper = objectMapper;
@@ -70,7 +70,7 @@ public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerS
     Resource serializedPreferences = resourceLoader
           .getResource(location);
     try (InputStream is = serializedPreferences.getInputStream()) {
-      TypeReference<List<RankedCloudService>> typeRef 
+      TypeReference<List<RankedCloudService>> typeRef
           = new TypeReference<List<RankedCloudService>>() {};
       return objectMapper.readValue(is, typeRef);
     } catch (IOException e) {

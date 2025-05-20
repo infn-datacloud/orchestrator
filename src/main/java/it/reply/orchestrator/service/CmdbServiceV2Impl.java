@@ -419,7 +419,7 @@ public class CmdbServiceV2Impl implements CmdbService {
         for (Network network : project.getNetworks()) {
           if (Boolean.TRUE.equals(network.getIsDefault())
               && network.getService().getRegion().getName().equals(regionName)) {
-            if (Boolean.TRUE.equals(network.getIsShared())) {
+            if (Boolean.TRUE.equals(network.getIsRouterExternal())) {
               publicNetworkName = network.getName();
             } else {
               privateNetworkName = network.getName();
