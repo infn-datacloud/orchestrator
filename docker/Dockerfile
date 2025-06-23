@@ -18,7 +18,7 @@
 FROM amazoncorretto:8
 
 # Fix https://github.com/docker-library/openjdk/issues/73
-RUN yum install -y fontconfig dejavu-sans-fonts bash shadow-utils
+RUN yum install -y fontconfig dejavu-sans-fonts bash shadow-utils nc
 
 WORKDIR /orchestrator
 
