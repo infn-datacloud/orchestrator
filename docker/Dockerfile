@@ -15,14 +15,10 @@
 # limitations under the License.
 #
 
-FROM openjdk:8-jdk-alpine
-
-MAINTAINER Alberto Brigandì <a.brigandi@reply.com>
+FROM amazoncorretto:8
 
 # Fix https://github.com/docker-library/openjdk/issues/73
-RUN apk add --no-cache fontconfig ttf-dejavu
-
-RUN apk add --no-cache bash
+RUN yum install -y fontconfig dejavu-sans-fonts bash shadow-utils
 
 WORKDIR /orchestrator
 
@@ -34,9 +30,9 @@ ARG ARTIFACT_SRC="${ARTIFACT_NAME}"
 
 ADD [ "${ARTIFACT_SRC}", "${ARTIFACT_NAME}" ]
 
-RUN addgroup -S orchestrator \
-	&& adduser -S -g orchestrator orchestrator \
-	&& chown orchestrator:orchestrator /orchestrator
+RUN groupadd -r orchestrator \
+    && useradd -r -g orchestrator orchestrator \
+    && chown orchestrator:orchestrator /orchestrator
 
 USER orchestrator
 
