@@ -25,7 +25,6 @@ import it.reply.orchestrator.config.properties.RucioProperties;
 import it.reply.orchestrator.config.properties.SlamProperties;
 import it.reply.orchestrator.config.properties.VaultProperties;
 import it.reply.orchestrator.dto.SystemEndpoints;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,6 +54,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   /**
    * Return the system configuration endpoints.
+   *
    * @return the configuration endpoints
    */
   public SystemEndpoints getConfiguration() {

@@ -20,9 +20,7 @@ package it.reply.orchestrator.service;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.DeploymentSchedule;
 import it.reply.orchestrator.utils.MdcUtils;
-
 import lombok.AllArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -87,11 +87,21 @@ public class Resource extends AbstractResourceEntity {
   @Column(columnDefinition = "TEXT")
   private Map<String, String> metadata;
 
+  /**
+   * addRequiredResource.
+   *
+   * @param resource the resource
+   */
   public void addRequiredResource(Resource resource) {
     requires.add(resource);
     resource.requiredBy.add(this);
   }
 
+  /**
+   * removeRequiredResource.
+   *
+   * @param resource the resource
+   */
   public void removeRequiredResource(Resource resource) {
     requires.remove(resource);
     resource.requiredBy.remove(this);

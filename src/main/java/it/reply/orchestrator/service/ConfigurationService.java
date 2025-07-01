@@ -21,5 +21,10 @@ import it.reply.orchestrator.dto.SystemEndpoints;
 
 public interface ConfigurationService {
 
+  /**
+   * getConfiguration.
+   *
+   * @return sytem endpoints configuration
+   */
   public SystemEndpoints getConfiguration();
 }

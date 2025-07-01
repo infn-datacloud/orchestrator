@@ -31,6 +31,11 @@ public class DeploymentScheduleEventResourceAssembler
 
   private final DeploymentResourceAssembler deploymentResourceAssembler;
 
+  /**
+   * DeploymentScheduleEventResourceAssembler.
+   *
+   * @param deploymentResourceAssembler the DeploymentResourceAssembler
+   */
   public DeploymentScheduleEventResourceAssembler(
       DeploymentResourceAssembler deploymentResourceAssembler) {
     super(DeploymentScheduleController.class, DeploymentScheduleEventResource.class);

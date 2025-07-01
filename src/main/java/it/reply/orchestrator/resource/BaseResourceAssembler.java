@@ -20,7 +20,6 @@ package it.reply.orchestrator.resource;
 import it.reply.orchestrator.controller.DeploymentController;
 import it.reply.orchestrator.controller.ResourceController;
 import it.reply.orchestrator.dal.entity.Resource;
-
 import org.springframework.hateoas.core.DummyInvocationUtils;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
@@ -29,6 +28,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class BaseResourceAssembler extends ResourceAssemblerSupport<Resource, BaseResource> {
 
+  /**
+   * BaseResourceAssembler.
+   */
   public BaseResourceAssembler() {
     super(ResourceController.class, BaseResource.class);
   }
