@@ -74,10 +74,10 @@ public abstract class AbstractCmdbServiceImpl implements CmdbService {
               computeService.setPrivateNetworkProxyUser(tenant.getPrivateNetworkProxyUser());
               computeService.setTenant(tenant.getTenantName());
             }
-            LOG.debug("Image list for service <{}> of provider <{}>: <{}>",
+            LOG.info("Image list for service <{}> of provider <{}>: <{}>",
                 Arrays.toString(imageList.toArray()), serviceId, prId);
             computeService.setImages(imageList);
-            LOG.debug("Flavor list for service <{}> of provider <{}>: <{}>",
+            LOG.info("Flavor list for service <{}> of provider <{}>: <{}>",
                 Arrays.toString(flavorList.toArray()), serviceId, prId);
             computeService.setFlavors(flavorList);
           }

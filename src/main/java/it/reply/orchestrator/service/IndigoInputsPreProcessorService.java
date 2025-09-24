@@ -18,14 +18,11 @@
 package it.reply.orchestrator.service;
 
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import com.google.common.collect.Lists;
-
 import it.reply.orchestrator.exception.service.ToscaException;
 import it.reply.orchestrator.function.ToscaFunction;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.ToscaUtils;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -40,10 +37,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
 import org.alien4cloud.tosca.model.definitions.FunctionPropertyValue;
 import org.alien4cloud.tosca.model.definitions.IValue;
@@ -499,7 +494,7 @@ public class IndigoInputsPreProcessorService {
                 "No input provided for <" + inputName
                     + "> and no default value provided in the definition")));
 
-    LOG.debug(
+    LOG.info(
         "TOSCA input function replacement: <{}>, input name <{}>, input value <{}>",
         propertyName, inputName, inputValue);
 
