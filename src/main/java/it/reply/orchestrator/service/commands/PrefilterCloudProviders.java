@@ -217,7 +217,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                     .isEmpty();
                 if (!hasMatchingTypes) {
                   // Failed to match all required volume types -> discard provider
-                  LOG.debug(
+                  LOG.info(
                       "Discarded service {} of provider {} {}", cloudService.getId(),
                       cloudProvider.getId(), "because it doesn't match volume types requirements");
                   addServiceToDiscard(servicesToDiscard, cloudService);
@@ -240,7 +240,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                     .isEmpty();
                 if (!hasMatchingImages) {
                   // Failed to match all required images -> discard provider
-                  LOG.debug(
+                  LOG.info(
                       "Discarded service {} of provider {} {}", cloudService.getId(),
                       cloudProvider.getId(), "because it doesn't match images requirements");
                   addServiceToDiscard(servicesToDiscard, cloudService);
@@ -261,7 +261,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                     .isEmpty();
                 if (!hasMatchingFlavors) {
                   // Failed to match all required flavors -> discard provider
-                  LOG.debug(
+                  LOG.info(
                       "Discarded service {} of provider {} {}", cloudService.getId(),
                       cloudProvider.getId(), "because it doesn't match flavors requirements");
                   addServiceToDiscard(servicesToDiscard, cloudService);
@@ -326,7 +326,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                           .equals(cloudService.getRegion());
                 }
                 if (!serviceIsInSlaPolicy && (slaPlacementRequired || credentialsRequired)) {
-                  LOG.debug(
+                  LOG.info(
                       "Discarded service {} of provider {} because it doesn't match SLA policies",
                       cloudService.getId(), cloudProvider.getId());
                   addServiceToDiscard(servicesToDiscard, cloudService);
@@ -338,7 +338,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
   protected void discardOnPublicNetworkRequirement(ComputeService computeService,
       Set<CloudService> servicesToDiscard) {
     if (!computeService.isPublicIpAssignable()) {
-      LOG.debug(
+      LOG.info(
           "Discarded Compute service {} of provider {} because it doesn't support public IPs",
           computeService.getId(), computeService.getProviderId());
       addServiceToDiscard(servicesToDiscard, computeService);
@@ -353,7 +353,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
         || (StringUtils.isEmpty(computeService.getPrivateNetworkName())
         && networkType.equals(PrivateNetworkType.PRIVATE))
         || networkType.equals(PrivateNetworkType.NONE)) {
-      LOG.debug(
+      LOG.info(
           "Discarded Compute service {} of provider {} because it doesn't support private newtork",
           computeService.getId(), computeService.getProviderId());
       addServiceToDiscard(servicesToDiscard, computeService);
@@ -365,7 +365,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
       Set<CloudService> servicesToDiscard) {
     boolean requiresGpu = toscaService.isMesosGpuRequired(archiveRoot);
     if (requiresGpu && !mesosFrameworkService.getProperties().isGpuSupport()) {
-      LOG.debug(
+      LOG.info(
           "Discarded Mesos framework service {} of provider {} because it doesn't support GPUs",
           mesosFrameworkService.getId(), mesosFrameworkService.getProviderId());
       addServiceToDiscard(servicesToDiscard, mesosFrameworkService);
@@ -390,7 +390,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
             .isPresent());
 
     if (isSecretsRequired && !marathonService.getProperties().isSecretSupport()) {
-      LOG.debug(
+      LOG.info(
           "Discarded Marathon service {} of provider {} because it doesn't support Secrets",
               marathonService.getId(), marathonService.getProviderId());
       addServiceToDiscard(servicesToDiscard, marathonService);
@@ -409,7 +409,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                 .getId()
                 .equals(providerInfo.getCloudProviderId()));
         if (!hasOneProviderSupportingSpace) {
-          LOG.debug(
+          LOG.info(
               "Discarded provider {} because it doesn't have any oneProvider supporting space {}",
               cloudProvider.getId(), requirement.getSpace());
           addProviderToDiscard(providersToDiscard, servicesToDiscard, cloudProvider);
@@ -432,7 +432,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
               .stream()
               .anyMatch(resource -> cloudProvider.getId().equals(resource.getCloudProviderId())));
       if (!supportsAllFiles) {
-        LOG.debug("Discarded provider {} {}", cloudProvider.getId(),
+        LOG.info("Discarded provider {} {}", cloudProvider.getId(),
             "because it doesn't have any storage provider supporting the dynafed requirements");
         addProviderToDiscard(providersToDiscard, servicesToDiscard, cloudProvider);
       }
@@ -461,7 +461,7 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
       listOfCloudServices.forEach(computeServiceToDiscard -> cloudProvider.getServices()
           .remove(computeServiceToDiscard.getId()));
       if (cloudProvider.getServicesOfType(CloudServiceType.COMPUTE).isEmpty()) {
-        LOG.debug("Discarded provider {} {}", cloudProvider.getId(),
+        LOG.info("Discarded provider {} {}", cloudProvider.getId(),
             "because it doesn't have any compute service matching the deployment requirements");
         addProviderToDiscard(providersToDiscard, servicesToDiscard, cloudProvider);
       }

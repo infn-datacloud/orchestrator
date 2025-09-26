@@ -54,7 +54,6 @@ import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -416,7 +415,7 @@ public class DeploymentServiceImpl implements DeploymentService {
       OidcTokenId requestedWithToken) {
     Deployment deployment = getDeployment(id);
     MdcUtils.setDeploymentId(deployment.getId());
-    LOG.debug("Updating deployment with template\n{}", request.getTemplate());
+    LOG.info("Updating deployment with template\n{}", request.getTemplate());
     throwIfNotOwned(deployment);
     DeploymentProvider providerType = deployment.getDeploymentProvider();
     if (providerType == DeploymentProvider.CHRONOS
@@ -483,7 +482,7 @@ public class DeploymentServiceImpl implements DeploymentService {
   public void resetDeployment(String id, String status, OidcTokenId requestedWithToken) {
     Deployment deployment = getDeployment(id);
     MdcUtils.setDeploymentId(deployment.getId());
-    LOG.debug("Resetting deployment status to {}\n", status);
+    LOG.info("Resetting deployment status to {}\n", status);
     throwIfNotOwned(deployment);
 
     Status resetStatus = Status.valueOf(status);
@@ -553,7 +552,7 @@ public class DeploymentServiceImpl implements DeploymentService {
   @Transactional(readOnly = true)
   public String getDeploymentLog(String id, OidcTokenId requestedWithToken) {
     Deployment deployment = getDeployment(id);
-    LOG.debug("Retrieving infrastructure log for deployment {}", id);
+    LOG.info("Retrieving infrastructure log for deployment {}", id);
     throwIfNotOwned(deployment);
 
     DeploymentType deploymentType = DeploymentService.inferDeploymentType(
@@ -580,7 +579,7 @@ public class DeploymentServiceImpl implements DeploymentService {
   @Transactional(readOnly = true)
   public String getDeploymentExtendedInfo(String id, OidcTokenId requestedWithToken) {
     Deployment deployment = getDeployment(id);
-    LOG.debug("Retrieving infrastructure extra info for deployment {}", id);
+    LOG.info("Retrieving infrastructure extra info for deployment {}", id);
     throwIfNotOwned(deployment);
 
     DeploymentType deploymentType = DeploymentService.inferDeploymentType(

@@ -404,12 +404,12 @@ public class ToscaServiceImpl implements ToscaService {
         if (image.isPresent()) {
           // Found a good image -> replace the image attribute with the provider-specific
           // ID
-          LOG.debug(
+          LOG.info(
               "Found image match in service <{}> of provider <{}>: {}",
               computeService.getId(), computeService.getProviderId(), image.get());
         } else {
           // No image match found -> throw error
-          LOG.debug("Couldn't find a match in service <{}> of provider <{}>",
+          LOG.info("Couldn't find a match in service <{}> of provider <{}>",
               computeService.getId(), computeService.getProviderId());
         }
         return new SimpleEntry<>(node, image);
@@ -456,12 +456,12 @@ public class ToscaServiceImpl implements ToscaService {
         }).findFirst();
 
         if (vt.isPresent()) {
-          LOG.debug(
+          LOG.info(
               "Found volume type match in service <{}> of provider <{}>: {}/{}",
               computeService.getId(), computeService.getProviderId(),
               vt.get().getQos(), vt.get().getName());
         } else {
-          LOG.debug("Couldn't find a volume type match in service <{}> of provider <{}>",
+          LOG.info("Couldn't find a volume type match in service <{}> of provider <{}>",
               computeService.getId(), computeService.getProviderId());
         }
         return new SimpleEntry<>(node, vt);
@@ -493,12 +493,12 @@ public class ToscaServiceImpl implements ToscaService {
         if (flavor.isPresent()) {
           // Found a good flavor -> replace the flavor attribute with the
           // provider-specific ID
-          LOG.debug(
+          LOG.info(
               "Found flavor match in service <{}> of provider <{}>: {}",
               computeService.getId(), computeService.getProviderId(), flavor.get());
         } else {
           // No flavor match found -> throw error
-          LOG.debug("Couldn't find a match in service <{}> of provider <{}> for flavor metadata",
+          LOG.info("Couldn't find a match in service <{}> of provider <{}> for flavor metadata",
               computeService.getId(), computeService.getProviderId());
         }
         return new SimpleEntry<>(node, flavor);
@@ -523,7 +523,7 @@ public class ToscaServiceImpl implements ToscaService {
       // The node doesn't have an OS Capability -> need to add a dummy one to hold a
       // random image for underlying deployment systems
       Capability osCapability = capabilities.computeIfAbsent(OS_CAPABILITY_NAME, key -> {
-        LOG.debug("Generating default OperatingSystem capability for node <{}>", node.getName());
+        LOG.info("Generating default OperatingSystem capability for node <{}>", node.getName());
         Capability capability = new Capability();
         capability.setType("tosca.capabilities.indigo.OperatingSystem");
         return capability;
@@ -559,7 +559,7 @@ public class ToscaServiceImpl implements ToscaService {
       // The node doesn't have an OS Capability -> need to add a dummy one to hold a
       // random image for underlying deployment systems
       Capability osCapability = capabilities.computeIfAbsent(HOST_CAPABILITY_NAME, key -> {
-        LOG.debug("Generating default Container capability for node <{}>", node.getName());
+        LOG.info("Generating default Container capability for node <{}>", node.getName());
         Capability capability = new Capability();
         capability.setType("tosca.capabilities.indigo.Container");
         return capability;
@@ -576,7 +576,7 @@ public class ToscaServiceImpl implements ToscaService {
   private void replaceVolumeType(Map<NodeTemplate, VolumeType> contextualizedVolumes,
       ComputeService cloudService, DeploymentProvider deploymentProvider) {
     contextualizedVolumes.forEach((node, vtype) -> {
-      LOG.debug("Updating node <{}> with volume type <{}/{}>",
+      LOG.info("Updating node <{}> with volume type <{}/{}>",
           node.getName(), vtype.getQos(), vtype.getName());
       node.getProperties().put("type", new ScalarPropertyValue(vtype.getName()));
     });
@@ -651,14 +651,14 @@ public class ToscaServiceImpl implements ToscaService {
       Collection<Image> cloudProviderServiceImages) {
     String requiredImageName = requiredImageMetadata.getImageName();
     if (requiredImageName != null) {
-      LOG.debug("Looking up images by name <{}>", requiredImageName);
+      LOG.info("Looking up images by name <{}>", requiredImageName);
       Optional<Image> imageWithName = cloudProviderServiceImages
           .stream()
           .filter(image -> requiredImageMetadata(requiredImageName, image.getImageName()))
           .findFirst();
 
       if (imageWithName.isPresent()) {
-        LOG.debug("Image <{}> found with name <{}>", imageWithName.get().getImageId(),
+        LOG.info("Image <{}> found with name <{}>", imageWithName.get().getImageId(),
             requiredImageName);
         return imageWithName;
       }
@@ -670,14 +670,14 @@ public class ToscaServiceImpl implements ToscaService {
       Collection<Flavor> cloudProviderServiceFlavors) {
     String requiredFlavorName = requiredFlavorMetadata.getFlavorName();
     if (requiredFlavorName != null) {
-      LOG.debug("Looking up flavors by name <{}>", requiredFlavorName);
+      LOG.info("Looking up flavors by name <{}>", requiredFlavorName);
       Optional<Flavor> flavorWithName = cloudProviderServiceFlavors
           .stream()
           .filter(flavor -> requiredFlavorName.equals(flavor.getFlavorName()))
           .findFirst();
 
       if (flavorWithName.isPresent()) {
-        LOG.debug("Flavor <{}> found with name <{}>", flavorWithName.get().getFlavorId(),
+        LOG.info("Flavor <{}> found with name <{}>", flavorWithName.get().getFlavorId(),
             requiredFlavorName);
         return flavorWithName;
       }
@@ -711,7 +711,7 @@ public class ToscaServiceImpl implements ToscaService {
 
   protected Optional<Image> findImageByFallbackFields(Image requiredImageMetadata,
       Collection<Image> cloudProviderServiceImages) {
-    LOG.debug("Looking up images by metatada {}", requiredImageMetadata);
+    LOG.info("Looking up images by metatada {}", requiredImageMetadata);
     ArrayList<Filter<Image, ?>> fallbackFieldExtractors = Lists.newArrayList(
         new Filter<>(Image::getType, String::equalsIgnoreCase),
         new Filter<>(Image::getArchitecture, String::equalsIgnoreCase),
@@ -764,7 +764,7 @@ public class ToscaServiceImpl implements ToscaService {
 
   protected Optional<Flavor> findFlavorByFallbackFields(Flavor requiredFlavorMetadata,
       Collection<Flavor> cloudProviderServiceFlavors) {
-    LOG.debug("Looking up flavors by metatada {}", requiredFlavorMetadata);
+    LOG.info("Looking up flavors by metatada {}", requiredFlavorMetadata);
     ArrayList<Filter<Flavor, ?>> fallbackFieldExtractors = Lists.newArrayList(
         new Filter<>(Flavor::getNumCpus, (a, b) -> b >= a),
         new Filter<>(Flavor::getMemSize, (a, b) -> b >= a),
