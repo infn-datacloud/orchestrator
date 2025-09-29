@@ -53,6 +53,7 @@ public class DeploymentScheduleResource extends AbstractResource {
 
   /**
    * Create a new DeploymentScheduleResource.
+   *
    * @param uuid the uuid
    * @param creationTime the creation time
    * @param updateTime the update time

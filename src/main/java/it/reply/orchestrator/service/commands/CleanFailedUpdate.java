@@ -22,7 +22,6 @@ import it.reply.orchestrator.dto.workflow.CloudServiceWf;
 import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
 import it.reply.orchestrator.utils.WorkflowConstants;
 import it.reply.orchestrator.utils.WorkflowConstants.Delegate;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 

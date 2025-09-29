@@ -38,10 +38,10 @@ public class DeleteTempReplicationRule extends BaseDeployCommand {
   protected void execute(DelegateExecution execution, DeploymentMessage message) {
     OidcTokenId requestedWithToken = message.getRequestedWithToken();
     Optional
-      .of(getDeployment(message))
-      .map(Deployment::getDeploymentScheduleEvent)
-      .map(DeploymentScheduleEvent::getTempReplicationRule)
-      .ifPresent(rule -> rucioService.deleteReplicationRuleIfUnused(requestedWithToken, rule));
+        .of(getDeployment(message))
+        .map(Deployment::getDeploymentScheduleEvent)
+        .map(DeploymentScheduleEvent::getTempReplicationRule)
+        .ifPresent(rule -> rucioService.deleteReplicationRuleIfUnused(requestedWithToken, rule));
 
   }
 

@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.deployment.providers;
 
 import com.google.common.collect.MoreCollectors;
 import com.google.common.primitives.Ints;
-
 import it.reply.orchestrator.dto.mesos.MesosContainer;
 import it.reply.orchestrator.dto.mesos.MesosPortMapping;
 import it.reply.orchestrator.dto.mesos.MesosPortMapping.Protocol;
@@ -29,12 +28,10 @@ import it.reply.orchestrator.service.ToscaService;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.EnumUtils;
 import it.reply.orchestrator.utils.ToscaUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.alien4cloud.tosca.model.definitions.DeploymentArtifact;
 import org.alien4cloud.tosca.model.templates.Capability;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;

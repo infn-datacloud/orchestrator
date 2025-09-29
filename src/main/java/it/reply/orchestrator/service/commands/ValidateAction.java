@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 

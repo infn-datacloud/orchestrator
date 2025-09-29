@@ -21,6 +21,12 @@ import it.reply.monitoringpillar.domain.dsl.monitoring.pillar.wrapper.paas.Group
 
 public interface MonitoringService {
 
+  /**
+   * getProviderData.
+   *
+   * @param providerId the providerId
+   * @return the provider data
+   */
   public Group getProviderData(String providerId);
 
 }

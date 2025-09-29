@@ -31,6 +31,9 @@ import org.springframework.stereotype.Component;
 public class DeploymentScheduleResourceAssembler
     extends ResourceAssemblerSupport<DeploymentSchedule, DeploymentScheduleResource> {
 
+  /**
+   * DeploymentScheduleResourceAssembler.
+   */
   public DeploymentScheduleResourceAssembler() {
     super(DeploymentScheduleController.class, DeploymentScheduleResource.class);
   }

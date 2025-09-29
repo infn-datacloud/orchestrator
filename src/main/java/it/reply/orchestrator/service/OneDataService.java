@@ -25,9 +25,7 @@ import it.reply.orchestrator.dto.onedata.SpaceDetails;
 import it.reply.orchestrator.dto.onedata.Token;
 import it.reply.orchestrator.dto.onedata.Tokens;
 import it.reply.orchestrator.dto.onedata.UserSpaces;
-
 import java.util.Map;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface OneDataService {

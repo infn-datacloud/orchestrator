@@ -19,12 +19,10 @@ package it.reply.orchestrator.service;
 
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dto.vault.TokenAuthenticationExtended;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.support.VaultResponse;
 

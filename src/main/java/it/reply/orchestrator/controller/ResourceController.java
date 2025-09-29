@@ -27,12 +27,9 @@ import it.reply.orchestrator.resource.BaseResource;
 import it.reply.orchestrator.resource.BaseResourceAssembler;
 import it.reply.orchestrator.service.ResourceService;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-
 import java.util.List;
 import java.util.Optional;
-
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
