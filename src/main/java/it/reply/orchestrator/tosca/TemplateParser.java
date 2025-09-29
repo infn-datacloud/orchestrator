@@ -25,11 +25,9 @@ import alien4cloud.tosca.parser.ParsingException;
 import alien4cloud.tosca.parser.ParsingResult;
 import alien4cloud.tosca.parser.ToscaParser;
 import alien4cloud.tosca.serializer.VelocityUtil;
-
 import it.reply.orchestrator.config.properties.ToscaProperties;
 import it.reply.orchestrator.exception.OrchestratorException;
 import it.reply.orchestrator.exception.service.ToscaException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -38,9 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.templates.Topology;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -155,7 +151,7 @@ public class TemplateParser {
       VelocityUtil.generate("org/alien4cloud/tosca/exporter/topology-tosca_simple_yaml_1_0.yml.vm",
           writer, velocityCtx);
       String template = writer.toString();
-      LOG.debug(template);
+      LOG.info(template);
       return template;
     } catch (IOException ex) {
       throw new OrchestratorException("Error serializing TOSCA template", ex);

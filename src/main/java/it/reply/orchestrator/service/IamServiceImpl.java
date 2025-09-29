@@ -189,7 +189,7 @@ public class IamServiceImpl implements IamService {
       throw new IamServiceException(errorMessage, e);
     }
 
-    LOG.debug("Access token with client credentials as grant type successfully created");
+    LOG.info("Access token with client credentials as grant type successfully created");
     return accessToken;
   }
 
@@ -309,7 +309,7 @@ public class IamServiceImpl implements IamService {
       String errorMessage = String.format(
           "The delete of the client with client_id %s was unsuccessful. Status code: %s",
               clientId, responseEntity.getStatusCode());
-      LOG.debug(errorMessage);
+      LOG.error(errorMessage);
       throw new IamServiceException(errorMessage);
     }
 

@@ -220,7 +220,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       try {
         email = JwtUtils.getJwtClaimsSet(JwtUtils.parseJwt(accessToken)).getStringClaim("email");
       } catch (ParseException e) {
-        LOG.debug(e.getMessage());
+        LOG.error(e.getMessage());
         email = null;
       }
       try {
@@ -241,7 +241,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         preferredUsername = JwtUtils.getJwtClaimsSet(JwtUtils.parseJwt(accessToken))
             .getStringClaim("preferred_username");
       } catch (ParseException e) {
-        LOG.debug(e.getMessage());
+        LOG.error(e.getMessage());
         preferredUsername = null;
       }
     }
@@ -889,12 +889,12 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         List<CloudProviderEndpoint> cloudProviderEndpoints =
             deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
-        LOG.debug("Deleting VMs {}", vmsToRemove);
+        LOG.info("Deleting VMs {}", vmsToRemove);
 
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client
             .removeResource(deployment.getEndpoint(), new ArrayList<>(vmsToRemove)));
       } else {
-        LOG.debug("No VMs to delete");
+        LOG.info("No VMs to delete");
       }
 
       String templateToDeploy = toscaService.serialize(newAr);
