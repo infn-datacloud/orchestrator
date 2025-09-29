@@ -23,12 +23,10 @@ import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.enums.Status;
 import it.reply.orchestrator.enums.Task;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,11 +45,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
@@ -132,6 +128,11 @@ public class Deployment extends AbstractResourceEntity {
   @Nullable
   private OidcEntity owner;
 
+  /**
+   * addWorkflowReferences.
+   *
+   * @param workflowReference the workflowReference
+   */
   @Transient
   public void addWorkflowReferences(WorkflowReference workflowReference) {
     workflowReference.setDeployment(this);

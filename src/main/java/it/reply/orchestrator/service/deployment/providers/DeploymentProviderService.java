@@ -20,7 +20,6 @@ package it.reply.orchestrator.service.deployment.providers;
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.exception.service.DeploymentException;
-
 import java.util.Optional;
 
 public interface DeploymentProviderService {

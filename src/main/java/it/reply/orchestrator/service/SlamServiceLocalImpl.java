@@ -30,9 +30,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.Nullable;
-
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
@@ -50,10 +48,15 @@ public class SlamServiceLocalImpl implements SlamService {
 
   /**
    * Creates a new SlamServiceLocalImpl.
-   * @param slamProperties the slamProperties
-   * @param oauth2TokenService the oauth2TokenService
-   * @param objectMapper the objectMapper
-   * @param resourceLoader the ResourceLoader
+   *
+   * @param slamProperties
+   *          the slamProperties
+   * @param oauth2TokenService
+   *          the oauth2TokenService
+   * @param objectMapper
+   *          the objectMapper
+   * @param resourceLoader
+   *          the ResourceLoader
    */
   public SlamServiceLocalImpl(SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,
       ObjectMapper objectMapper, ResourceLoader resourceLoader)  {

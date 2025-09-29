@@ -45,6 +45,7 @@ public class DeploymentScheduleEventResource extends AbstractResource {
 
   /**
    *  Create a new DeploymentScheduleEventResource.
+   *
    * @param uuid the uuid
    * @param creationTime the creation time
    * @param updateTime the update time

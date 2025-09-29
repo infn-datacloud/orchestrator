@@ -68,11 +68,14 @@ public class SlamServiceV2Impl implements SlamService {
       Lists.newArrayList("description", "perUser", "type", "usage", "uid", "service");
 
   /**
-   * Creates a new SlamServiceImpl.
+   * Creates a new SlamServiceV2Impl.
    *
-   * @param slamProperties the SlamProperties to use
-   * @param oauth2TokenService the OAuth2TokenService to use
-   * @param restTemplateBuilder the RestTemplateBuilder to use
+   * @param slamProperties
+   *          the SlamProperties to use
+   * @param oauth2TokenService
+   *          the OAuth2TokenService to use
+   * @param restTemplateBuilder
+   *          the RestTemplateBuilder to use
    */
   public SlamServiceV2Impl(SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,
       RestTemplateBuilder restTemplateBuilder) {
@@ -166,7 +169,6 @@ public class SlamServiceV2Impl implements SlamService {
               continue;
             }
 
-            Integer value = (Integer) valueObject;
             Restrictions restriction = new Restrictions();
             restriction.setInstanceGuaranteed(null);
             restriction.setInstanceLimit(null);
@@ -177,6 +179,7 @@ public class SlamServiceV2Impl implements SlamService {
               restriction = mapForRestrictions.get(fieldName);
             }
 
+            Integer value = (Integer) valueObject;
             // If the quota does not refer to perUser limits set the total* attributes
             // otherwise set the user* attributes
             if (Boolean.FALSE.equals(quotaFedReg.getPerUser())) {

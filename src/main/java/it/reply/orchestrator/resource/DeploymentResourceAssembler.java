@@ -37,6 +37,9 @@ import org.springframework.stereotype.Component;
 public class DeploymentResourceAssembler
     extends ResourceAssemblerSupport<Deployment, DeploymentResource> {
 
+  /**
+   * DeploymentResourceAssembler class public constructor.
+   */
   public DeploymentResourceAssembler() {
     super(DeploymentController.class, DeploymentResource.class);
   }
@@ -54,9 +57,9 @@ public class DeploymentResourceAssembler
           new HashMap<>();
       Iterator it = endpoint.getHybridCloudProviderEndpoints().entrySet().iterator();
       while (it.hasNext()) {
-        Map.Entry pair = (Map.Entry)it.next();
-        hybridCloudProviderEndpointsResource.put((String)pair.getKey(),
-            getCloudProviderEndpointResource((CloudProviderEndpoint)pair.getValue()));
+        Map.Entry pair = (Map.Entry) it.next();
+        hybridCloudProviderEndpointsResource.put((String) pair.getKey(),
+            getCloudProviderEndpointResource((CloudProviderEndpoint) pair.getValue()));
       }
       return new CloudProviderEndpointResource(endpoint.getCpEndpoint(),
           endpoint.getRegion().orElse(null),

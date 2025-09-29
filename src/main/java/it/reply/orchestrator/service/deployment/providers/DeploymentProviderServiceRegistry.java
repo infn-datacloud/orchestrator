@@ -22,11 +22,9 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.enums.DeploymentProvider;
 import it.reply.orchestrator.exception.OrchestratorException;
-
 import java.util.EnumMap;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -65,10 +63,22 @@ public class DeploymentProviderServiceRegistry {
     });
   }
 
+  /**
+   * getDeploymentProviderService.
+   *
+   * @param deploymentId the deploymentId
+   * @return the deployment provider service
+   */
   public DeploymentProviderService getDeploymentProviderService(String deploymentId) {
     return getDeploymentProviderService(deploymentRepository.findOne(deploymentId));
   }
 
+  /**
+   * getDeploymentProviderService.
+   *
+   * @param deployment the deployment
+   * @return  the deployment provider service
+   */
   public DeploymentProviderService getDeploymentProviderService(Deployment deployment) {
     return getDeploymentProviderService(deployment.getDeploymentProvider());
   }

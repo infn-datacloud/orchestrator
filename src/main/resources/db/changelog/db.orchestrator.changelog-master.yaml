@@ -17,3 +17,6 @@ databaseChangeLog:
   - include:
     - file: 0011_orchestrator-refresh-token-size-2501.yaml
       relativeToChangelogFile: true
+  - include:
+    - file: 0012_orchestrator-workflow-reference-fields-2502.yaml
+      relativeToChangelogFile: true

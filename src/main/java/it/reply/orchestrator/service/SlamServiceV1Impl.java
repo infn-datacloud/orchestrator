@@ -46,7 +46,7 @@ public class SlamServiceV1Impl implements SlamService {
   private RestTemplate restTemplate;
 
   /**
-   * Creates a new SlamServiceImpl.
+   * Creates a new SlamServiceV1Impl.
    *
    * @param slamProperties
    *          the SlamProperties to use

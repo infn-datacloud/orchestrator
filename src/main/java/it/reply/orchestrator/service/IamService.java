@@ -25,6 +25,11 @@ import org.springframework.web.client.RestTemplate;
 
 public interface IamService {
 
+  /**
+   * getOrchestratorScopes. 
+   *
+   * @return the orchestrator scopes
+   */
   public String getOrchestratorScopes();
 
   /**

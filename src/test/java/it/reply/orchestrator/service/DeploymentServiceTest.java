@@ -497,17 +497,17 @@ public class DeploymentServiceTest {
 
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
-    String force = "false";
     Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
-
+    Mockito.when(deploymentRepository.save(deployment)).thenReturn(deployment);
     ExecutionQueryImpl executionQueryImpl = Mockito.spy(new ExecutionQueryImpl());
     Mockito.when(wfService.createExecutionQuery()).thenReturn(executionQueryImpl);
     Mockito.doReturn(Lists.emptyList()).when(executionQueryImpl).list();
 
+    String force = "false";
     deploymentService.deleteDeployment(deployment.getId(), null, force);
 
     Mockito.verify(wfService, Mockito.never()).startProcessInstance(Mockito.any());
-    Mockito.verify(deploymentRepository, Mockito.times(1)).delete(deployment);
+    Mockito.verify(deploymentRepository, Mockito.times(0)).delete(deployment);
   }
 
   @Test
@@ -525,8 +525,8 @@ public class DeploymentServiceTest {
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
     deployment.setDeploymentProvider(DeploymentProvider.IM);
-    String force = "false";
     Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Mockito.when(deploymentRepository.save(deployment)).thenReturn(deployment);
 
     ProcessInstanceBuilderImpl builder = Mockito.spy(new ProcessInstanceBuilderImpl(wfService));
     Mockito
@@ -538,6 +538,7 @@ public class DeploymentServiceTest {
     Mockito.when(wfService.createExecutionQuery()).thenReturn(executionQueryImpl);
     Mockito.doReturn(Lists.emptyList()).when(executionQueryImpl).list();
 
+    String force = "false";
     deploymentService.deleteDeployment(deployment.getId(), null, force);
 
     Mockito.verify(wfService, Mockito.times(1)).startProcessInstance(Mockito.eq(builder));

@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
 public class GetProvidersRank extends BaseRankCloudProvidersCommand {
 
   @Autowired
-  private CloudProviderRankerService cloudProviderRankerService;
+  private CloudProviderRankerService cprService;
 
   @Override
   public void execute(DelegateExecution execution,
@@ -69,10 +69,12 @@ public class GetProvidersRank extends BaseRankCloudProvidersCommand {
         .preferences(preferences)
         .sla(rankCloudProvidersMessage.getSlamPreferences().getSla())
         .monitoring(monitoring)
+        .deploymentId(rankCloudProvidersMessage.getDeploymentId())
+        .cloudProviders(rankCloudProvidersMessage.getCloudProviders())
         .build();
 
     // Get provider rank and save in message
-    List<RankedCloudService> ranking = cloudProviderRankerService.getProviderServicesRanking(cprr);
+    List<RankedCloudService> ranking = cprService.getProviderServicesRanking(cprr);
     rankCloudProvidersMessage.setRankedCloudServices(ranking);
   }
 

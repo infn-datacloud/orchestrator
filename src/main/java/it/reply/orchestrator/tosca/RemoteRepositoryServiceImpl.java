@@ -22,10 +22,8 @@ import alien4cloud.exception.NotFoundException;
 import alien4cloud.tosca.context.ToscaContext;
 import alien4cloud.tosca.model.ArchiveRoot;
 import alien4cloud.tosca.parser.ParsingContextExecution;
-
 import it.reply.orchestrator.config.properties.ToscaProperties;
 import it.reply.orchestrator.exception.service.ToscaException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -33,10 +31,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.CSARDependency;
 import org.alien4cloud.tosca.model.CSARDependencyWithUrl;
 import org.alien4cloud.tosca.model.Csar;

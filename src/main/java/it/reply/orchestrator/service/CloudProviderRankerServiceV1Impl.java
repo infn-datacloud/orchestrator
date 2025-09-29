@@ -17,15 +17,13 @@
 
 package it.reply.orchestrator.service;
 
+import it.reply.orchestrator.annotation.ServiceVersion;
 import it.reply.orchestrator.config.properties.CprProperties;
 import it.reply.orchestrator.dto.ranker.CloudProviderRankerRequest;
 import it.reply.orchestrator.dto.ranker.RankedCloudService;
 import it.reply.orchestrator.exception.service.DeploymentException;
-
 import java.net.URI;
 import java.util.List;
-
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -36,8 +34,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@EnableConfigurationProperties(CprProperties.class)
-public class CloudProviderRankerServiceImpl implements CloudProviderRankerService {
+@ServiceVersion("v1")
+public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerService {
 
   private static final ParameterizedTypeReference<List<RankedCloudService>> RESPONSE_TYPE =
       new ParameterizedTypeReference<List<RankedCloudService>>() {
@@ -47,7 +45,13 @@ public class CloudProviderRankerServiceImpl implements CloudProviderRankerServic
 
   private RestTemplate restTemplate;
 
-  public CloudProviderRankerServiceImpl(CprProperties cprProperties,
+  /**
+  * Creates a new CloudProviderRankerServiceV1Impl.
+  *
+  * @param cprProperties the CprProperties
+  * @param restTemplateBuilder the RestTemplateBuilder
+  */
+  public CloudProviderRankerServiceV1Impl(CprProperties cprProperties,
       RestTemplateBuilder restTemplateBuilder) {
     this.cprProperties = cprProperties;
     this.restTemplate = restTemplateBuilder.build();

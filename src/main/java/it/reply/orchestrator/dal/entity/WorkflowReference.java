@@ -17,18 +17,19 @@
 
 package it.reply.orchestrator.dal.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
 @Getter
@@ -36,7 +37,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"processId", "requestId"}, callSuper = true)
 @ToString(of = {"processId", "requestId"}, callSuper = true)
-public class WorkflowReference extends UuidIdentifiable {
+public class WorkflowReference extends AbstractResourceEntity {
 
   public enum Action {
     CREATE,
@@ -59,6 +60,16 @@ public class WorkflowReference extends UuidIdentifiable {
   @JoinColumn(name = "deployment_id", nullable = false, updatable = false)
   private Deployment deployment;
 
+  @ManyToOne(cascade = {
+      CascadeType.DETACH,
+      CascadeType.MERGE,
+      CascadeType.PERSIST,
+      CascadeType.REFRESH
+  })
+  @JoinColumn(name = "actor_id")
+  @Nullable
+  private OidcEntity actor;
+
   /**
    * Generate a WorkflowReference.
    *
@@ -66,12 +77,15 @@ public class WorkflowReference extends UuidIdentifiable {
    *     the processId
    * @param requestId
    *     the requestId
+   * @param actor
+   *     the OidcEntity of actor that start the process
    * @param action
    *     the action
    */
-  public WorkflowReference(String processId, String requestId, Action action) {
+  public WorkflowReference(String processId, String requestId, OidcEntity actor, Action action) {
     this.processId = processId;
     this.requestId = requestId;
+    this.actor = actor;
     this.action = action;
   }
 

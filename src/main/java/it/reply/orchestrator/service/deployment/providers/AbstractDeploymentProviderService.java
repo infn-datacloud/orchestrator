@@ -22,11 +22,8 @@ import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.enums.Status;
-
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
@@ -46,10 +43,23 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
     return deploymentRepository.findOne(deploymentMessage.getDeploymentId());
   }
 
+  /**
+   * updateOnError.
+   *
+   * @param deploymentUuid  the deploymentUuid
+   * @param throwable the throwable object
+   */
   public void updateOnError(String deploymentUuid, Throwable throwable) {
     deploymentStatusHelper.updateOnError(deploymentUuid, throwable);
   }
 
+  /**
+   * updateOnError.
+   *
+   * @param deploymentUuid the deploymentUuid
+   * @param message the message
+   * @param throwable the throwable object
+   */
   public void updateOnError(String deploymentUuid, String message, Throwable throwable) {
     deploymentStatusHelper.updateOnError(deploymentUuid, message, throwable);
   }
