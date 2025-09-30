@@ -13,7 +13,11 @@ local.properties
 .settings/
 .loadpath
 target/
-.vscode/
+**/.vscode/**
+!**/.vscode/launch.json
+ignite/
+**/security*.yml
+**/security*.yaml
 
 # Eclipse Core
 .project

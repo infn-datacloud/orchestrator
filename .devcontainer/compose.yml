@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  base:
+    container_name: orchestrator-devc-base
+    image: giosava94/orchestrator-devcontainer-base
+    depends_on:
+      - db
+      - oidc-agent
+    environment:
+      DATASOURCE_ORCHESTRATOR_NAME: ${DB_ORCHESTRATOR_NAME-orchestrator}
+      DATASOURCE_ORCHESTRATOR_USERNAME: ${DB_ORCHESTRATOR_USERNAME-orchestrator}
+      DATASOURCE_ORCHESTRATOR_PASSWORD: ${DB_ORCHESTRATOR_PASSWORD-root}
+      DATASOURCE_ORCHESTRATOR_URL: "jdbc:mysql://orchestrator-devc-db:3306/${DB_ORCHESTRATOR_NAME-orchestrator}?allowPublicKeyRetrieval=true&useSSL=false"
+      DATASOURCE_WORKFLOW_NAME: ${DB_WORKFLOW_NAME-workflow}
+      DATASOURCE_WORKFLOW_USERNAME: ${DB_WORKFLOW_USERNAME-workflow}
+      DATASOURCE_WORKFLOW_PASSWORD: ${DB_WORKFLOW_PASSWORD-root}
+      DATASOURCE_WORKFLOW_URL: "jdbc:mysql://orchestrator-devc-db:3306/${DB_WORKFLOW_NAME-workflow}?allowPublicKeyRetrieval=true&useSSL=false"
+      ORCHENT_URL: "http://orchestrator-devc-base:8080"
+      OIDC_AGENT_CONTAINER_NAME: orchestrator-devc-oidc-agent
+    volumes:
+      - ..:/workspace:cached
+      - orchestrator-devc-oidc-agent-config:/oidc-agent-config
+    networks:
+      - orchestrator-devc-net
+    command: sleep infinity
+
+  db:
+    container_name: orchestrator-devc-db
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD-root}
+      DB_ORCHESTRATOR_NAME: ${DB_ORCHESTRATOR_NAME-orchestrator}
+      DB_ORCHESTRATOR_USERNAME: ${DB_ORCHESTRATOR_USERNAME-orchestrator}
+      DB_ORCHESTRATOR_PASSWORD: ${DB_ORCHESTRATOR_PASSWORD-root}
+      DB_WORKFLOW_NAME: ${DB_WORKFLOW_NAME-workflow}
+      DB_WORKFLOW_USERNAME: ${DB_WORKFLOW_USERNAME-workflow}
+      DB_WORKFLOW_PASSWORD: ${DB_WORKFLOW_PASSWORD-root}
+    volumes:
+      - orchestrator-devc-db-data:/var/lib/mysql
+      - ./init.sh:/docker-entrypoint-initdb.d/init.sh
+    networks:
+      - orchestrator-devc-net
+
+  oidc-agent:
+    container_name: orchestrator-devc-oidc-agent
+    image: opensciencegrid/oidc-agent:3.6-release-20220118-1936
+    platform: linux/amd64
+    volumes:
+      - orchestrator-devc-oidc-agent-iss-config:/root/.oidc-agent
+      - orchestrator-devc-oidc-agent-config:/tmp
+    networks:
+      - orchestrator-devc-net
+
+volumes:
+  orchestrator-devc-db-data:
+  orchestrator-devc-oidc-agent-iss-config:
+  orchestrator-devc-oidc-agent-config:
+
+networks:
+  orchestrator-devc-net:
+    name: orchestrator-devc-net
