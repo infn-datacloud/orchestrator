@@ -39,4 +39,7 @@ public class AuthMethod {
   @NotNull
   private String protocol;
 
+  @JsonProperty("audience")
+  private String audience;
+
 }

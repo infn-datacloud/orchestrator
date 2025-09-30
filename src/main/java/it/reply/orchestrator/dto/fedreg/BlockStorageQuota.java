@@ -39,4 +39,16 @@ public class BlockStorageQuota extends Quota {
   @JsonProperty("volumes")
   private Integer volumes;
 
+  @JsonProperty("pvcs")
+  private Integer pvcs;
+
+  @JsonProperty("storage")
+  private Integer storage;
+
+  @JsonProperty("requests_ephemeral_storage")
+  private Integer requestsEphemeralStorage;
+
+  @JsonProperty("limits_ephemeral_storage")
+  private Integer limitsEphemeralStorage;
+
 }
