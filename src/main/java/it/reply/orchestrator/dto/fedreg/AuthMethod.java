@@ -18,7 +18,6 @@
 package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,11 +31,9 @@ import lombok.NoArgsConstructor;
 public class AuthMethod {
 
   @JsonProperty("idp_name")
-  @NotNull
   private String idpName;
 
   @JsonProperty("protocol")
-  @NotNull
   private String protocol;
 
   @JsonProperty("audience")
