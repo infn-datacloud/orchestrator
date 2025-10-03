@@ -293,6 +293,10 @@ public class ImClientFactory {
         iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();
         break;
+      case KUBERNETES:
+        iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
+            CommonUtils.checkNotNull(accessToken)).serialize();
+        break;
       case OPENNEBULA:
         iaasHeader = getOpenNebulaAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();

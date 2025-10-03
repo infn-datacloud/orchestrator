@@ -38,6 +38,7 @@ import es.upv.i3m.grycap.im.rest.client.BodyContentType;
 import it.reply.orchestrator.annotation.DeploymentProviderQualifier;
 import it.reply.orchestrator.config.properties.ImProperties;
 import it.reply.orchestrator.config.properties.OidcProperties;
+import it.reply.orchestrator.config.properties.OidcProperties.ScopedOidcClientProperties;
 import it.reply.orchestrator.config.properties.OrchestratorProperties;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
@@ -86,6 +87,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.Topology;
@@ -553,6 +555,13 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.error(e.getMessage());
     }
 
+    ScopedOidcClientProperties orchestratorProperties = oidcProperties.getIamConfiguration(issuerUser).get().getOrchestrator();
+    String tokenEndpoint = iamService.getWellKnown(restTemplate, issuerUser).getTokenEndpoint();
+
+    String newToken= iamService.getExchangedToken(restTemplate, accessToken, Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+        Stream.of("k8s").collect(Collectors.toSet()), orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(), tokenEndpoint);
+
+    LOG.debug("New token: {}", newToken);
     // Deploy on IM
     try {
       String infrastructureId = executeWithClientForResult(cloudProviderEndpoints,

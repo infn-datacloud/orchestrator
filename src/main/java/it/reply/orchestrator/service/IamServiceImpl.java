@@ -25,6 +25,7 @@ import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dto.iam.IamClientRequest;
 import it.reply.orchestrator.dto.iam.WellKnownResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -192,6 +194,58 @@ public class IamServiceImpl implements IamService {
     LOG.info("Access token with client credentials as grant type successfully created");
     return accessToken;
   }
+
+  public String getExchangedToken(RestTemplate restTemplate, String subjectToken, Set<String> scopes,
+                                    Set<String> audiences, String clientId, String clientSecret, String tokenEndpoint) {
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
+        formData.add("subject_token", subjectToken);
+        formData.add("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
+
+        if (scopes != null && !scopes.isEmpty()) {
+            formData.add("scope", scopes.stream().collect(Collectors.joining(" ")));
+        }
+
+        if (audiences != null && !audiences.isEmpty()) {
+            formData.add("audience", audiences.stream().collect(Collectors.joining(" ")));
+        }
+
+        String auth = clientId + ":" + clientSecret;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+        String authHeader = "Basic " + encodedAuth;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Authorization", authHeader);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
+
+        ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
+                tokenEndpoint,
+                request,
+                TokenResponse.class
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new RuntimeException("Errore nell'exchange del token: " + response.getStatusCode());
+        }
+
+        return response.getBody().getAccessToken();
+    }
+
+    // Classe di supporto per deserializzare la risposta JSON
+    public static class TokenResponse {
+        private String access_token;
+
+        public String getAccessToken() {
+            return access_token;
+        }
+
+        public void setAccess_token(String access_token) {
+            this.access_token = access_token;
+        }
+    }
 
   @Override
   public Map<String, String> createClient(RestTemplate restTemplate, String iamRegistration,

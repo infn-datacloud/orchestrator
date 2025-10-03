@@ -55,6 +55,9 @@ public interface IamService {
   public String getTokenClientCredentials(RestTemplate restTemplate, String iamClientId,
       String iamClientSecret, String iamClientScopes, String iamTokenEndpoint);
 
+  public String getExchangedToken(RestTemplate restTemplate, String subjectToken, Set<String> scopes,
+  Set<String> audiences, String clientId, String clientSecret, String tokenEndpoint);
+
   /**
    * Create an IAM client setting the minimal information, in addition to the mail field.
    * As output it gives the client_id and registration_access_token of the created client.
