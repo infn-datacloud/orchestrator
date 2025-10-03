@@ -18,6 +18,7 @@
 package it.reply.orchestrator.dto.fedreg;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -83,5 +84,35 @@ public class Quota {
 
   @JsonProperty("security_group_rules")
   private Integer securityGroupsRules;
+
+  @JsonProperty("pvcs")
+  private Integer pvcs;
+
+  @JsonProperty("storage")
+  private Integer storage;
+
+  @JsonProperty("requests_ephemeral_storage")
+  private Integer requestsEphemeralStorage;
+
+  @JsonProperty("limits_ephemeral_storage")
+  private Integer limitsEphemeralStorage;
+
+  @JsonProperty("limits_cpu")
+  private Integer limitsCpu;
+
+  @JsonProperty("requests_cpu")
+  private Integer requestsCpu;
+
+  @JsonProperty("limits_memory")
+  private Integer limitsMemory;
+
+  @JsonProperty("requests_memory")
+  private Integer requestsMemory;
+
+  @JsonProperty("pods")
+  private Integer pods;
+
+  @JsonProperty("gpus")
+  private Map<String, Integer> gpus;
 
 }
