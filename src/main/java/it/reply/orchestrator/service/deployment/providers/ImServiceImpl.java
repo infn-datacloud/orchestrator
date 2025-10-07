@@ -45,6 +45,8 @@ import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dal.repository.ResourceRepository;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
+import it.reply.orchestrator.dto.CloudProviderEndpoint.IaaSType;
+import it.reply.orchestrator.dto.cmdb.CloudService.SupportedIdp;
 import it.reply.orchestrator.dto.cmdb.ComputeService;
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
@@ -83,6 +85,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -555,13 +558,32 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.error(e.getMessage());
     }
 
-    ScopedOidcClientProperties orchestratorProperties = oidcProperties.getIamConfiguration(issuerUser).get().getOrchestrator();
-    String tokenEndpoint = iamService.getWellKnown(restTemplate, issuerUser).getTokenEndpoint();
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      final String finalIssuerUser = issuerUser;
+      SupportedIdp supportedIdp = null;
+      try {
+        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+            .filter(idp -> finalIssuerUser.equals(idp.getIssuer())).findAny()
+            .orElseThrow(() -> new NoSuchElementException(
+                String.format("No SupportedIdp found for issuer '%s'", finalIssuerUser)));
+      } catch (NoSuchElementException e) {
+        iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
+        throw new RuntimeException(e.getMessage(), e);
+      }
+      if (supportedIdp.getAudience() != null) {
 
-    String newToken= iamService.getExchangedToken(restTemplate, accessToken, Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
-        Stream.of("k8s").collect(Collectors.toSet()), orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(), tokenEndpoint);
+        ScopedOidcClientProperties orchestratorProperties =
+            oidcProperties.getIamConfiguration(finalIssuerUser).get().getOrchestrator();
+        String tokenEndpoint =
+            iamService.getWellKnown(restTemplate, finalIssuerUser).getTokenEndpoint();
 
-    LOG.debug("New token: {}", newToken);
+        String newToken = iamService.getExchangedToken(restTemplate, accessToken,
+            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+            Stream.of("k8s").collect(Collectors.toSet()), orchestratorProperties.getClientId(),
+            orchestratorProperties.getClientSecret(), tokenEndpoint);
+      }
+    }
+
     // Deploy on IM
     try {
       String infrastructureId = executeWithClientForResult(cloudProviderEndpoints,

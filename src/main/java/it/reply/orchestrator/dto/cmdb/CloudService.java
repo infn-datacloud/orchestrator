@@ -114,6 +114,10 @@ public class CloudService implements CmdbIdentifiable {
     @JsonProperty("issuer")
     private String issuer;
 
+    @Nullable
+    @JsonProperty("audience")
+    private String audience;
+
     /**
      * Default constructor.
      */

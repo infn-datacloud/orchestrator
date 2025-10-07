@@ -113,7 +113,7 @@ public class ImClientFactory {
         SupportedIdp supportedidp = cloudProviderEndpoint
                        .getSupportedIdps().stream()
                        .filter(idp -> issuer.equals(idp.getIssuer())).findAny()
-                       .orElse(new SupportedIdp(organization, issuer));
+                       .orElse(new SupportedIdp(organization, issuer, null));
 
         endpoint = matcher.group(1);
         OpenStackCredentials cred = cloudProviderEndpoint
@@ -293,10 +293,10 @@ public class ImClientFactory {
         iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();
         break;
-      case KUBERNETES:
-        iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
-            CommonUtils.checkNotNull(accessToken)).serialize();
-        break;
+      // case KUBERNETES:
+      //   iaasHeader = getKubernetesAuthHeader(cloudProviderEndpoint,
+      //       CommonUtils.checkNotNull(accessToken)).serialize();
+      //   break;
       case OPENNEBULA:
         iaasHeader = getOpenNebulaAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();
