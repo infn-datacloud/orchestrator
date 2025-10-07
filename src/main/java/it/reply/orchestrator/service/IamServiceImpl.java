@@ -228,7 +228,7 @@ public class IamServiceImpl implements IamService {
         );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new RuntimeException("Errore nell'exchange del token: " + response.getStatusCode());
+            throw new RuntimeException("Error in token exchange: " + response.getStatusCode());
         }
 
         return response.getBody().getAccessToken();
