@@ -27,21 +27,17 @@ import it.reply.orchestrator.exception.OrchestratorException;
 import it.reply.orchestrator.utils.JwtUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.MdcUtils.MdcCloseable;
-
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-
 import javax.cache.Cache;
 import javax.cache.Cache.Entry;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
@@ -118,6 +114,10 @@ public class OAuth2TokenCacheService {
     return oauth2TokensCache.invoke(id, getEntryProcessor(), MdcUtils.getRequestId(),
         MdcUtils.getDeploymentId());
   }
+
+  public void put(OidcTokenId id, AccessGrant grant) {
+    oauth2TokensCache.put(id, grant);
+}
 
   public AccessGrant getNew(OidcTokenId id) {
     return oauth2TokensCache.invoke(id, getNewEntryProcessor(), MdcUtils.getRequestId(),

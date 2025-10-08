@@ -153,6 +153,52 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
 
+  private void exchangeTokenForKubernetes(OidcTokenId requestedWithToken, List<CloudProviderEndpoint> cloudProviderEndpoints){
+    String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
+    SupportedIdp supportedIdp = null;
+        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+            .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
+            .orElseThrow(() -> new NoSuchElementException(
+                String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
+      String audience = supportedIdp.getAudience();
+      if (audience != null) {
+
+        ScopedOidcClientProperties orchestratorProperties =
+            oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
+        String tokenEndpoint =
+            iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
+
+        String newToken = iamService.getExchangedToken(restTemplate, oauth2TokenService.getAccessToken(requestedWithToken),
+            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+            Stream.of(audience).collect(Collectors.toSet()), orchestratorProperties.getClientId(),
+            orchestratorProperties.getClientSecret(), tokenEndpoint);
+        oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+      }
+  }
+
+  private void exchangeTokenForKubernetesv2(OidcTokenId requestedWithToken, List<CloudProviderEndpoint> cloudProviderEndpoints){
+    String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
+    SupportedIdp supportedIdp = null;
+        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+            .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
+            .orElseThrow(() -> new NoSuchElementException(
+                String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
+      String audience = "k8s";
+      if (audience != null) {
+
+        ScopedOidcClientProperties orchestratorProperties =
+            oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
+        String tokenEndpoint =
+            iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
+
+        String newToken = iamService.getExchangedToken(restTemplate, oauth2TokenService.getAccessToken(requestedWithToken),
+            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+            Stream.of(audience).collect(Collectors.toSet()), orchestratorProperties.getClientId(),
+            orchestratorProperties.getClientSecret(), tokenEndpoint);
+        oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+      }
+  }
+
   private void deleteExternalResources(RestTemplate restTemplate,
       Map<Boolean, Set<Resource>> resources, String userGroup, Boolean isForce, String accessToken)
       throws S3ServiceException {
@@ -557,32 +603,16 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     } catch (JsonProcessingException e) {
       LOG.error(e.getMessage());
     }
-
-    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
-      final String finalIssuerUser = issuerUser;
-      SupportedIdp supportedIdp = null;
+    LOG.info(oauth2TokenService.getAccessToken(requestedWithToken));
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.OPENSTACK)) {
       try {
-        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
-            .filter(idp -> finalIssuerUser.equals(idp.getIssuer())).findAny()
-            .orElseThrow(() -> new NoSuchElementException(
-                String.format("No SupportedIdp found for issuer '%s'", finalIssuerUser)));
-      } catch (NoSuchElementException e) {
+        exchangeTokenForKubernetesv2(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
         iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
         throw new RuntimeException(e.getMessage(), e);
       }
-      if (supportedIdp.getAudience() != null) {
-
-        ScopedOidcClientProperties orchestratorProperties =
-            oidcProperties.getIamConfiguration(finalIssuerUser).get().getOrchestrator();
-        String tokenEndpoint =
-            iamService.getWellKnown(restTemplate, finalIssuerUser).getTokenEndpoint();
-
-        String newToken = iamService.getExchangedToken(restTemplate, accessToken,
-            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
-            Stream.of("k8s").collect(Collectors.toSet()), orchestratorProperties.getClientId(),
-            orchestratorProperties.getClientSecret(), tokenEndpoint);
-      }
     }
+    LOG.info(oauth2TokenService.getAccessToken(requestedWithToken));
 
     // Deploy on IM
     try {

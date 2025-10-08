@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.security;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.IamProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.OidcClientProperties;
@@ -27,6 +26,7 @@ import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcEntityId;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.repository.OidcEntityRepository;
+import it.reply.orchestrator.dto.security.AccessGrant;
 import it.reply.orchestrator.dto.security.IamUserInfo;
 import it.reply.orchestrator.dto.security.IndigoOAuth2Authentication;
 import it.reply.orchestrator.exception.OrchestratorException;
@@ -35,11 +35,9 @@ import it.reply.orchestrator.function.ThrowingConsumer;
 import it.reply.orchestrator.function.ThrowingFunction;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.JwtUtils;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -221,6 +219,12 @@ public class OAuth2TokenService {
   public String getAccessToken(OidcTokenId id) {
     handleSecurityDisabled();
     return oauth2TokenCacheService.get(id).getAccessToken();
+  }
+
+  public void setAccessToken(OidcTokenId id, String newAccessToken) {
+    AccessGrant grant = oauth2TokenCacheService.get(id);
+    grant.setAccessToken(newAccessToken);
+    oauth2TokenCacheService.put(id, grant);
   }
 
   /**
