@@ -74,6 +74,12 @@ public class ImClientFactory {
   @Autowired
   private OAuth2TokenService oauth2TokenService;
 
+  protected String getKubernetesAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
+      @NonNull String accessToken) {
+    return String.format("id = kub; type = Kubernetes; token = %s; host = %s", accessToken,  
+        cloudProviderEndpoint.getCpEndpoint());
+  }
+
   protected OpenStackCredentials getOpenStackAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
       @NonNull String accessToken) {
     String endpoint = cloudProviderEndpoint.getCpEndpoint();
@@ -293,10 +299,10 @@ public class ImClientFactory {
         iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();
         break;
-      // case KUBERNETES:
-      //   iaasHeader = getKubernetesAuthHeader(cloudProviderEndpoint,
-      //       CommonUtils.checkNotNull(accessToken)).serialize();
-      //   break;
+      case KUBERNETES:
+        iaasHeader = getKubernetesAuthHeader(cloudProviderEndpoint,
+            CommonUtils.checkNotNull(accessToken));
+        break;
       case OPENNEBULA:
         iaasHeader = getOpenNebulaAuthHeader(cloudProviderEndpoint,
             CommonUtils.checkNotNull(accessToken)).serialize();

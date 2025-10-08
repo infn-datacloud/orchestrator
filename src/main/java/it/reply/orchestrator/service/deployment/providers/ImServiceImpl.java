@@ -160,30 +160,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
             .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
             .orElseThrow(() -> new NoSuchElementException(
                 String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
-      String audience = supportedIdp.getAudience();
-      if (audience != null) {
-
-        ScopedOidcClientProperties orchestratorProperties =
-            oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
-        String tokenEndpoint =
-            iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
-
-        String newToken = iamService.getExchangedToken(restTemplate, oauth2TokenService.getAccessToken(requestedWithToken),
-            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
-            Stream.of(audience).collect(Collectors.toSet()), orchestratorProperties.getClientId(),
-            orchestratorProperties.getClientSecret(), tokenEndpoint);
-        oauth2TokenService.setAccessToken(requestedWithToken, newToken);
-      }
-  }
-
-  private void exchangeTokenForKubernetesv2(OidcTokenId requestedWithToken, List<CloudProviderEndpoint> cloudProviderEndpoints){
-    String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
-    SupportedIdp supportedIdp = null;
-        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
-            .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
-            .orElseThrow(() -> new NoSuchElementException(
-                String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
-      String audience = "k8s";
+      String audience = "k8s";//supportedIdp.getAudience();
       if (audience != null) {
 
         ScopedOidcClientProperties orchestratorProperties =
@@ -603,16 +580,16 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     } catch (JsonProcessingException e) {
       LOG.error(e.getMessage());
     }
-    LOG.info(oauth2TokenService.getAccessToken(requestedWithToken));
-    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.OPENSTACK)) {
+
+    cloudProviderEndpoints.get(0).setIaasType(IaaSType.KUBERNETES);
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
       try {
-        exchangeTokenForKubernetesv2(requestedWithToken, cloudProviderEndpoints);
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
       } catch (RuntimeException e) {
         iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
         throw new RuntimeException(e.getMessage(), e);
       }
     }
-    LOG.info(oauth2TokenService.getAccessToken(requestedWithToken));
 
     // Deploy on IM
     try {
