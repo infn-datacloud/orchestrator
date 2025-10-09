@@ -69,6 +69,29 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
   public List<RankedCloudService> getProviderServicesRanking(
       CloudProviderRankerRequest cloudProviderRankerRequest) {
 
+    List<RankedCloudService> result = new ArrayList<RankedCloudService>();
+    Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
+    int count = 1;
+
+    if (cloudProviders.size() < 2) {
+      for (CloudProvider provider : cloudProviders.values()) {
+        for (CloudService service : provider.getServices().values()) {
+          if (service.getType() == CloudServiceType.COMPUTE) {
+            result.add(RankedCloudService
+                .builder()
+                .provider(provider.getId())
+                .serviceId(service.getId())
+                .totalScore(1)
+                .rank(count)
+                .ranked(true)
+                .build());
+            count++;
+          }
+        }
+      }
+      return result;
+    }
+
     URI requestUri = UriComponentsBuilder
         .fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
         .build()
@@ -76,9 +99,6 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
         .toUri();
 
     HttpEntity<String> entity = new HttpEntity<>(cloudProviderRankerRequest.getDeploymentId());
-    List<RankedCloudService> result = new ArrayList<RankedCloudService>();
-    Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
-    int count = 1;
 
     try {
       List<AiRankedCloudService> airanking = restTemplate.exchange(requestUri, HttpMethod.POST,
