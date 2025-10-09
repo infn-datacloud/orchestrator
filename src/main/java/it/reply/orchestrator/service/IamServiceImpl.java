@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dto.iam.IamClientRequest;
 import it.reply.orchestrator.dto.iam.WellKnownResponse;
+import it.reply.orchestrator.utils.CommonUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -81,7 +82,8 @@ public class IamServiceImpl implements IamService {
     ResponseEntity<String> responseEntity;
     WellKnownResponse wellKnownResponse = new WellKnownResponse();
     try {
-      responseEntity = restTemplate.getForEntity(issuer + WELL_KNOWN_ENDPOINT, String.class);
+      responseEntity = restTemplate.getForEntity(CommonUtils.addTrailingSlash(issuer)
+          + WELL_KNOWN_ENDPOINT, String.class);
     } catch (HttpClientErrorException e) {
       String errorMessage = String.format("The %s endpoint cannot be contacted. Status code: %s",
           WELL_KNOWN_ENDPOINT, e.getStatusCode());
@@ -106,7 +108,8 @@ public class IamServiceImpl implements IamService {
       responseJson = objectMapper.readTree(responseEntity.getBody());
     } catch (IOException e) {
       String errorMessage =
-          String.format("Error in contacting %s. %s", issuer + WELL_KNOWN_ENDPOINT, e.getMessage());
+          String.format("Error in contacting %s. %s", CommonUtils.addTrailingSlash(issuer)
+              + WELL_KNOWN_ENDPOINT, e.getMessage());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     }
@@ -333,7 +336,7 @@ public class IamServiceImpl implements IamService {
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
     // URL of the REST service to contact to perform the DELETE request
-    String deleteUrl = iamUrl + "/" + clientId;
+    String deleteUrl = CommonUtils.addTrailingSlash(iamUrl) + clientId;
 
     // Do the DELETE request
     ResponseEntity<String> responseEntity;
@@ -409,7 +412,8 @@ public class IamServiceImpl implements IamService {
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
     // URL of the REST service to contact to assign the ownership of a client
-    String assignOwnershipUrl = iamUrl + "iam/api/clients/" + clientId + "/owners/" + owner;
+    String assignOwnershipUrl = CommonUtils.addTrailingSlash(iamUrl)
+        + "iam/api/clients/" + clientId + "/owners/" + owner;
 
     // Do the POST request
     ResponseEntity<String> responseEntity;
@@ -448,7 +452,7 @@ public class IamServiceImpl implements IamService {
   @Override
   public boolean checkIam(RestTemplate restTemplate, String idpUrl) {
     // URL of the endpoint to be contacted
-    String endpointUrl = idpUrl + "actuator/info";
+    String endpointUrl = CommonUtils.addTrailingSlash(idpUrl) + "actuator/info";
 
     // Create HTTP headers to accept JSON
     HttpHeaders headers = new HttpHeaders();
@@ -518,7 +522,7 @@ public class IamServiceImpl implements IamService {
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
     // URL of the REST service to contact to perform the request
-    String getUrl = iamUrl + clientId;
+    String getUrl = CommonUtils.addTrailingSlash(iamUrl) + clientId;
 
     // Do the GET request
     ResponseEntity<String> responseEntity;
@@ -563,7 +567,7 @@ public class IamServiceImpl implements IamService {
     HttpEntity<?> requestEntity = new HttpEntity<>(jsonUpdated, headers);
 
     // URL of the REST service to contact to perform the update request
-    String updateUrl = iamUrl + clientId;
+    String updateUrl = CommonUtils.addTrailingSlash(iamUrl) + clientId;
 
     // Do the GET request
     ResponseEntity<String> responseEntity;

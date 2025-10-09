@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import lombok.experimental.UtilityClass;
+import lombok.experimental.var;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -239,4 +240,8 @@ public class CommonUtils {
     return o != null && PRIMITIVE_CLASSES.contains(Primitives.wrap(o.getClass()));
   }
 
+  public static String addTrailingSlash(String url) {
+    url += url.endsWith("/") ? "" : "/";
+    return url;
+  }
 }
