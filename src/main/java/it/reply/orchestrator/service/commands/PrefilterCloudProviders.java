@@ -166,6 +166,14 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                         }
                         discardOnPrivateNetworkRequirement(ar, computeService, servicesToDiscard);
                       }
+                      if (deployment.getTemplate().contains("target_provider_type: kubernetes")
+                          && !cloudProviderService.isKubernetesFedregComputeProviderService()) {
+                        addServiceToDiscard(servicesToDiscard, cloudProviderService);
+                      }
+                      if (deployment.getTemplate().contains("target_provider_type: openstack")
+                          && !cloudProviderService.isOpenStackComputeProviderService()) {
+                        addServiceToDiscard(servicesToDiscard, cloudProviderService);
+                      }
                     } else {
                       addServiceToDiscard(servicesToDiscard, cloudProviderService);
                     }
