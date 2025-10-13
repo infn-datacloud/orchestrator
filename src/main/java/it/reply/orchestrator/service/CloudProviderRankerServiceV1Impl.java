@@ -19,11 +19,17 @@ package it.reply.orchestrator.service;
 
 import it.reply.orchestrator.annotation.ServiceVersion;
 import it.reply.orchestrator.config.properties.CprProperties;
+import it.reply.orchestrator.dto.cmdb.CloudProvider;
+import it.reply.orchestrator.dto.cmdb.CloudService;
+import it.reply.orchestrator.dto.cmdb.CloudServiceType;
 import it.reply.orchestrator.dto.ranker.CloudProviderRankerRequest;
 import it.reply.orchestrator.dto.ranker.RankedCloudService;
 import it.reply.orchestrator.exception.service.DeploymentException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -61,6 +67,29 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
   public List<RankedCloudService> getProviderServicesRanking(
       CloudProviderRankerRequest cloudProviderRankerRequest) {
 
+    Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
+  
+    if (cloudProviders.size() < 2) {
+      List<RankedCloudService> result = new ArrayList<RankedCloudService>();
+      int count = 1;
+      for (CloudProvider provider : cloudProviders.values()) {
+        for (CloudService service : provider.getServices().values()) {
+          if (service.getType() == CloudServiceType.COMPUTE) {
+            result.add(RankedCloudService
+                .builder()
+                .provider(provider.getId())
+                .serviceId(service.getId())
+                .totalScore(1)
+                .rank(count)
+                .ranked(true)
+                .build());
+            count++;
+          }
+        }
+      }
+      return result;
+    }
+
     URI requestUri = UriComponentsBuilder
         .fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
         .build()
@@ -72,7 +101,32 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
     try {
       return restTemplate.exchange(requestUri, HttpMethod.POST, entity, RESPONSE_TYPE).getBody();
     } catch (RestClientException ex) {
-      throw new DeploymentException("Error retrieving cloud provider ranking data", ex);
+      if (cprProperties.isInternalFallback() && cloudProviders.size() > 0) {
+        List<RankedCloudService> result = new ArrayList<RankedCloudService>();
+        try {
+          int count = 1;
+          for (CloudProvider provider : cloudProviders.values()) {
+            for (CloudService service : provider.getServices().values()) {
+              if (service.getType() == CloudServiceType.COMPUTE) {
+                result.add(RankedCloudService
+                    .builder()
+                    .provider(provider.getId())
+                    .serviceId(service.getId())
+                    .totalScore(1)
+                    .rank(count)
+                    .ranked(true)
+                    .build());
+                count++;
+              }
+            }
+          }
+        } catch (Exception exx) {
+          throw new DeploymentException("Error retrieving cloud provider ranking data", exx);
+        }
+        return result;
+      } else {
+        throw new DeploymentException("Error retrieving cloud provider ranking data", ex);
+      }
     }
   }
 }
