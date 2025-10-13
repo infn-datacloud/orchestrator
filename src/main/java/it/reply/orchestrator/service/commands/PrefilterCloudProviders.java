@@ -160,19 +160,19 @@ public class PrefilterCloudProviders extends BaseRankCloudProvidersCommand {
                   case TOSCA:
                     if (cloudProviderService instanceof ComputeService) {
                       ComputeService computeService = (ComputeService) cloudProviderService;
+                      if (deployment.getTemplate().contains("target_provider_type: kubernetes")
+                          && cloudProviderService.isOpenStackComputeProviderService()) {
+                        addServiceToDiscard(servicesToDiscard, computeService);
+                      }
+                      if (deployment.getTemplate().contains("target_provider_type: openstack")
+                          && cloudProviderService.isKubernetesFedregComputeProviderService()) {
+                        addServiceToDiscard(servicesToDiscard, computeService);
+                      }
                       if (toscaService.isElasticClusterDeployment(ar)) {
                         if (deployment.getStatus() == Status.CREATE_IN_PROGRESS) {
                           discardOnPublicNetworkRequirement(computeService, servicesToDiscard);
                         }
                         discardOnPrivateNetworkRequirement(ar, computeService, servicesToDiscard);
-                      }
-                      if (deployment.getTemplate().contains("target_provider_type: kubernetes")
-                          && !cloudProviderService.isKubernetesFedregComputeProviderService()) {
-                        addServiceToDiscard(servicesToDiscard, cloudProviderService);
-                      }
-                      if (deployment.getTemplate().contains("target_provider_type: openstack")
-                          && !cloudProviderService.isOpenStackComputeProviderService()) {
-                        addServiceToDiscard(servicesToDiscard, cloudProviderService);
                       }
                     } else {
                       addServiceToDiscard(servicesToDiscard, cloudProviderService);
