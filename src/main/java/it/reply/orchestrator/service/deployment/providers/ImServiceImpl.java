@@ -160,7 +160,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
             .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
             .orElseThrow(() -> new NoSuchElementException(
                 String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
-      String audience = "k8s";//supportedIdp.getAudience();
+      String audience = supportedIdp.getAudience();
       if (audience != null) {
 
         ScopedOidcClientProperties orchestratorProperties =
@@ -581,7 +581,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.error(e.getMessage());
     }
 
-    cloudProviderEndpoints.get(0).setIaasType(IaaSType.KUBERNETES);
     if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
       try {
         exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
