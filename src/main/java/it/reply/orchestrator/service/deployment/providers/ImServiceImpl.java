@@ -156,23 +156,27 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   private void exchangeTokenForKubernetes(OidcTokenId requestedWithToken, List<CloudProviderEndpoint> cloudProviderEndpoints){
     String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
     SupportedIdp supportedIdp = null;
-        supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
-            .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
-            .orElseThrow(() -> new NoSuchElementException(
-                String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
-      String audience = supportedIdp.getAudience();
-      if (audience != null) {
+    supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+        .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
+        .orElseThrow(() -> new NoSuchElementException(
+            String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
+    String requestedAudience = supportedIdp.getAudience();
+    if (requestedAudience != null) {
 
-        ScopedOidcClientProperties orchestratorProperties =
-            oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
-        String tokenEndpoint =
-            iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
+      ScopedOidcClientProperties orchestratorProperties =
+          oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
+      String orchestratorAudience =
+          oidcProperties.getIamConfiguration(userIssuer).get().getAudience();
+      String tokenEndpoint = iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
 
-        String newToken = iamService.getExchangedToken(restTemplate, oauth2TokenService.getAccessToken(requestedWithToken),
-            Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
-            Stream.of(audience).collect(Collectors.toSet()), orchestratorProperties.getClientId(),
-            orchestratorProperties.getClientSecret(), tokenEndpoint);
-        oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+      String newToken = iamService.getExchangedToken(restTemplate,
+          oauth2TokenService.getAccessToken(requestedWithToken),
+          Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+          Stream.of(requestedAudience, orchestratorAudience).filter(Objects::nonNull)
+              .collect(Collectors.toSet()),
+          orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
+          tokenEndpoint);
+      oauth2TokenService.setAccessToken(requestedWithToken, newToken);
       }
   }
 
@@ -616,6 +620,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     try {
 
       InfrastructureState infrastructureState = executeWithClientForResult(cloudProviderEndpoints,
@@ -656,6 +668,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     // Try to get the logs of the virtual infrastructure for debug purposes.
     try {
       Property contMsg = executeWithClientForResult(cloudProviderEndpoints, requestedWithToken,
@@ -677,6 +697,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
     // Try to get the logs of the virtual infrastructure.
     try {
@@ -727,6 +755,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     try {
       deployment.setOutputs(executeWithClientForResult(cloudProviderEndpoints, requestedWithToken,
           client -> client.getInfrastructureOutputs(deployment.getEndpoint())).getOutputs());
@@ -757,6 +793,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
       try {
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client
