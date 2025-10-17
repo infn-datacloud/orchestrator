@@ -17,10 +17,6 @@
 
 package it.reply.orchestrator.dto.cmdb;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.DatabindContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 import static it.reply.orchestrator.dto.cmdb.CloudService.AWS_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.AZURE_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.CDMI_STORAGE_SERVICE;
@@ -35,6 +31,11 @@ import static it.reply.orchestrator.dto.cmdb.CloudService.OPENNEBULA_TOSCA_SERVI
 import static it.reply.orchestrator.dto.cmdb.CloudService.OPENSTACK_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.OTC_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.QCG_COMPUTE_SERVICE;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.databind.DatabindContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
 
 public class CloudServiceResolver extends TypeIdResolverBase {
 

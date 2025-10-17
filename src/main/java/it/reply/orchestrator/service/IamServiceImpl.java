@@ -17,6 +17,7 @@
 
 package it.reply.orchestrator.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,8 +83,8 @@ public class IamServiceImpl implements IamService {
     ResponseEntity<String> responseEntity;
     WellKnownResponse wellKnownResponse = new WellKnownResponse();
     try {
-      responseEntity = restTemplate.getForEntity(CommonUtils.addTrailingSlash(issuer)
-          + WELL_KNOWN_ENDPOINT, String.class);
+      responseEntity = restTemplate
+          .getForEntity(CommonUtils.addTrailingSlash(issuer) + WELL_KNOWN_ENDPOINT, String.class);
     } catch (HttpClientErrorException e) {
       String errorMessage = String.format("The %s endpoint cannot be contacted. Status code: %s",
           WELL_KNOWN_ENDPOINT, e.getStatusCode());
@@ -107,9 +108,8 @@ public class IamServiceImpl implements IamService {
     try {
       responseJson = objectMapper.readTree(responseEntity.getBody());
     } catch (IOException e) {
-      String errorMessage =
-          String.format("Error in contacting %s. %s", CommonUtils.addTrailingSlash(issuer)
-              + WELL_KNOWN_ENDPOINT, e.getMessage());
+      String errorMessage = String.format("Error in contacting %s. %s",
+          CommonUtils.addTrailingSlash(issuer) + WELL_KNOWN_ENDPOINT, e.getMessage());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     }
@@ -198,57 +198,68 @@ public class IamServiceImpl implements IamService {
     return accessToken;
   }
 
-  public String getExchangedToken(RestTemplate restTemplate, String subjectToken, Set<String> scopes,
-                                    Set<String> audiences, String clientId, String clientSecret, String tokenEndpoint) {
+  /**
+   *  Get exchanged token asking specific audiences and scopes.
+   *
+   * @param restTemplate object used to make HTTP requests
+   * @param subjectToken token of the user
+   * @param scopes list of scopes to ask in the request
+   * @param audiences scopes to set for the new client
+   * @param clientId client id of the orchestrator
+   * @param clientSecret client secret of the orchestrator
+   * @param tokenEndpoint token endpoint of the IAM
+   * @return the exchanged token
+   */
+  public String getExchangedToken(RestTemplate restTemplate, String subjectToken,
+      Set<String> scopes, Set<String> audiences, String clientId, String clientSecret,
+      String tokenEndpoint) {
 
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
-        formData.add("subject_token", subjectToken);
-        formData.add("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+    formData.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
+    formData.add("subject_token", subjectToken);
+    formData.add("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
 
-        if (scopes != null && !scopes.isEmpty()) {
-            formData.add("scope", scopes.stream().collect(Collectors.joining(" ")));
-        }
-
-        if (audiences != null && !audiences.isEmpty()) {
-            formData.add("audience", audiences.stream().collect(Collectors.joining(" ")));
-        }
-
-        String auth = clientId + ":" + clientSecret;
-        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
-        String authHeader = "Basic " + encodedAuth;
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Authorization", authHeader);
-
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
-
-        ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
-                tokenEndpoint,
-                request,
-                TokenResponse.class
-        );
-
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new RuntimeException("Error in token exchange: " + response.getStatusCode());
-        }
-
-        return response.getBody().getAccessToken();
+    if (scopes != null && !scopes.isEmpty()) {
+      formData.add("scope", scopes.stream().collect(Collectors.joining(" ")));
     }
 
-    // Classe di supporto per deserializzare la risposta JSON
-    public static class TokenResponse {
-        private String access_token;
-
-        public String getAccessToken() {
-            return access_token;
-        }
-
-        public void setAccess_token(String access_token) {
-            this.access_token = access_token;
-        }
+    if (audiences != null && !audiences.isEmpty()) {
+      formData.add("audience", audiences.stream().collect(Collectors.joining(" ")));
     }
+
+    String auth = clientId + ":" + clientSecret;
+    String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+    String authHeader = "Basic " + encodedAuth;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    headers.set("Authorization", authHeader);
+
+    HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, headers);
+
+    ResponseEntity<TokenResponse> response =
+        restTemplate.postForEntity(tokenEndpoint, request, TokenResponse.class);
+
+    if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+      throw new RuntimeException("Error in token exchange: " + response.getStatusCode());
+    }
+
+    return response.getBody().getAccessToken();
+  }
+
+  public static class TokenResponse {
+
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    public String getAccessToken() {
+      return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+      this.accessToken = accessToken;
+    }
+  }
 
   @Override
   public Map<String, String> createClient(RestTemplate restTemplate, String iamRegistration,
@@ -319,8 +330,7 @@ public class IamServiceImpl implements IamService {
 
     clientCreated.put(CLIENT_ID, clientId);
     clientCreated.put(REGISTRATION_ACCESS_TOKEN, registrationAccessToken);
-    LOG.debug(
-        "The client with client_id {} and registration_access_token {} has been "
+    LOG.debug("The client with client_id {} and registration_access_token {} has been "
         + "successfully created", clientId, registrationAccessToken);
     return clientCreated;
   }
@@ -349,14 +359,14 @@ public class IamServiceImpl implements IamService {
         return false;
       }
       String errorMessage = String.format(
-          "The delete of the client with client_id %s was unsuccessful. Status code: %s",
-          clientId, e.getStatusCode());
+          "The delete of the client with client_id %s was unsuccessful. Status code: %s", clientId,
+          e.getStatusCode());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     } catch (RestClientException e) {
-      String errorMessage = String.format(
-          "The delete of the client with client_id %s was unsuccessful. %s",
-                  clientId, e.getMessage());
+      String errorMessage =
+          String.format("The delete of the client with client_id %s was unsuccessful. %s", clientId,
+              e.getMessage());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     }
@@ -364,8 +374,8 @@ public class IamServiceImpl implements IamService {
     // Check the response
     if (!HttpStatus.NO_CONTENT.equals(responseEntity.getStatusCode())) {
       String errorMessage = String.format(
-          "The delete of the client with client_id %s was unsuccessful. Status code: %s",
-              clientId, responseEntity.getStatusCode());
+          "The delete of the client with client_id %s was unsuccessful. Status code: %s", clientId,
+          responseEntity.getStatusCode());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage);
     }
@@ -412,8 +422,8 @@ public class IamServiceImpl implements IamService {
     HttpEntity<?> requestEntity = new HttpEntity<>(headers);
 
     // URL of the REST service to contact to assign the ownership of a client
-    String assignOwnershipUrl = CommonUtils.addTrailingSlash(iamUrl)
-        + "iam/api/clients/" + clientId + "/owners/" + owner;
+    String assignOwnershipUrl =
+        CommonUtils.addTrailingSlash(iamUrl) + "iam/api/clients/" + clientId + "/owners/" + owner;
 
     // Do the POST request
     ResponseEntity<String> responseEntity;
@@ -576,22 +586,22 @@ public class IamServiceImpl implements IamService {
           restTemplate.exchange(updateUrl, HttpMethod.PUT, requestEntity, String.class);
     } catch (HttpClientErrorException e) {
       String errorMessage = String.format(
-          "The update of the client with client_id %s was unsuccessful. Status code: %s",
-          clientId, e.getStatusCode());
+          "The update of the client with client_id %s was unsuccessful. Status code: %s", clientId,
+          e.getStatusCode());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     } catch (RestClientException e) {
-      String errorMessage = String.format(
-          "The update of the client with client_id %s was unsuccessful. %s",
-              clientId, e.getMessage());
+      String errorMessage =
+          String.format("The update of the client with client_id %s was unsuccessful. %s", clientId,
+              e.getMessage());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage, e);
     }
     // Check the response
     if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
       String errorMessage = String.format(
-          "The update of the client with client_id %s was unsuccessful. Status code: %s",
-          clientId, responseEntity.getStatusCode());
+          "The update of the client with client_id %s was unsuccessful. Status code: %s", clientId,
+          responseEntity.getStatusCode());
       LOG.error(errorMessage);
       throw new IamServiceException(errorMessage);
     }

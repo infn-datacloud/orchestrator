@@ -221,10 +221,16 @@ public class OAuth2TokenService {
     return oauth2TokenCacheService.get(id).getAccessToken();
   }
 
-  public void setAccessToken(OidcTokenId id, String newAccessToken) {
-    AccessGrant grant = oauth2TokenCacheService.get(id);
+  /**
+   * Gets the user's organization from the token ID.
+   *
+   * @param oidcTokenId the token ID
+   * @param newAccessToken the new access token to set
+   */
+  public void setAccessToken(OidcTokenId oidcTokenId, String newAccessToken) {
+    AccessGrant grant = oauth2TokenCacheService.get(oidcTokenId);
     grant.setAccessToken(newAccessToken);
-    oauth2TokenCacheService.put(id, grant);
+    oauth2TokenCacheService.put(oidcTokenId, grant);
   }
 
   /**

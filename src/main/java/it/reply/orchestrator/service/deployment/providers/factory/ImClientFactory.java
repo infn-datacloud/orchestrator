@@ -76,7 +76,7 @@ public class ImClientFactory {
 
   protected String getKubernetesAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
       @NonNull String accessToken) {
-    return String.format("id = kub; type = Kubernetes; token = %s; host = %s", accessToken,  
+    return String.format("id = kub; type = Kubernetes; token = %s; host = %s", accessToken,
         cloudProviderEndpoint.getCpEndpoint());
   }
 

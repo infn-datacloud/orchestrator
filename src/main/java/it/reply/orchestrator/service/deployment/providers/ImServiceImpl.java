@@ -153,7 +153,8 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
 
-  private void exchangeTokenForKubernetes(OidcTokenId requestedWithToken, List<CloudProviderEndpoint> cloudProviderEndpoints){
+  private void exchangeTokenForKubernetes(OidcTokenId requestedWithToken,
+      List<CloudProviderEndpoint> cloudProviderEndpoints) {
     String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
     SupportedIdp supportedIdp = null;
     supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
@@ -177,7 +178,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
           orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
           tokenEndpoint);
       oauth2TokenService.setAccessToken(requestedWithToken, newToken);
-      }
+    }
   }
 
   private void deleteExternalResources(RestTemplate restTemplate,
@@ -292,9 +293,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     toscaService.contextualizeAndReplaceImages(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceFlavors(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceVolumeTypes(ar, computeService, DeploymentProvider.IM);
-
-    List<CloudProviderEndpoint> cloudProviderEndpoints =
-        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
     if (toscaService.isHybridDeployment(ar)) {
       toscaService.setHybridDeployment(ar, computeService.getPublicNetworkName(),
@@ -585,6 +583,9 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.error(e.getMessage());
     }
 
+    List<CloudProviderEndpoint> cloudProviderEndpoints =
+        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
     if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
       try {
         exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
@@ -795,12 +796,12 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
       if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
-      try {
-        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
-      } catch (RuntimeException e) {
-        throw new RuntimeException(e.getMessage(), e);
+        try {
+          exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+        } catch (RuntimeException e) {
+          throw new RuntimeException(e.getMessage(), e);
+        }
       }
-    }
 
       try {
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client

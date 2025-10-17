@@ -117,7 +117,7 @@ public class OAuth2TokenCacheService {
 
   public void put(OidcTokenId id, AccessGrant grant) {
     oauth2TokensCache.put(id, grant);
-}
+  }
 
   public AccessGrant getNew(OidcTokenId id) {
     return oauth2TokensCache.invoke(id, getNewEntryProcessor(), MdcUtils.getRequestId(),

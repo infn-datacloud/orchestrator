@@ -68,7 +68,7 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
       CloudProviderRankerRequest cloudProviderRankerRequest) {
 
     Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
-  
+
     if (cloudProviders.size() < 2) {
       List<RankedCloudService> result = new ArrayList<RankedCloudService>();
       int count = 1;
