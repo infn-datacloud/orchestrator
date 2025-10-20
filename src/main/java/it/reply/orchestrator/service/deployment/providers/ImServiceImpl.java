@@ -26,6 +26,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Multimap;
+import com.nimbusds.jwt.JWTParser;
 import es.upv.i3m.grycap.im.InfrastructureManager;
 import es.upv.i3m.grycap.im.exceptions.ImClientErrorException;
 import es.upv.i3m.grycap.im.exceptions.ImClientException;
@@ -157,28 +158,53 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       List<CloudProviderEndpoint> cloudProviderEndpoints) {
     String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
     SupportedIdp supportedIdp = null;
-    supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
-        .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
-        .orElseThrow(() -> new NoSuchElementException(
-            String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
-    String requestedAudience = supportedIdp.getAudience();
-    if (requestedAudience != null) {
 
-      ScopedOidcClientProperties orchestratorProperties =
-          oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
-      String orchestratorAudience =
-          oidcProperties.getIamConfiguration(userIssuer).get().getAudience();
-      String tokenEndpoint = iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
-
-      String newToken = iamService.getExchangedToken(restTemplate,
-          oauth2TokenService.getAccessToken(requestedWithToken),
-          Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
-          Stream.of(requestedAudience, orchestratorAudience).filter(Objects::nonNull)
-              .collect(Collectors.toSet()),
-          orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
-          tokenEndpoint);
-      oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+    // Extract the audience requested by the cloudProvider
+    try {
+      supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+          .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
+          .orElseThrow(() -> new NoSuchElementException(
+              String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
+    } catch (NoSuchElementException e) {
+      LOG.error(e.getMessage());
+      throw new IamServiceException(e.getMessage(), e);
     }
+    String requestedAudience = supportedIdp.getAudience();
+
+    // Extract the audience already present in the token
+    List<String> existingAudiences = null;
+    try {
+      existingAudiences =
+          JWTParser.parse(oauth2TokenService.getAccessToken(requestedWithToken)).getJWTClaimsSet()
+              .getAudience().stream().map(String::toLowerCase).collect(Collectors.toList());
+    } catch (ParseException e) {
+      LOG.error(e.getMessage());
+      throw new IamServiceException(e.getMessage(), e);
+    }
+
+    // If the requested audience is already present in the token, do nothing
+    if (requestedAudience.isEmpty() || requestedAudience == null
+        || existingAudiences.contains(requestedAudience)) {
+      return;
+    }
+
+    // Otherwise exchange the token
+    ScopedOidcClientProperties orchestratorProperties =
+        oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
+    String orchestratorAudience =
+        oidcProperties.getIamConfiguration(userIssuer).get().getAudience();
+    String tokenEndpoint = iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
+
+    String newToken = iamService.getExchangedToken(restTemplate,
+        oauth2TokenService.getAccessToken(requestedWithToken),
+        Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+        Stream
+            .concat(requestedAudience != null ? Stream.of(requestedAudience) : Stream.empty(),
+                orchestratorAudience != null ? existingAudiences.stream() : Stream.empty())
+            .filter(Objects::nonNull).collect(Collectors.toSet()),
+        orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
+        tokenEndpoint);
+    oauth2TokenService.setAccessToken(requestedWithToken, newToken);
   }
 
   private void deleteExternalResources(RestTemplate restTemplate,
