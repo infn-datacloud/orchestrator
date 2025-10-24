@@ -1049,6 +1049,15 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+        try {
+          exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+        } catch (RuntimeException e) {
+          iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
+          throw new RuntimeException(e.getMessage(), e);
+        }
+      }
+
       try {
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client
             .destroyInfrastructureAsync(deploymentEndpoint, deploymentMessage.isForce()));
