@@ -867,6 +867,10 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     try {
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      }
       InfrastructureState infrastructureState = executeWithClientForResult(cloudProviderEndpoints,
           requestedWithToken, client -> client.getInfrastructureState(deployment.getEndpoint()));
       Set<String> exsistingVms = Optional.ofNullable(infrastructureState.getVmStates())
@@ -886,6 +890,8 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       vmsToRemove.addAll(exsistingVms); // remaining VMs that we didn't know of their existence
     } catch (ImClientException exception) {
       throw handleImClientException(exception);
+    } catch (RuntimeException e) {
+      throw new RuntimeException(e.getMessage(), e);
     }
 
     updateResources(deployment, deployment.getStatus());
@@ -1100,6 +1106,15 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     try {
       InfrastructureState infrastructureState = executeWithClientForResult(cloudProviderEndpoints,
           requestedWithToken, client -> client.getInfrastructureState(deploymentEndpoint));
@@ -1146,6 +1161,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
     // for each URL get the tosca Node Name about the VM
     Multimap<String, String> vmMap = HashMultimap.create();
