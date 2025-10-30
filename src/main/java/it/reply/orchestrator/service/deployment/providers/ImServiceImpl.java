@@ -83,6 +83,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Service
@@ -205,6 +208,70 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
         tokenEndpoint);
     oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+  }
+
+  public static String resolveTemplate(String yamlTemplate) {
+    Yaml yaml = new Yaml();
+    Object rootObj = yaml.load(yamlTemplate);
+
+    if (!(rootObj instanceof Map)) {
+      throw new IllegalArgumentException(
+          "Template not valid");
+    }
+
+    Map<String, Object> root = (Map<String, Object>) rootObj;
+
+    // Extract inputs
+    Map<String, Object> inputs = new HashMap<>();
+    if (root.containsKey("inputs")) {
+      Map<String, Object> inputDefs = (Map<String, Object>) root.get("inputs");
+      for (Map.Entry<String, Object> entry : inputDefs.entrySet()) {
+        Object val = entry.getValue();
+        if (val instanceof Map && ((Map<String, Object>) val).containsKey("default")) {
+          inputs.put(entry.getKey(), ((Map<String, Object>) val).get("default"));
+        }
+      }
+    }
+
+    // Resolve inputs
+    Object resolvedRoot = resolve(root, inputs);
+
+    // Dump resolved template
+    DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setPrettyFlow(true);
+    Yaml dumper = new Yaml(options);
+
+    return dumper.dump(resolvedRoot);
+  }
+
+  // Recursive method to resolve get_input in a node
+  @SuppressWarnings("unchecked")
+  private static Object resolve(Object node, Map<String, Object> inputs) {
+    if (node instanceof Map) {
+      Map<String, Object> map = (Map<String, Object>) node;
+
+      // Caso singolo: { get_input: qualcosa }
+      if (map.size() == 1 && map.containsKey("get_input")) {
+        String key = String.valueOf(map.get("get_input"));
+        return inputs.getOrDefault(key, map);
+      }
+
+      Map<String, Object> resolved = new LinkedHashMap<>();
+      for (Map.Entry<String, Object> entry : map.entrySet()) {
+        resolved.put(entry.getKey(), resolve(entry.getValue(), inputs));
+      }
+      return resolved;
+
+    } else if (node instanceof List) {
+      List<Object> resolvedList = new ArrayList<>();
+      for (Object item : (List<?>) node) {
+        resolvedList.add(resolve(item, inputs));
+      }
+      return resolvedList;
+    }
+
+    return node;
   }
 
   private void deleteExternalResources(RestTemplate restTemplate,
@@ -586,7 +653,12 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     toscaService.setDeploymentClientIam(ar, iamTemplateOutput);
     toscaService.setDeploymentS3Buckets(ar, s3TemplateOutput);
 
-    String imCustomizedTemplate = toscaService.serialize(ar);
+    List<CloudProviderEndpoint> cloudProviderEndpoints =
+        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+    String imCustomizedTemplate =
+        cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)
+            ? resolveTemplate(deployment.getTemplate())
+            : toscaService.serialize(ar);
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -609,10 +681,8 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.error(e.getMessage());
     }
 
-    List<CloudProviderEndpoint> cloudProviderEndpoints =
-        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
-
     if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      LOG.info(imCustomizedTemplate);
       try {
         exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
       } catch (RuntimeException e) {
