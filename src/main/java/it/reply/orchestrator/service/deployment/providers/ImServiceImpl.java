@@ -210,6 +210,12 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     oauth2TokenService.setAccessToken(requestedWithToken, newToken);
   }
 
+  /**
+   * Resolve template for kubernetes.
+   *
+   * @param yamlTemplate input template
+   * @return resolved template
+   */
   public static String resolveTemplate(String yamlTemplate) {
     Yaml yaml = new Yaml();
     Object rootObj = yaml.load(yamlTemplate);
