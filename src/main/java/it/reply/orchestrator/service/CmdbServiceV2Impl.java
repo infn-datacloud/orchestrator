@@ -367,7 +367,8 @@ public class CmdbServiceV2Impl implements CmdbService {
     AuthMethod relationship = project.getSla().getUserGroup().getIdentityProvider().getProviders()
         .get(0).getRelationship();
     SupportedIdp supportedIdp = new SupportedIdp(relationship.getIdpName(),
-        project.getSla().getUserGroup().getIdentityProvider().getEndpoint());
+        project.getSla().getUserGroup().getIdentityProvider().getEndpoint(),
+        relationship.getAudience());
     supportedIdps.add(supportedIdp);
     idpProtocol.set(relationship.getProtocol());
 

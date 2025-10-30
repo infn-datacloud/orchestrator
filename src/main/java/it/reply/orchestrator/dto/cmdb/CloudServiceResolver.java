@@ -22,6 +22,7 @@ import static it.reply.orchestrator.dto.cmdb.CloudService.AZURE_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.CDMI_STORAGE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.CHRONOS_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.KUBERNETES_COMPUTE_SERVICE;
+import static it.reply.orchestrator.dto.cmdb.CloudService.KUBERNETES_COMPUTE_SERVICE_FEDREG;
 import static it.reply.orchestrator.dto.cmdb.CloudService.MARATHON_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.OCCI_COMPUTE_SERVICE;
 import static it.reply.orchestrator.dto.cmdb.CloudService.ONEPROVIDER_STORAGE_SERVICE;
@@ -75,6 +76,7 @@ public class CloudServiceResolver extends TypeIdResolverBase {
       case OPENNEBULA_COMPUTE_SERVICE:
       case OPENNEBULA_TOSCA_SERVICE:
       case OPENSTACK_COMPUTE_SERVICE:
+      case KUBERNETES_COMPUTE_SERVICE_FEDREG:
       case AWS_COMPUTE_SERVICE:
       case AZURE_COMPUTE_SERVICE:
       case OTC_COMPUTE_SERVICE:

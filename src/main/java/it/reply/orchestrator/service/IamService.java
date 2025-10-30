@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate;
 public interface IamService {
 
   /**
-   * getOrchestratorScopes. 
+   * getOrchestratorScopes.
    *
    * @return the orchestrator scopes
    */
@@ -54,6 +54,22 @@ public interface IamService {
    */
   public String getTokenClientCredentials(RestTemplate restTemplate, String iamClientId,
       String iamClientSecret, String iamClientScopes, String iamTokenEndpoint);
+
+  /**
+   *  Get exchanged token asking specific audiences and scopes.
+   *
+   * @param restTemplate object used to make HTTP requests
+   * @param subjectToken token of the user
+   * @param scopes list of scopes to ask in the request
+   * @param audiences scopes to set for the new client
+   * @param clientId client id of the orchestrator
+   * @param clientSecret client secret of the orchestrator
+   * @param tokenEndpoint token endpoint of the IAM
+   * @return the exchanged token
+   */
+  public String getExchangedToken(RestTemplate restTemplate, String subjectToken,
+      Set<String> scopes, Set<String> audiences, String clientId, String clientSecret,
+      String tokenEndpoint);
 
   /**
    * Create an IAM client setting the minimal information, in addition to the mail field.

@@ -136,7 +136,8 @@ public class CloudProviderEndpointServiceImpl {
       iaasType = IaaSType.MARATHON;
     } else if (computeService.isQcgComputeProviderService()) {
       iaasType = IaaSType.QCG;
-    } else if (computeService.isKubernetesComputeProviderService()) {
+    } else if (computeService.isKubernetesComputeProviderService()
+        || computeService.isKubernetesFedregComputeProviderService()) {
       iaasType = IaaSType.KUBERNETES;
     } else {
       throw new IllegalArgumentException("Unknown Cloud Provider type: " + computeService);

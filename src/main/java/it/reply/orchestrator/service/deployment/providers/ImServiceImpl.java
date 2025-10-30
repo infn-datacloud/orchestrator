@@ -26,6 +26,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Multimap;
+import com.nimbusds.jwt.JWTParser;
 import es.upv.i3m.grycap.im.InfrastructureManager;
 import es.upv.i3m.grycap.im.exceptions.ImClientErrorException;
 import es.upv.i3m.grycap.im.exceptions.ImClientException;
@@ -38,12 +39,15 @@ import es.upv.i3m.grycap.im.rest.client.BodyContentType;
 import it.reply.orchestrator.annotation.DeploymentProviderQualifier;
 import it.reply.orchestrator.config.properties.ImProperties;
 import it.reply.orchestrator.config.properties.OidcProperties;
+import it.reply.orchestrator.config.properties.OidcProperties.ScopedOidcClientProperties;
 import it.reply.orchestrator.config.properties.OrchestratorProperties;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dal.repository.ResourceRepository;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
+import it.reply.orchestrator.dto.CloudProviderEndpoint.IaaSType;
+import it.reply.orchestrator.dto.cmdb.CloudService.SupportedIdp;
 import it.reply.orchestrator.dto.cmdb.ComputeService;
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
@@ -79,13 +83,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.Topology;
@@ -98,6 +105,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Service
@@ -147,6 +156,129 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   public static final String ISSUER = "issuer";
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
+
+  private void exchangeTokenForKubernetes(OidcTokenId requestedWithToken,
+      List<CloudProviderEndpoint> cloudProviderEndpoints) {
+    String userIssuer = requestedWithToken.getOidcEntityId().getIssuer();
+    SupportedIdp supportedIdp = null;
+
+    // Extract the audience requested by the cloudProvider
+    try {
+      supportedIdp = cloudProviderEndpoints.get(0).getSupportedIdps().stream()
+          .filter(idp -> userIssuer.equals(idp.getIssuer())).findAny()
+          .orElseThrow(() -> new NoSuchElementException(
+              String.format("No SupportedIdp found for issuer '%s'", userIssuer)));
+    } catch (NoSuchElementException e) {
+      LOG.error(e.getMessage());
+      throw new IamServiceException(e.getMessage(), e);
+    }
+    String requestedAudience = supportedIdp.getAudience();
+
+    // Extract the audience already present in the token
+    List<String> existingAudiences = null;
+    try {
+      existingAudiences =
+          JWTParser.parse(oauth2TokenService.getAccessToken(requestedWithToken)).getJWTClaimsSet()
+              .getAudience().stream().map(String::toLowerCase).collect(Collectors.toList());
+    } catch (ParseException e) {
+      LOG.error(e.getMessage());
+      throw new IamServiceException(e.getMessage(), e);
+    }
+
+    // If the requested audience is already present in the token, do nothing
+    if (requestedAudience.isEmpty() || requestedAudience == null
+        || existingAudiences.contains(requestedAudience)) {
+      return;
+    }
+
+    // Otherwise exchange the token
+    ScopedOidcClientProperties orchestratorProperties =
+        oidcProperties.getIamConfiguration(userIssuer).get().getOrchestrator();
+    String orchestratorAudience =
+        oidcProperties.getIamConfiguration(userIssuer).get().getAudience();
+    String tokenEndpoint = iamService.getWellKnown(restTemplate, userIssuer).getTokenEndpoint();
+
+    String newToken = iamService.getExchangedToken(restTemplate,
+        oauth2TokenService.getAccessToken(requestedWithToken),
+        Stream.of("openid", "profile", "email").collect(Collectors.toSet()),
+        Stream
+            .concat(requestedAudience != null ? Stream.of(requestedAudience) : Stream.empty(),
+                orchestratorAudience != null ? existingAudiences.stream() : Stream.empty())
+            .filter(Objects::nonNull).collect(Collectors.toSet()),
+        orchestratorProperties.getClientId(), orchestratorProperties.getClientSecret(),
+        tokenEndpoint);
+    oauth2TokenService.setAccessToken(requestedWithToken, newToken);
+  }
+
+  /**
+   * Resolve template for kubernetes.
+   *
+   * @param yamlTemplate input template
+   * @return resolved template
+   */
+  public static String resolveTemplate(String yamlTemplate) {
+    Yaml yaml = new Yaml();
+    Object rootObj = yaml.load(yamlTemplate);
+
+    if (!(rootObj instanceof Map)) {
+      throw new IllegalArgumentException(
+          "Template not valid");
+    }
+
+    Map<String, Object> root = (Map<String, Object>) rootObj;
+
+    // Extract inputs
+    Map<String, Object> inputs = new HashMap<>();
+    if (root.containsKey("inputs")) {
+      Map<String, Object> inputDefs = (Map<String, Object>) root.get("inputs");
+      for (Map.Entry<String, Object> entry : inputDefs.entrySet()) {
+        Object val = entry.getValue();
+        if (val instanceof Map && ((Map<String, Object>) val).containsKey("default")) {
+          inputs.put(entry.getKey(), ((Map<String, Object>) val).get("default"));
+        }
+      }
+    }
+
+    // Resolve inputs
+    Object resolvedRoot = resolve(root, inputs);
+
+    // Dump resolved template
+    DumperOptions options = new DumperOptions();
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+    options.setPrettyFlow(true);
+    Yaml dumper = new Yaml(options);
+
+    return dumper.dump(resolvedRoot);
+  }
+
+  // Recursive method to resolve get_input in a node
+  @SuppressWarnings("unchecked")
+  private static Object resolve(Object node, Map<String, Object> inputs) {
+    if (node instanceof Map) {
+      Map<String, Object> map = (Map<String, Object>) node;
+
+      // Caso singolo: { get_input: qualcosa }
+      if (map.size() == 1 && map.containsKey("get_input")) {
+        String key = String.valueOf(map.get("get_input"));
+        return inputs.getOrDefault(key, map);
+      }
+
+      Map<String, Object> resolved = new LinkedHashMap<>();
+      for (Map.Entry<String, Object> entry : map.entrySet()) {
+        resolved.put(entry.getKey(), resolve(entry.getValue(), inputs));
+      }
+      return resolved;
+
+    } else if (node instanceof List) {
+      List<Object> resolvedList = new ArrayList<>();
+      for (Object item : (List<?>) node) {
+        resolvedList.add(resolve(item, inputs));
+      }
+      return resolvedList;
+    }
+
+    return node;
+  }
 
   private void deleteExternalResources(RestTemplate restTemplate,
       Map<Boolean, Set<Resource>> resources, String userGroup, Boolean isForce, String accessToken)
@@ -260,9 +392,6 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     toscaService.contextualizeAndReplaceImages(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceFlavors(ar, computeService, DeploymentProvider.IM);
     toscaService.contextualizeAndReplaceVolumeTypes(ar, computeService, DeploymentProvider.IM);
-
-    List<CloudProviderEndpoint> cloudProviderEndpoints =
-        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
     if (toscaService.isHybridDeployment(ar)) {
       toscaService.setHybridDeployment(ar, computeService.getPublicNetworkName(),
@@ -530,7 +659,12 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     toscaService.setDeploymentClientIam(ar, iamTemplateOutput);
     toscaService.setDeploymentS3Buckets(ar, s3TemplateOutput);
 
-    String imCustomizedTemplate = toscaService.serialize(ar);
+    List<CloudProviderEndpoint> cloudProviderEndpoints =
+        deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+    String imCustomizedTemplate =
+        cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)
+            ? resolveTemplate(deployment.getTemplate())
+            : toscaService.serialize(ar);
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -551,6 +685,16 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       LOG.info("Submission of deployment request to the IM. {}", jsonString);
     } catch (JsonProcessingException e) {
       LOG.error(e.getMessage());
+    }
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      LOG.info(imCustomizedTemplate);
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
+        throw new RuntimeException(e.getMessage(), e);
+      }
     }
 
     // Deploy on IM
@@ -578,6 +722,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
     try {
 
@@ -619,6 +771,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     // Try to get the logs of the virtual infrastructure for debug purposes.
     try {
       Property contMsg = executeWithClientForResult(cloudProviderEndpoints, requestedWithToken,
@@ -640,6 +800,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
     // Try to get the logs of the virtual infrastructure.
     try {
@@ -690,6 +858,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     try {
       deployment.setOutputs(executeWithClientForResult(cloudProviderEndpoints, requestedWithToken,
           client -> client.getInfrastructureOutputs(deployment.getEndpoint())).getOutputs());
@@ -720,6 +896,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+        try {
+          exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+        } catch (RuntimeException e) {
+          throw new RuntimeException(e.getMessage(), e);
+        }
+      }
 
       try {
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client
@@ -759,6 +943,10 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     try {
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      }
       InfrastructureState infrastructureState = executeWithClientForResult(cloudProviderEndpoints,
           requestedWithToken, client -> client.getInfrastructureState(deployment.getEndpoint()));
       Set<String> exsistingVms = Optional.ofNullable(infrastructureState.getVmStates())
@@ -778,6 +966,8 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       vmsToRemove.addAll(exsistingVms); // remaining VMs that we didn't know of their existence
     } catch (ImClientException exception) {
       throw handleImClientException(exception);
+    } catch (RuntimeException e) {
+      throw new RuntimeException(e.getMessage(), e);
     }
 
     updateResources(deployment, deployment.getStatus());
@@ -941,6 +1131,15 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
       List<CloudProviderEndpoint> cloudProviderEndpoints =
           deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
 
+      if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+        try {
+          exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+        } catch (RuntimeException e) {
+          iamService.deleteAllClients(restTemplate, resources, deploymentMessage.isForce());
+          throw new RuntimeException(e.getMessage(), e);
+        }
+      }
+
       try {
         executeWithClient(cloudProviderEndpoints, requestedWithToken, client -> client
             .destroyInfrastructureAsync(deploymentEndpoint, deploymentMessage.isForce()));
@@ -983,6 +1182,15 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
     try {
       InfrastructureState infrastructureState = executeWithClientForResult(cloudProviderEndpoints,
           requestedWithToken, client -> client.getInfrastructureState(deploymentEndpoint));
@@ -1029,6 +1237,14 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
 
     List<CloudProviderEndpoint> cloudProviderEndpoints =
         deployment.getCloudProviderEndpoint().getAllCloudProviderEndpoint();
+
+    if (cloudProviderEndpoints.get(0).getIaasType().equals(IaaSType.KUBERNETES)) {
+      try {
+        exchangeTokenForKubernetes(requestedWithToken, cloudProviderEndpoints);
+      } catch (RuntimeException e) {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
 
     // for each URL get the tosca Node Name about the VM
     Multimap<String, String> vmMap = HashMultimap.create();

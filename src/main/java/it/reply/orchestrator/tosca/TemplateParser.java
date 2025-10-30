@@ -141,7 +141,7 @@ public class TemplateParser {
     velocityCtx.put("tosca_definitions_version",
         archiveRoot.getArchive().getToscaDefinitionsVersion());
     velocityCtx.put("template_description", archiveRoot.getArchive().getDescription());
-    velocityCtx.put("template_name", "template");
+    velocityCtx.put("template_name", archiveRoot.getArchive().getName());
     velocityCtx.put("template_version", "1.0.0-SNAPSHOT");
     velocityCtx.put("template_author", "orchestrator");
     velocityCtx.put("topology",

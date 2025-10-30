@@ -42,4 +42,8 @@ public class CprProperties {
   @NotNull
   @NonNull
   private String serviceVersion = "v1";
+
+  @NotNull
+  @NonNull
+  private boolean internalFallback = false;
 }
