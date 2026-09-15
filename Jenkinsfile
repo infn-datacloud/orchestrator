@@ -24,7 +24,6 @@ pipeline {
             }
             steps {
                 configFileProvider([configFile(fileId: 'maven-nexus-settings.xml', variable: 'MAVEN_SETTINGS')]) {
-                    sh 'mvn -s $MAVEN_SETTINGS editorconfig:format'
                     sh 'mvn -s $MAVEN_SETTINGS clean install'
                 }
             }
