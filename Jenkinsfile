@@ -17,7 +17,7 @@ pipeline {
             agent {
                 docker {
                     label 'jenkinsworker00'
-                    image 'maven:3.5.4-ibmjava-8'
+                    image 'maven:3.9.16-ibmjava-8'
                     args '--privileged'
                     reuseNode true
                 }
