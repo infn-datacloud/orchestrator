@@ -147,6 +147,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
   public static final String ISSUER = "issuer";
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
+  private static final String CLIENT_SECRET = "client_secret";
 
   private void deleteExternalResources(RestTemplate restTemplate,
       Map<Boolean, Set<Resource>> resources, String userGroup, Boolean isForce, String accessToken)
@@ -383,6 +384,7 @@ public class ImServiceImpl extends AbstractDeploymentProviderService {
         Map<String, String> resourceMetadata = new HashMap<>();
         resourceMetadata.put(ISSUER, issuerNode);
         resourceMetadata.put(CLIENT_ID, clientCreated.get(CLIENT_ID));
+        resourceMetadata.put(CLIENT_SECRET, clientCreated.get(CLIENT_SECRET));
         resourceMetadata.put("registration_access_token",
             clientCreated.get("registration_access_token"));
         resource.setMetadata(resourceMetadata);
