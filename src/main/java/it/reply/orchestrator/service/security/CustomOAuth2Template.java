@@ -17,9 +17,6 @@
 
 package it.reply.orchestrator.service.security;
 
-import it.reply.orchestrator.dto.security.AccessGrant;
-import it.reply.orchestrator.dto.security.TokenIntrospectionResponse;
-
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -40,7 +37,11 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import it.reply.orchestrator.dto.security.AccessGrant;
+import it.reply.orchestrator.dto.security.TokenIntrospectionResponse;
 
 public class CustomOAuth2Template {
 
@@ -138,7 +139,14 @@ public class CustomOAuth2Template {
               (clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret())
                   .getBytes(Charset.forName("UTF-8"))));
     }
-    return restTemplate.exchange(request.body(params), responseClass).getBody();
+    try {
+      return restTemplate.exchange(request.body(params), responseClass).getBody();
+    } catch (HttpClientErrorException ex) {
+      // Inspect this in the debugger:
+      String errorBody = ex.getResponseBodyAsString();
+      System.out.println("Error 400: " + errorBody);
+      throw ex;
+    }
   }
 
   protected AccessGrant postForAccessGrant(MultiValueMap<String, String> params,
