@@ -63,6 +63,7 @@ public class IamServiceImpl implements IamService {
   private static final String ORCHESTRATOR_SCOPES =
       "openid profile email offline_access iam:admin.write iam:admin.read";
   private static final String CLIENT_ID = "client_id";
+  private static final String CLIENT_SECRET = "client_secret";
   private static final String REGISTRATION_ACCESS_TOKEN = "registration_access_token";
   private static final String AUTHORIZATION = "Authorization";
   private static final String BEARER = "Bearer ";
@@ -246,12 +247,15 @@ public class IamServiceImpl implements IamService {
     String responseBody = responseEntity.getBody();
     String clientId = null;
     String registrationAccessToken = null;
+    String clientSecret = null;
     Map<String, String> clientCreated = new HashMap<>();
     try {
-      // Extract "CLIENT_ID", and "registration_access_token" from Json
+      // Extract "CLIENT_ID", and "registration_access_token", and "CLIENT_SECRET" from Json
       clientId = objectMapper.readTree(responseBody).get(CLIENT_ID).asText();
       registrationAccessToken =
-          objectMapper.readTree(responseBody).get(REGISTRATION_ACCESS_TOKEN).asText();
+          objectMapper.readTree(responseBody).	get(REGISTRATION_ACCESS_TOKEN).asText();
+      clientSecret =
+          objectMapper.readTree(responseBody).get(CLIENT_SECRET).asText();
     } catch (IOException e) {
       String errorMessage = String.format("No IAM client created. %s", e.getMessage());
       LOG.error(errorMessage);
@@ -265,9 +269,10 @@ public class IamServiceImpl implements IamService {
 
     clientCreated.put(CLIENT_ID, clientId);
     clientCreated.put(REGISTRATION_ACCESS_TOKEN, registrationAccessToken);
+    clientCreated.put(CLIENT_SECRET, clientSecret);
     LOG.debug(
-        "The client with client_id {} and registration_access_token {} has been "
-        + "successfully created", clientId, registrationAccessToken);
+        "The client with client_id {} has been "
+        + "successfully created", clientId);
     return clientCreated;
   }
 
