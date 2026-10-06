@@ -253,7 +253,7 @@ public class IamServiceImpl implements IamService {
       // Extract "CLIENT_ID", and "registration_access_token", and "CLIENT_SECRET" from Json
       clientId = objectMapper.readTree(responseBody).get(CLIENT_ID).asText();
       registrationAccessToken =
-          objectMapper.readTree(responseBody).	get(REGISTRATION_ACCESS_TOKEN).asText();
+          objectMapper.readTree(responseBody).get(REGISTRATION_ACCESS_TOKEN).asText();
       clientSecret =
           objectMapper.readTree(responseBody).get(CLIENT_SECRET).asText();
     } catch (IOException e) {

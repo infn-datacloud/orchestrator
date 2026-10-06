@@ -115,6 +115,7 @@ public class ToscaServiceImpl implements ToscaService {
   public static final String SCOPES = "scopes";
   public static final String OWNER = "owner";
   private static final String CLIENT_ID = "client_id";
+  private static final String CLIENT_SECRET = "client_secret";
   private static final String REGISTRATION_ACCESS_TOKEN = "registration_access_token";
 
   private static final String S3_TOSCA_NODE_TYPE = "tosca.nodes.indigo.S3Bucket";
@@ -1265,6 +1266,8 @@ public class ToscaServiceImpl implements ToscaService {
           new ScalarPropertyValue(iamTemplateOutput.get(iamNodeName).get(ISSUER)));
       properties.put(CLIENT_ID,
           new ScalarPropertyValue(iamTemplateOutput.get(iamNodeName).get(CLIENT_ID)));
+      properties.put(CLIENT_SECRET,
+          new ScalarPropertyValue(iamTemplateOutput.get(iamNodeName).get(CLIENT_SECRET)));
       properties.put(REGISTRATION_ACCESS_TOKEN, new ScalarPropertyValue(
           iamTemplateOutput.get(iamNodeName).get(REGISTRATION_ACCESS_TOKEN)));
     });
