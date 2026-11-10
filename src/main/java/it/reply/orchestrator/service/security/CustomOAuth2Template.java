@@ -28,6 +28,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.config.ServerConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -38,9 +40,12 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 public class CustomOAuth2Template {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CustomOAuth2Template.class);
 
   private static final String TOKEN_TYPE_ACCESS_TOKEN =
       "urn:ietf:params:oauth:token-type:access_token";
@@ -138,7 +143,35 @@ public class CustomOAuth2Template {
                   (clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret())
                       .getBytes(Charset.forName("UTF-8"))));
     }
-    return restTemplate.exchange(request.body(params), responseClass).getBody();
+    try {
+      return restTemplate.exchange(request.body(params), responseClass).getBody();
+    } catch (HttpStatusCodeException ex) {
+      String responseBody = ex.getResponseBodyAsString();
+      String[] sensitiveValues = {
+        clientConfiguration.getClientSecret(),
+        params.getFirst("client_secret"),
+        params.getFirst("refresh_token"),
+        params.getFirst("subject_token"),
+        params.getFirst("token")
+      };
+      for (String value : sensitiveValues) {
+        if (StringUtils.hasText(value)) {
+          responseBody = responseBody.replace(value, "[REDACTED]");
+        }
+      }
+      responseBody = responseBody.replace('\r', ' ').replace('\n', ' ');
+      LOG.error(
+          "OAuth2 endpoint request failed: url={}, clientId={}, "
+              + "grantType={}, scope={}, audience={}, status={}, responseBody={}",
+          url,
+          clientConfiguration.getClientId(),
+          params.getFirst("grant_type"),
+          params.getFirst("scope"),
+          params.getFirst("audience"),
+          ex.getStatusCode().value(),
+          responseBody);
+      throw ex;
+    }
   }
 
   protected AccessGrant postForAccessGrant(
