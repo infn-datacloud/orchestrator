@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.commands;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
@@ -31,22 +30,15 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @JsonTest
 public abstract class BaseJavaDelegateTest<T extends BaseJavaDelegate> {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @InjectMocks
-  @Spy
-  protected T command;
+  @InjectMocks @Spy protected T command;
 
-  @Spy
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Spy @Autowired private ObjectMapper objectMapper;
 
   public BaseJavaDelegateTest(T command) {
     this.command = command;
   }
-
 }

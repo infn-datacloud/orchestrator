@@ -30,21 +30,22 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RucioEventHandlerService {
 
-  @Autowired
-  private RuntimeService wfService;
+  @Autowired private RuntimeService wfService;
 
   /**
    * Handle a Rucio Event.
+   *
    * @param rucioEvent the event
    */
   public void handleEvent(Event<?> rucioEvent) {
-    try (MdcUtils.MdcCloseable requestId = MdcUtils
-        .setRequestIdCloseable(UUID.randomUUID().toString())) {
+    try (MdcUtils.MdcCloseable requestId =
+        MdcUtils.setRequestIdCloseable(UUID.randomUUID().toString())) {
       if (rucioEvent instanceof RuleOkEvent) {
         LOG.debug(rucioEvent.toString());
         RuleOkEvent ruleOkEvent = (RuleOkEvent) rucioEvent;
-        String wfEventName = String
-            .format("%s-%s", ruleOkEvent.getEventType(), ruleOkEvent.getPayload().getRuleId());
+        String wfEventName =
+            String.format(
+                "%s-%s", ruleOkEvent.getEventType(), ruleOkEvent.getPayload().getRuleId());
         wfService.signalEventReceivedAsync(wfEventName);
       }
     }

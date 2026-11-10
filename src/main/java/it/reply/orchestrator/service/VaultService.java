@@ -34,8 +34,7 @@ public interface VaultService {
 
   public VaultResponse writeSecret(ClientAuthentication token, String path, Object secret);
 
-  public VaultResponse writeSecret(URI uri, ClientAuthentication token, String path,
-      Object secret);
+  public VaultResponse writeSecret(URI uri, ClientAuthentication token, String path, Object secret);
 
   public <T> T readSecret(ClientAuthentication token, String path, Class<T> type);
 
@@ -60,5 +59,4 @@ public interface VaultService {
   public TokenAuthenticationExtended retrieveToken(OidcTokenId oidcTokenId);
 
   public TokenAuthenticationExtended retrieveToken(URI uri, OidcTokenId oidcTokenId);
-
 }

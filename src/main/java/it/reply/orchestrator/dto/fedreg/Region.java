@@ -47,5 +47,4 @@ public class Region {
   @JsonProperty("identity_services")
   @Builder.Default
   private List<Service> identityServices = new ArrayList<>();
-
 }

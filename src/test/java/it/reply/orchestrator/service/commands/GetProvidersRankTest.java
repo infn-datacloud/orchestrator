@@ -28,16 +28,13 @@ import it.reply.orchestrator.dto.ranker.RankedCloudService;
 import it.reply.orchestrator.service.CloudProviderRankerService;
 import it.reply.orchestrator.service.CloudProviderRankerServiceTest;
 import it.reply.orchestrator.utils.JsonUtils;
-
 import java.util.List;
-
 import org.junit.Test;
 import org.mockito.Mock;
 
 public class GetProvidersRankTest extends BaseRankCloudProvidersCommandTest<GetProvidersRank> {
 
-  @Mock
-  private CloudProviderRankerService cloudProviderRankerService;
+  @Mock private CloudProviderRankerService cloudProviderRankerService;
 
   public GetProvidersRankTest() {
     super(new GetProvidersRank());
@@ -47,8 +44,8 @@ public class GetProvidersRankTest extends BaseRankCloudProvidersCommandTest<GetP
   public void doexecuteSuccesfully() throws Exception {
     List<RankedCloudService> providers =
         CloudProviderRankerServiceTest.generateMockedRankedServices();
-    when(cloudProviderRankerService
-        .getProviderServicesRanking(any(CloudProviderRankerRequest.class)))
+    when(cloudProviderRankerService.getProviderServicesRanking(
+            any(CloudProviderRankerRequest.class)))
         .thenReturn(providers);
 
     String serializedRankCloudProvidersMessage =
@@ -56,10 +53,7 @@ public class GetProvidersRankTest extends BaseRankCloudProvidersCommandTest<GetP
     RankCloudProvidersMessage rankCloudProvidersMessage =
         JsonUtils.deserialize(serializedRankCloudProvidersMessage, RankCloudProvidersMessage.class);
 
-    assertThatCode(() -> execute(rankCloudProvidersMessage))
-        .doesNotThrowAnyException();
-    assertThat(rankCloudProvidersMessage.getRankedCloudServices())
-        .isEqualTo(providers);
+    assertThatCode(() -> execute(rankCloudProvidersMessage)).doesNotThrowAnyException();
+    assertThat(rankCloudProvidersMessage.getRankedCloudServices()).isEqualTo(providers);
   }
-
 }

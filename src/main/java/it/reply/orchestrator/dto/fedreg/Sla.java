@@ -59,5 +59,4 @@ public class Sla {
 
   @JsonProperty("user_group")
   private UserGroup userGroup;
-
 }

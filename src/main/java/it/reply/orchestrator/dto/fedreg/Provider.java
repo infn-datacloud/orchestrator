@@ -64,5 +64,4 @@ public class Provider {
   @JsonProperty("regions")
   @Builder.Default
   private List<Region> regions = new ArrayList<>();
-
 }

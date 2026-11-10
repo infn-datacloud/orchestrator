@@ -47,5 +47,4 @@ public class WebAppInitializer {
   public CustomRequestLoggingFilter customRequestLoggingFilter() {
     return new CustomRequestLoggingFilter();
   }
-
 }

@@ -21,10 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.jackson.JsonComponent;
 
@@ -57,16 +55,14 @@ public class JsonUtils {
    * Deserialize an object from a String.
    *
    * @param <T> The type of object
-   * @param serializedObject
-   *          the object serialized as String.
-   * @param typeReference
-   *          the TypeReference of the object
+   * @param serializedObject the object serialized as String.
+   * @param typeReference the TypeReference of the object
    * @return the deserialized object
-   * @throws JsonProcessingException
-   *           in case of deserialization exceptions
+   * @throws JsonProcessingException in case of deserialization exceptions
    */
-  public static <T> @NonNull T deserialize(@NonNull String serializedObject,
-      TypeReference<T> typeReference) throws JsonProcessingException {
+  public static <T> @NonNull T deserialize(
+      @NonNull String serializedObject, TypeReference<T> typeReference)
+      throws JsonProcessingException {
     try {
       return getObjectMapper().readValue(serializedObject, typeReference);
     } catch (IOException e) {
@@ -79,16 +75,13 @@ public class JsonUtils {
    * Deserialize an object from a String.
    *
    * @param <T> The type of object
-   * @param serializedObject
-   *          the object serialized as String.
-   * @param typeReference
-   *          the Class of the object
+   * @param serializedObject the object serialized as String.
+   * @param typeReference the Class of the object
    * @return the deserialized object
-   * @throws JsonProcessingException
-   *           in case of deserialization exceptions
+   * @throws JsonProcessingException in case of deserialization exceptions
    */
-  public static <T> @NonNull T deserialize(@NonNull String serializedObject,
-      Class<T> typeReference) throws JsonProcessingException {
+  public static <T> @NonNull T deserialize(@NonNull String serializedObject, Class<T> typeReference)
+      throws JsonProcessingException {
     try {
       return getObjectMapper().readValue(serializedObject, typeReference);
     } catch (IOException e) {

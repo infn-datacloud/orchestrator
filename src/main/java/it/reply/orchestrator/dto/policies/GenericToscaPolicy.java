@@ -20,15 +20,12 @@ package it.reply.orchestrator.dto.policies;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Getter
@@ -38,13 +35,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @EqualsAndHashCode
 public class GenericToscaPolicy implements ToscaPolicy {
 
-  @NonNull
-  @NotNull
-  private String type;
+  @NonNull @NotNull private String type;
 
-  @NonNull
-  @NotNull
-  private Set<String> targets = new HashSet<>();
+  @NonNull @NotNull private Set<String> targets = new HashSet<>();
 
   @Deprecated
   protected GenericToscaPolicy() {

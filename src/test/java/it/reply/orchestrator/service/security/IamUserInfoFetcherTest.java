@@ -17,23 +17,20 @@
 
 package it.reply.orchestrator.service.security;
 
+import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
-import com.google.gson.JsonObject;
-
 public class IamUserInfoFetcherTest {
 
-  @InjectMocks
-  CustomUserInfoFetcher customUserInfoFetcher = new CustomUserInfoFetcher();
+  @InjectMocks CustomUserInfoFetcher customUserInfoFetcher = new CustomUserInfoFetcher();
 
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
   }
-
 
   @Test
   public void fromJson() {

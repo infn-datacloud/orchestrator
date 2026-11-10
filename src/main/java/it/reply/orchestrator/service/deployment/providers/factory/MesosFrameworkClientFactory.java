@@ -19,16 +19,12 @@ package it.reply.orchestrator.service.deployment.providers.factory;
 
 import feign.RequestInterceptor;
 import feign.auth.BasicAuthRequestInterceptor;
-
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.dto.cmdb.MesosFrameworkService;
 import it.reply.orchestrator.dto.security.GenericServiceCredential;
 import it.reply.orchestrator.service.deployment.providers.CredentialProviderService;
-
 import java.util.Objects;
-
 import lombok.AllArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -38,8 +34,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public abstract class MesosFrameworkClientFactory<V extends MesosFrameworkService, T> {
 
-  @Autowired
-  private CredentialProviderService credProvServ;
+  @Autowired private CredentialProviderService credProvServ;
 
   /**
    * Generate a new Mesos framework client.
@@ -52,14 +47,15 @@ public abstract class MesosFrameworkClientFactory<V extends MesosFrameworkServic
     final RequestInterceptor requestInterceptor;
     Objects.requireNonNull(accessToken, "Access Token must not be null");
     if (cloudProviderEndpoint.isIamEnabled()) {
-      requestInterceptor = requestTemplate ->
-        requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+      requestInterceptor =
+          requestTemplate ->
+              requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
     } else {
-      GenericServiceCredential imCred = credProvServ.credentialProvider(
-          cloudProviderEndpoint.getCpComputeServiceId(),
-          accessToken,
-          GenericServiceCredential.class
-          );
+      GenericServiceCredential imCred =
+          credProvServ.credentialProvider(
+              cloudProviderEndpoint.getCpComputeServiceId(),
+              accessToken,
+              GenericServiceCredential.class);
       requestInterceptor =
           new BasicAuthRequestInterceptor(imCred.getUsername(), imCred.getPassword());
     }
@@ -67,5 +63,4 @@ public abstract class MesosFrameworkClientFactory<V extends MesosFrameworkServic
   }
 
   public abstract T build(String endpoint, RequestInterceptor authInterceptor);
-
 }

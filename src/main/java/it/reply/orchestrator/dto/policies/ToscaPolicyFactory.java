@@ -29,19 +29,18 @@ public class ToscaPolicyFactory {
   /**
    * Generate a ToscaPolicy from a {@link PolicyTemplate PolicyTemplate}.
    *
-   * @param policyTemplate
-   *     the TOSCA placement policy
+   * @param policyTemplate the TOSCA placement policy
    * @return the new ToscaPolicy
    */
   public static ToscaPolicy fromToscaType(PolicyTemplate policyTemplate) {
 
     if (Types.SLA_PLACEMENT.equals(policyTemplate.getType())) {
-      String slaIdProperty = ToscaUtils
-          .extractScalar(policyTemplate.getProperties(), Properties.PLACEMENT_ID)
-          .orElse(null);
-      String slaRegionProperty = ToscaUtils
-          .extractScalar(policyTemplate.getProperties(), Properties.SLA_REGION)
-          .orElse(null);
+      String slaIdProperty =
+          ToscaUtils.extractScalar(policyTemplate.getProperties(), Properties.PLACEMENT_ID)
+              .orElse(null);
+      String slaRegionProperty =
+          ToscaUtils.extractScalar(policyTemplate.getProperties(), Properties.SLA_REGION)
+              .orElse(null);
       return new SlaPlacementPolicy(policyTemplate.getTargets(), slaIdProperty, slaRegionProperty);
     } else {
       return new GenericToscaPolicy(policyTemplate.getType(), policyTemplate.getTargets());

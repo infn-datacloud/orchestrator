@@ -30,14 +30,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GenericEvent extends Event<GenericEvent.GenericEventPayload> {
 
-  public GenericEvent(@NonNull String eventType, @NonNull String createdAt,
-      @NonNull GenericEventPayload payload) {
+  public GenericEvent(
+      @NonNull String eventType, @NonNull String createdAt, @NonNull GenericEventPayload payload) {
     super(eventType, createdAt, payload);
   }
 
   @Data
   @NoArgsConstructor(access = AccessLevel.PROTECTED)
-  public static class GenericEventPayload implements EventPayload {
-
-  }
+  public static class GenericEventPayload implements EventPayload {}
 }

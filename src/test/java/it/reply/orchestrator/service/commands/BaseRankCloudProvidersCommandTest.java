@@ -20,11 +20,9 @@ package it.reply.orchestrator.service.commands;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.utils.JsonUtils;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.junit.Before;
 import org.mockito.Mock;
@@ -38,11 +36,9 @@ public abstract class BaseRankCloudProvidersCommandTest<T extends BaseRankCloudP
 
   protected MockRestServiceServer mockServer;
 
-  @Mock
-  protected RestTemplateBuilder restTemplateBuilder;
+  @Mock protected RestTemplateBuilder restTemplateBuilder;
 
-  @Spy
-  protected RestTemplate restTemplate;
+  @Spy protected RestTemplate restTemplate;
 
   public BaseRankCloudProvidersCommandTest(T command) {
     super(command);
@@ -50,17 +46,17 @@ public abstract class BaseRankCloudProvidersCommandTest<T extends BaseRankCloudP
 
   @Before
   public void baseSetup() {
-    when(restTemplateBuilder.build())
-        .thenReturn(restTemplate);
+    when(restTemplateBuilder.build()).thenReturn(restTemplate);
     mockServer = MockRestServiceServer.createServer(restTemplate);
   }
 
   protected ExecutionEntity execute(RankCloudProvidersMessage rankCloudProvidersMessage) {
 
-    ExecutionEntity execution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
-            rankCloudProvidersMessage)
-        .build();
+    ExecutionEntity execution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(
+                WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE, rankCloudProvidersMessage)
+            .build();
 
     command.execute(execution);
     mockServer.verify();
@@ -72,5 +68,4 @@ public abstract class BaseRankCloudProvidersCommandTest<T extends BaseRankCloudP
     return execute(
         JsonUtils.deserialize(rankCloudProvidersMessage, RankCloudProvidersMessage.class));
   }
-
 }

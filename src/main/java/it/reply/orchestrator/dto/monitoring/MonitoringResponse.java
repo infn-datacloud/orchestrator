@@ -18,13 +18,11 @@
 package it.reply.orchestrator.dto.monitoring;
 
 import it.reply.monitoringpillar.domain.dsl.monitoring.pillar.wrapper.paas.MonitoringWrappedResponsePaas;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
@@ -33,7 +31,5 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MonitoringResponse {
 
-  @Nullable
-  private MonitoringWrappedResponsePaas result;
-
+  @Nullable private MonitoringWrappedResponsePaas result;
 }

@@ -62,40 +62,25 @@ public class SlaPlacementPolicy extends GenericToscaPolicy {
   }
 
   protected SlaPlacementPolicy(
-      @NonNull String type,
-      @NonNull Set<String> targets,
-      @NonNull String slaId
-  ) {
+      @NonNull String type, @NonNull Set<String> targets, @NonNull String slaId) {
     super(type, targets);
     this.slaId = Objects.requireNonNull(slaId);
     servicesId = new ArrayList<>();
   }
 
   protected SlaPlacementPolicy(
-      @NonNull String type,
-      @NonNull Set<String> targets,
-      @NonNull String slaId,
-      String slaRegion
-  ) {
+      @NonNull String type, @NonNull Set<String> targets, @NonNull String slaId, String slaRegion) {
     super(type, targets);
     this.slaId = Objects.requireNonNull(slaId);
     servicesId = new ArrayList<>();
     this.slaRegion = slaRegion;
   }
 
-  public SlaPlacementPolicy(
-      @NonNull Set<String> targets,
-      @NonNull String slaId
-  ) {
+  public SlaPlacementPolicy(@NonNull Set<String> targets, @NonNull String slaId) {
     this(Types.SLA_PLACEMENT, targets, slaId);
   }
 
-  public SlaPlacementPolicy(
-      @NonNull Set<String> targets,
-      @NonNull String slaId,
-      String slaRegion
-  ) {
+  public SlaPlacementPolicy(@NonNull Set<String> targets, @NonNull String slaId, String slaRegion) {
     this(Types.SLA_PLACEMENT, targets, slaId, slaRegion);
   }
-
 }

@@ -18,12 +18,10 @@
 package it.reply.orchestrator.service.deployment.providers;
 
 import alien4cloud.tosca.model.ArchiveRoot;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
 import com.mysql.jdbc.StringUtils;
-
 import it.infn.ba.deep.qcg.client.Qcg;
 import it.infn.ba.deep.qcg.client.model.Job;
 import it.infn.ba.deep.qcg.client.model.JobDescription;
@@ -63,7 +61,6 @@ import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.ToscaConstants.Nodes;
 import it.reply.orchestrator.utils.ToscaUtils;
 import it.reply.orchestrator.utils.WorkflowConstants.ErrorCode;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,15 +70,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
 import org.alien4cloud.tosca.model.templates.RelationshipTemplate;
 import org.alien4cloud.tosca.model.templates.Topology;
@@ -97,34 +91,34 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class QcgServiceImpl extends AbstractDeploymentProviderService {
 
-  @Autowired
-  private ToscaService toscaService;
+  @Autowired private ToscaService toscaService;
 
-  @Autowired
-  private ResourceRepository resourceRepository;
+  @Autowired private ResourceRepository resourceRepository;
 
-  @Autowired
-  private QcgClientFactory qcgClientFactory;
+  @Autowired private QcgClientFactory qcgClientFactory;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
-  @Autowired
-  private IndigoInputsPreProcessorService indigoInputsPreProcessorService;
+  @Autowired private IndigoInputsPreProcessorService indigoInputsPreProcessorService;
 
-  protected <R> R executeWithClientForResult(CloudProviderEndpoint cloudProviderEndpoint,
-      OidcTokenId requestedWithToken, ThrowingFunction<Qcg, R, QcgException> function)
-          throws QcgException {
-    return oauth2TokenService.executeWithClientForResult(requestedWithToken,
+  protected <R> R executeWithClientForResult(
+      CloudProviderEndpoint cloudProviderEndpoint,
+      OidcTokenId requestedWithToken,
+      ThrowingFunction<Qcg, R, QcgException> function)
+      throws QcgException {
+    return oauth2TokenService.executeWithClientForResult(
+        requestedWithToken,
         token -> function.apply(qcgClientFactory.build(cloudProviderEndpoint, token)),
         ex -> ex instanceof QcgException && ((QcgException) ex).getStatus() == 401);
   }
 
-  protected void executeWithClient(CloudProviderEndpoint cloudProviderEndpoint,
+  protected void executeWithClient(
+      CloudProviderEndpoint cloudProviderEndpoint,
       OidcTokenId requestedWithToken,
-      ThrowingConsumer<Qcg, QcgException> consumer) throws QcgException {
-    executeWithClientForResult(cloudProviderEndpoint, requestedWithToken,
-        client -> consumer.asFunction().apply(client));
+      ThrowingConsumer<Qcg, QcgException> consumer)
+      throws QcgException {
+    executeWithClientForResult(
+        cloudProviderEndpoint, requestedWithToken, client -> consumer.asFunction().apply(client));
   }
 
   @Override
@@ -150,7 +144,9 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
 
     if (topologyIterator.hasNext()) {
       DeepJob currentJob = topologyIterator.next();
-      LOG.debug("Creating job {} on Qcg ({}/{})", currentJob.getQcgJob().getId(),
+      LOG.debug(
+          "Creating job {} on Qcg ({}/{})",
+          currentJob.getQcgJob().getId(),
           topologyIterator.currentIndex() + 1,
           topologyIterator.getSize());
       final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
@@ -163,8 +159,8 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
         throw new DeploymentException("Failed to create Qcg job", exception);
       }
       deployment.setEndpoint(currentJob.getQcgJob().getId());
-      updateResource(deployment, currentJob.getToscaNodeName(),
-          currentJob.getQcgJob(), NodeStates.CREATED);
+      updateResource(
+          deployment, currentJob.getToscaNodeName(), currentJob.getQcgJob(), NodeStates.CREATED);
     }
     boolean noMoreJob = !topologyIterator.hasNext();
 
@@ -175,28 +171,28 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
 
     // No error occurred
     return noMoreJob;
-
   }
 
   /**
    * Creates a Job on Qcg.
    *
-   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg
-   *                              instance
-   * @param requestedWithToken    the token ID of the request
-   * @param job                   the DeepJob to be created
-   *
+   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg instance
+   * @param requestedWithToken the token ID of the request
+   * @param job the DeepJob to be created
    * @return The Job object
    */
-  protected Job createJobOnQcg(CloudProviderEndpoint cloudProviderEndpoint,
-      OidcTokenId requestedWithToken, DeepJob job) {
+  protected Job createJobOnQcg(
+      CloudProviderEndpoint cloudProviderEndpoint, OidcTokenId requestedWithToken, DeepJob job) {
     // Create jobs based on the topological order
     try {
-      LOG.debug("Creating scheduled Qcg job\n{}",
-          ModelUtils.toString(job.getQcgJob().getDescription()));
+      LOG.debug(
+          "Creating scheduled Qcg job\n{}", ModelUtils.toString(job.getQcgJob().getDescription()));
 
-      Job created = executeWithClientForResult(cloudProviderEndpoint, requestedWithToken,
-          client -> client.createJob(job.getQcgJob().getDescription()));
+      Job created =
+          executeWithClientForResult(
+              cloudProviderEndpoint,
+              requestedWithToken,
+              client -> client.createJob(job.getQcgJob().getDescription()));
       return created;
     } catch (QcgException exception) { // Qcg job launch error
       throw new DeploymentException("Failed to launch job on Qcg", exception);
@@ -219,25 +215,32 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
 
     if (topologyIterator.hasCurrent()) {
       DeepJob currentJob = topologyIterator.current();
-      LOG.debug("Polling job {} on Qcg ({}/{})", currentJob.getQcgJob().getId(),
-          topologyIterator.currentIndex() + 1, topologyIterator.getSize());
+      LOG.debug(
+          "Polling job {} on Qcg ({}/{})",
+          currentJob.getQcgJob().getId(),
+          topologyIterator.currentIndex() + 1,
+          topologyIterator.getSize());
       final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
       CloudProviderEndpoint cloudProviderEndpoint = deployment.getCloudProviderEndpoint();
-      Job updatedJob = findJobOnQcg(cloudProviderEndpoint, requestedWithToken,
-          currentJob.getQcgJob().getId())
-          .orElseThrow(() -> new DeploymentException("Job " + currentJob.getQcgJob().getId()
-              + " not found on " + cloudProviderEndpoint.getCpComputeServiceId()));
+      Job updatedJob =
+          findJobOnQcg(cloudProviderEndpoint, requestedWithToken, currentJob.getQcgJob().getId())
+              .orElseThrow(
+                  () ->
+                      new DeploymentException(
+                          "Job "
+                              + currentJob.getQcgJob().getId()
+                              + " not found on "
+                              + cloudProviderEndpoint.getCpComputeServiceId()));
       boolean jobIsCompleted = checkJobState(updatedJob);
       if (!jobIsCompleted) {
         // Job still in progress
         // Wait before retrying to poll on the same node
         deploymentMessage.setSkipPollInterval(false);
-        updateResource(deployment, currentJob.getToscaNodeName(),
-            updatedJob, NodeStates.CONFIGURING);
+        updateResource(
+            deployment, currentJob.getToscaNodeName(), updatedJob, NodeStates.CONFIGURING);
         return false;
       } else {
-        updateResource(deployment, currentJob.getToscaNodeName(),
-            updatedJob, NodeStates.STARTED);
+        updateResource(deployment, currentJob.getToscaNodeName(), updatedJob, NodeStates.STARTED);
       }
     }
     boolean noMoreJob = !topologyIterator.hasNext();
@@ -253,7 +256,7 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
   }
 
   private void writeJobToResource(Resource resource, Job job) {
-    Map<String,String> resourceMetadata = resource.getMetadata();
+    Map<String, String> resourceMetadata = resource.getMetadata();
     if (resourceMetadata == null) {
       resourceMetadata = new HashMap<>();
       resource.setMetadata(resourceMetadata);
@@ -261,16 +264,14 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     Job oldJob = null;
     if (resourceMetadata.containsKey("Job")) {
       try {
-        oldJob = new ObjectMapper().readValue(resourceMetadata.get("Job"),
-            Job.class);
+        oldJob = new ObjectMapper().readValue(resourceMetadata.get("Job"), Job.class);
       } catch (IOException e) {
         throw new DeploymentException("Error deserializing Job", e);
       }
     }
     if (oldJob == null || !job.equals(oldJob)) {
       try {
-        resourceMetadata.put("Job",
-            new ObjectMapper().writeValueAsString(job));
+        resourceMetadata.put("Job", new ObjectMapper().writeValueAsString(job));
       } catch (IOException e) {
         throw new DeploymentException("Error serializing Job", e);
       }
@@ -286,7 +287,6 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
    * Gets the Job status.
    *
    * @param job the {@link Job}
-   *
    * @return status flag
    */
   protected boolean checkJobState(Job job) {
@@ -319,33 +319,33 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     }
   }
 
-  private void updateResource(Deployment deployment, String toscaNodeName,
-      Job job, NodeStates state) {
+  private void updateResource(
+      Deployment deployment, String toscaNodeName, Job job, NodeStates state) {
 
-    resourceRepository.findByToscaNodeNameAndDeployment_id(toscaNodeName,
-        deployment.getId())
-        .forEach(resource -> {
-          resource.setState(state);
-          resource.setIaasId(job.getId());
-          writeJobToResource(resource, job);
-        });
+    resourceRepository
+        .findByToscaNodeNameAndDeployment_id(toscaNodeName, deployment.getId())
+        .forEach(
+            resource -> {
+              resource.setState(state);
+              resource.setIaasId(job.getId());
+              writeJobToResource(resource, job);
+            });
   }
 
   /**
    * Gets the Job status.
    *
-   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg
-   *                              instance
-   * @param requestedWithToken    the token ID of the request
-   * @param jobId                 the ID of the Qcg job
-   *
+   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg instance
+   * @param requestedWithToken the token ID of the request
+   * @param jobId the ID of the Qcg job
    * @return the optional {@link Job}.
    */
-  protected Optional<Job> findJobOnQcg(CloudProviderEndpoint cloudProviderEndpoint,
-      OidcTokenId requestedWithToken, String jobId) {
+  protected Optional<Job> findJobOnQcg(
+      CloudProviderEndpoint cloudProviderEndpoint, OidcTokenId requestedWithToken, String jobId) {
     try {
-      Job job = executeWithClientForResult(cloudProviderEndpoint, requestedWithToken,
-          client -> client.getJob(jobId));
+      Job job =
+          executeWithClientForResult(
+              cloudProviderEndpoint, requestedWithToken, client -> client.getJob(jobId));
       return Optional.ofNullable(job);
     } catch (QcgException ex) {
       throw new DeploymentException("Unable to retrieve job " + jobId + " status on Qcg", ex);
@@ -370,9 +370,10 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
 
   @Override
   public void doProviderTimeout(DeploymentMessage deploymentMessage) {
-    throw new BusinessWorkflowException(ErrorCode.CLOUD_PROVIDER_ERROR,
-      "Error executing request to Qcg service",
-      new DeploymentException("Qcg service timeout during deployment"));
+    throw new BusinessWorkflowException(
+        ErrorCode.CLOUD_PROVIDER_ERROR,
+        "Error executing request to Qcg service",
+        new DeploymentException("Qcg service timeout during deployment"));
   }
 
   @Data
@@ -380,35 +381,29 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
   @RequiredArgsConstructor
   public static class DeepJob {
 
-    @NonNull
-    @NotNull
-    private Job qcgJob;
+    @NonNull @NotNull private Job qcgJob;
 
-    @NonNull
-    @NotNull
-    private String toscaNodeName;
-
+    @NonNull @NotNull private String toscaNodeName;
   }
 
   /**
-   * Creates the Job graph based on the given {@link Deployment} (the
-   * TOSCA template is parsed).
+   * Creates the Job graph based on the given {@link Deployment} (the TOSCA template is parsed).
    *
    * @param deploymentMessage the deployment message.
    * @param deployment the input deployment.
-   *
    * @return the job graph.
    */
-  protected QcgJobsOrderedIterator getJobsTopologicalOrder(DeploymentMessage deploymentMessage,
-      Deployment deployment) {
+  protected QcgJobsOrderedIterator getJobsTopologicalOrder(
+      DeploymentMessage deploymentMessage, Deployment deployment) {
     LOG.debug("Generating job graph");
     Map<String, OneData> odParameters = deploymentMessage.getOneDataParameters();
 
     ArchiveRoot ar = prepareTemplate(deployment, odParameters);
 
-    Map<String, NodeTemplate> nodes = Optional.ofNullable(ar.getTopology())
-        .map(Topology::getNodeTemplates)
-        .orElseGet(HashMap::new);
+    Map<String, NodeTemplate> nodes =
+        Optional.ofNullable(ar.getTopology())
+            .map(Topology::getNodeTemplates)
+            .orElseGet(HashMap::new);
 
     // don't check for cycles, already validated at web-service time
     DirectedMultigraph<NodeTemplate, RelationshipTemplate> graph =
@@ -417,9 +412,10 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     TopologicalOrderIterator<NodeTemplate, RelationshipTemplate> orderIterator =
         new TopologicalOrderIterator<>(graph);
 
-    List<NodeTemplate> orderedQcgJobs = CommonUtils.iteratorToStream(orderIterator)
-        .filter(node -> toscaService.isOfToscaType(node, ToscaConstants.Nodes.Types.QCG))
-        .collect(Collectors.toList());
+    List<NodeTemplate> orderedQcgJobs =
+        CommonUtils.iteratorToStream(orderIterator)
+            .filter(node -> toscaService.isOfToscaType(node, ToscaConstants.Nodes.Types.QCG))
+            .collect(Collectors.toList());
 
     List<DeepJob> deepJobs = new ArrayList<>();
 
@@ -437,21 +433,22 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
    *
    * @param graph the input nodegraph.
    * @param taskNode the input tasknode.
-   *
    * @return the Job.
    */
-  protected Job buildJob(DirectedMultigraph<NodeTemplate, RelationshipTemplate> graph,
-      NodeTemplate taskNode) {
+  protected Job buildJob(
+      DirectedMultigraph<NodeTemplate, RelationshipTemplate> graph, NodeTemplate taskNode) {
 
     JobDescriptionExecution execution = new JobDescriptionExecution();
 
     // property: executable
-    ToscaUtils.extractScalar(taskNode.getProperties(), "executable").map(String::trim)
+    ToscaUtils.extractScalar(taskNode.getProperties(), "executable")
+        .map(String::trim)
         .ifPresent(execution::setExecutable);
 
     if ("".equals(execution.getExecutable())) { // it must be either null or not empty
       throw new ToscaException(
-          String.format("<executable> property of node <%s> must not be an empty string",
+          String.format(
+              "<executable> property of node <%s> must not be an empty string",
               taskNode.getName()));
     }
 
@@ -503,23 +500,29 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     JobDescriptionResourcesComponent component = new JobDescriptionResourcesComponent();
 
     // property: total_cores
-    ToscaUtils.extractScalar(taskNode.getProperties(), "total_cores",
-        IntegerType.class).map(Ints::saturatedCast).ifPresent(component::setTotal_cores);
+    ToscaUtils.extractScalar(taskNode.getProperties(), "total_cores", IntegerType.class)
+        .map(Ints::saturatedCast)
+        .ifPresent(component::setTotal_cores);
     // property: total_nodes
-    ToscaUtils.extractScalar(taskNode.getProperties(), "total_nodes",
-        IntegerType.class).map(Ints::saturatedCast).ifPresent(component::setTotal_nodes);
+    ToscaUtils.extractScalar(taskNode.getProperties(), "total_nodes", IntegerType.class)
+        .map(Ints::saturatedCast)
+        .ifPresent(component::setTotal_nodes);
     // property: cores_per_node
-    ToscaUtils.extractScalar(taskNode.getProperties(), "cores_per_node",
-        IntegerType.class).map(Ints::saturatedCast).ifPresent(component::setCores_per_node);
+    ToscaUtils.extractScalar(taskNode.getProperties(), "cores_per_node", IntegerType.class)
+        .map(Ints::saturatedCast)
+        .ifPresent(component::setCores_per_node);
     // property: memory_per_node
-    ToscaUtils.extractScalar(taskNode.getProperties(), "memory_per_node",
-        IntegerType.class).map(Ints::saturatedCast).ifPresent(component::setMemory_per_node);
+    ToscaUtils.extractScalar(taskNode.getProperties(), "memory_per_node", IntegerType.class)
+        .map(Ints::saturatedCast)
+        .ifPresent(component::setMemory_per_node);
     // property: memory_per_core
-    ToscaUtils.extractScalar(taskNode.getProperties(), "memory_per_core",
-        IntegerType.class).map(Ints::saturatedCast).ifPresent(component::setMemory_per_core);
+    ToscaUtils.extractScalar(taskNode.getProperties(), "memory_per_core", IntegerType.class)
+        .map(Ints::saturatedCast)
+        .ifPresent(component::setMemory_per_core);
     // property: gpus
-    Optional<Integer> gpus = ToscaUtils.extractScalar(taskNode.getProperties(), "gpus",
-        IntegerType.class).map(Ints::saturatedCast);
+    Optional<Integer> gpus =
+        ToscaUtils.extractScalar(taskNode.getProperties(), "gpus", IntegerType.class)
+            .map(Ints::saturatedCast);
     if (gpus.isPresent()) {
       Integer ng = gpus.get();
       if (ng > 0) {
@@ -530,8 +533,9 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
       }
     }
     // property: batch_system_options
-    Optional<List<String>> batchSystemOptions = ToscaUtils.extractList(taskNode.getProperties(),
-        "batch_system_options", String.class::cast);
+    Optional<List<String>> batchSystemOptions =
+        ToscaUtils.extractList(
+            taskNode.getProperties(), "batch_system_options", String.class::cast);
     if (batchSystemOptions.isPresent()) {
       List<String> nativee =
           component.get_native() == null ? new ArrayList<>() : component.get_native();
@@ -554,18 +558,19 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
    * Also logs possible errors and updates the deployment status.
    *
    * @param deploymentMessage the deployment message.
-   * @return <tt>true</tt> if all jobs have been deleted, <tt>false</tt>
-   *         otherwise.
+   * @return <tt>true</tt> if all jobs have been deleted, <tt>false</tt> otherwise.
    */
   @Override
   public boolean doUndeploy(DeploymentMessage deploymentMessage) {
     // Delete all Jobs on Qcg
     Deployment deployment = getDeployment(deploymentMessage);
-    Iterator<Resource> topologyIterator = deployment.getResources().stream()
-        .filter(resource -> toscaService.isOfToscaType(resource, Nodes.Types.QCG))
-        // FIXME it should also not be DELETED
-        .filter(resource -> resource.getState() != NodeStates.DELETING)
-        .collect(Collectors.toList()).iterator();
+    Iterator<Resource> topologyIterator =
+        deployment.getResources().stream()
+            .filter(resource -> toscaService.isOfToscaType(resource, Nodes.Types.QCG))
+            // FIXME it should also not be DELETED
+            .filter(resource -> resource.getState() != NodeStates.DELETING)
+            .collect(Collectors.toList())
+            .iterator();
 
     if (topologyIterator.hasNext()) {
       Resource qcgResource = topologyIterator.next();
@@ -590,17 +595,16 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
   /**
    * Deletes a job from Qcg.
    *
-   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg
-   *                              instance
-   * @param requestedWithToken    the token ID of the request
-   * @param jobId                 the Id of the Qcg job
+   * @param cloudProviderEndpoint the {@link CloudProviderEndpoint} of the Qcg instance
+   * @param requestedWithToken the token ID of the request
+   * @param jobId the Id of the Qcg job
    */
-  protected void deleteJobsOnQcg(CloudProviderEndpoint cloudProviderEndpoint,
-      OidcTokenId requestedWithToken, String jobId) {
+  protected void deleteJobsOnQcg(
+      CloudProviderEndpoint cloudProviderEndpoint, OidcTokenId requestedWithToken, String jobId) {
 
     try {
-      executeWithClient(cloudProviderEndpoint, requestedWithToken,
-          client -> client.deleteJob(jobId));
+      executeWithClient(
+          cloudProviderEndpoint, requestedWithToken, client -> client.deleteJob(jobId));
     } catch (QcgException ex) {
       // Qcg API hack to avoid error 400 if the job to delete does not exist or cannot
       // be deleted
@@ -613,41 +617,45 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
   /**
    * Resolves the Tosca functions.
    *
-   * @param deployment   the deployment
+   * @param deployment the deployment
    * @param odParameters the OneData settings
-   *
    * @return the populated {@link ArchiveRoot}
    */
   public ArchiveRoot prepareTemplate(Deployment deployment, Map<String, OneData> odParameters) {
 
     RuntimeProperties runtimeProperties = new RuntimeProperties();
-    odParameters.forEach((nodeName, odParameter) -> {
-      runtimeProperties.put(odParameter.getOnezone(), nodeName, "onezone");
-      runtimeProperties.put(odParameter.getToken(), nodeName, "token");
-      runtimeProperties.put(odParameter.getSelectedOneprovider().getEndpoint(),
-          nodeName, "selected_provider");
-      if (odParameter.isServiceSpace()) {
-        runtimeProperties.put(odParameter.getSpace(), nodeName, "space");
-        runtimeProperties.put(odParameter.getPath(), nodeName, "path");
-      }
-    });
+    odParameters.forEach(
+        (nodeName, odParameter) -> {
+          runtimeProperties.put(odParameter.getOnezone(), nodeName, "onezone");
+          runtimeProperties.put(odParameter.getToken(), nodeName, "token");
+          runtimeProperties.put(
+              odParameter.getSelectedOneprovider().getEndpoint(), nodeName, "selected_provider");
+          if (odParameter.isServiceSpace()) {
+            runtimeProperties.put(odParameter.getSpace(), nodeName, "space");
+            runtimeProperties.put(odParameter.getPath(), nodeName, "path");
+          }
+        });
 
     ArchiveRoot ar = toscaService.parse(deployment.getTemplate());
 
-    indigoInputsPreProcessorService.processFunctions(ar, deployment.getParameters(),
-        runtimeProperties);
+    indigoInputsPreProcessorService.processFunctions(
+        ar, deployment.getParameters(), runtimeProperties);
     return ar;
   }
 
   public enum JobState {
-    SUBMITTED, PENDING, EXECUTING, FAILED, COMPLETING, FINISHED;
+    SUBMITTED,
+    PENDING,
+    EXECUTING,
+    FAILED,
+    COMPLETING,
+    FINISHED;
   }
 
   /**
    * Computes the Qcg job's state based on current success and error count.
    *
    * @param job the {@link Job}.
-   *
    * @return the {@link JobState}.
    */
   @VisibleForTesting
@@ -678,17 +686,16 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
     Deployment deployment = getDeployment(deploymentMessage);
 
     Map<Boolean, Set<Resource>> resources =
-        resourceRepository
-            .findByDeployment_id(deployment.getId())
-            .stream()
-            .collect(Collectors.partitioningBy(resource ->
-              (resource.getIaasId() != null && resource.getMetadata() != null),
-                Collectors.toSet()));
+        resourceRepository.findByDeployment_id(deployment.getId()).stream()
+            .collect(
+                Collectors.partitioningBy(
+                    resource -> (resource.getIaasId() != null && resource.getMetadata() != null),
+                    Collectors.toSet()));
     StringBuilder sb = new StringBuilder();
     sb.append("[");
     boolean first = true;
     for (Resource resource : resources.get(true)) {
-      Map<String,String> resourceMetadata = resource.getMetadata();
+      Map<String, String> resourceMetadata = resource.getMetadata();
       if (resourceMetadata != null && resourceMetadata.containsKey("Job")) {
         if (!first) {
           sb.append(",");
@@ -714,6 +721,5 @@ public class QcgServiceImpl extends AbstractDeploymentProviderService {
   @Override
   public void validateAction(ActionMessage deploymentMessage) {
     throw new UnsupportedOperationException("Qcg job deployments do not support actions.");
-
   }
 }

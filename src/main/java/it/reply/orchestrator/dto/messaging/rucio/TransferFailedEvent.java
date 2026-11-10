@@ -36,7 +36,9 @@ public class TransferFailedEvent
 
   public static final String EVENT_TYPE = "transfer-failed";
 
-  public TransferFailedEvent(@NonNull String eventType, @NonNull String createdAt,
+  public TransferFailedEvent(
+      @NonNull String eventType,
+      @NonNull String createdAt,
       @NonNull TransferFailedEventEventPayload payload) {
     super(eventType, createdAt, payload);
   }
@@ -47,60 +49,86 @@ public class TransferFailedEvent
   public static class TransferFailedEventEventPayload implements EventPayload {
     @JsonProperty("src-url")
     public String srcUrl;
+
     @JsonProperty("protocol")
     public String protocol;
+
     @JsonProperty("checksum-adler")
     public String checksumAdler;
+
     @JsonProperty("dst-rse")
     public String dstRse;
+
     @JsonProperty("previous-request-id")
     public String previousRequestId;
+
     @JsonProperty("tool-id")
     public String toolId;
+
     @JsonProperty("duration")
     public BigInteger duration;
+
     @JsonProperty("transfer-endpoint")
     public String transferEndpoint;
+
     @JsonProperty("started_at")
     public String startedAt;
+
     @JsonProperty("guid")
     public String guid;
+
     @JsonProperty("file-size")
     public BigInteger fileSize;
+
     @JsonProperty("scope")
     public String scope;
+
     @JsonProperty("transferred_at")
     public String transferredAt;
+
     @JsonProperty("src-type")
     public String srcType;
+
     @JsonProperty("dst-type")
     public String dstType;
+
     @JsonProperty("reason")
     public String reason;
+
     @JsonProperty("name")
     public String name;
+
     @JsonProperty("account")
     public String account;
+
     @JsonProperty("submitted_at")
     public String submittedAt;
+
     @JsonProperty("transfer-id")
     public String transferId;
+
     @JsonProperty("request-id")
     public String requestId;
+
     @JsonProperty("checksum-md5")
     public String checksumMd5;
+
     @JsonProperty("bytes")
     public BigInteger bytes;
+
     @JsonProperty("dst-url")
     public String dstUrl;
+
     @JsonProperty("activity")
     public String activity;
+
     @JsonProperty("transfer-link")
     public String transferLink;
+
     @JsonProperty("src-rse")
     public String srcRse;
+
     @JsonProperty("created_at")
     public String createdAt;
-
   }
 }

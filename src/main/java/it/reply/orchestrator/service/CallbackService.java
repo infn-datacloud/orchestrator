@@ -20,5 +20,4 @@ package it.reply.orchestrator.service;
 public interface CallbackService {
 
   public boolean doCallback(String deploymentId);
-
 }

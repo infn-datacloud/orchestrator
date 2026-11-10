@@ -55,5 +55,4 @@ public class WellKnownResponse {
   public void setTokenEndpoint(String tokenEndpoint) {
     this.tokenEndpoint = tokenEndpoint;
   }
-
 }

@@ -18,18 +18,15 @@
 package it.reply.orchestrator.config.security;
 
 import com.google.common.collect.Lists;
-
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.ScopedOidcClientProperties;
 import it.reply.orchestrator.exception.CustomOAuth2ExceptionRenderer;
 import it.reply.orchestrator.service.security.CustomUserInfoFetcher;
 import it.reply.orchestrator.service.security.OAuth2ConfigurationsService;
 import it.reply.orchestrator.service.security.UserInfoIntrospectingTokenService;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.oauth2.introspectingfilter.service.IntrospectionConfigurationService;
@@ -59,8 +56,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 @ConditionalOnProperty(value = OidcProperties.SECURITY_ENABLED_PROPERTY, havingValue = "true")
 public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
 
-  @Autowired
-  @Lazy // TODO Ugly
+  @Autowired @Lazy // TODO Ugly
   private OAuth2ConfigurationsService oauth2ConfigurationsService;
 
   /**
@@ -86,14 +82,15 @@ public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
     Map<String, RegisteredClient> clients = new HashMap<>();
     oidcProperties
         .getIamProperties()
-        .forEach((issuer, configuration) -> {
-          ScopedOidcClientProperties orchestrator = configuration.getOrchestrator();
-          RegisteredClient client = new RegisteredClient();
-          client.setClientId(orchestrator.getClientId());
-          client.setClientSecret(orchestrator.getClientSecret());
-          client.setScope(new HashSet<>(orchestrator.getScopes()));
-          clients.put(issuer, client);
-        });
+        .forEach(
+            (issuer, configuration) -> {
+              ScopedOidcClientProperties orchestrator = configuration.getOrchestrator();
+              RegisteredClient client = new RegisteredClient();
+              client.setClientId(orchestrator.getClientId());
+              client.setClientSecret(orchestrator.getClientSecret());
+              client.setScope(new HashSet<>(orchestrator.getScopes()));
+              clients.put(issuer, client);
+            });
 
     StaticClientConfigurationService clientConfigurationService =
         new StaticClientConfigurationService();
@@ -116,10 +113,8 @@ public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
   public IntrospectionConfigurationService introspectionConfigurationService() {
     JWTParsingIntrospectionConfigurationService introspectionConfigurationService =
         new JWTParsingIntrospectionConfigurationService();
-    introspectionConfigurationService
-        .setServerConfigurationService(serverConfigurationService());
-    introspectionConfigurationService
-        .setClientConfigurationService(clientConfigurationService());
+    introspectionConfigurationService.setServerConfigurationService(serverConfigurationService());
+    introspectionConfigurationService.setClientConfigurationService(clientConfigurationService());
     return introspectionConfigurationService;
   }
 
@@ -137,8 +132,8 @@ public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
   public ResourceServerTokenServices introspectingTokenService() {
 
     UserInfoIntrospectingTokenService introspectingTokenService =
-        new UserInfoIntrospectingTokenService(oauth2ConfigurationsService,
-            userInfoFetcher(), validationServices());
+        new UserInfoIntrospectingTokenService(
+            oauth2ConfigurationsService, userInfoFetcher(), validationServices());
     introspectingTokenService.setIntrospectionConfigurationService(
         introspectionConfigurationService());
     introspectingTokenService.setCacheTokens(oidcProperties.isCacheTokens());
@@ -153,8 +148,7 @@ public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
   @Override
   public void configure(@NonNull HttpSecurity http) throws Exception {
     super.configure(http);
-    http
-        .authorizeRequests()
+    http.authorizeRequests()
         .anyRequest()
         .fullyAuthenticated()
         .anyRequest()
@@ -165,8 +159,8 @@ public class AuthenticatedWebSecurityConfig extends BaseWebSecurityConfig {
     configurer.tokenServices(introspectingTokenService());
 
     CustomOAuth2ExceptionRenderer exceptionRenderer = new CustomOAuth2ExceptionRenderer();
-    exceptionRenderer
-      .setMessageConverters(Lists.newArrayList(new MappingJackson2HttpMessageConverter()));
+    exceptionRenderer.setMessageConverters(
+        Lists.newArrayList(new MappingJackson2HttpMessageConverter()));
 
     OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
     authenticationEntryPoint.setExceptionRenderer(exceptionRenderer);

@@ -49,16 +49,18 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
   public void updateOnError(String deploymentUuid, String message) {
     Deployment deployment = deploymentRepository.findOne(deploymentUuid);
     if (deployment == null) {
-      LOG.error("Unable to set deployment <{}> on error with message {} as it has been deleted",
-          deploymentUuid, message);
+      LOG.error(
+          "Unable to set deployment <{}> on error with message {} as it has been deleted",
+          deploymentUuid,
+          message);
       return;
     }
     switch (deployment.getStatus()) {
       case CREATE_FAILED:
       case UPDATE_FAILED:
       case DELETE_FAILED:
-        LOG.warn("Deployment < {} > was already in {} state.", deploymentUuid,
-            deployment.getStatus());
+        LOG.warn(
+            "Deployment < {} > was already in {} state.", deploymentUuid, deployment.getStatus());
         break;
       case CREATE_IN_PROGRESS:
       case CREATE_COMPLETE:
@@ -73,8 +75,10 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
         deployment.setStatus(Status.UPDATE_FAILED);
         break;
       default:
-        LOG.error("updateOnError: unsupported deployment status: {}. Setting status to {}",
-            deployment.getStatus(), Status.UNKNOWN);
+        LOG.error(
+            "updateOnError: unsupported deployment status: {}. Setting status to {}",
+            deployment.getStatus(),
+            Status.UNKNOWN);
         deployment.setStatus(Status.UNKNOWN);
         break;
     }
@@ -95,8 +99,8 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
       case CREATE_COMPLETE:
       case UPDATE_COMPLETE:
       case DELETE_COMPLETE:
-        LOG.warn("Deployment < {} > was already in {} state.", deploymentUuid,
-            deployment.getStatus());
+        LOG.warn(
+            "Deployment < {} > was already in {} state.", deploymentUuid, deployment.getStatus());
         break;
       case CREATE_IN_PROGRESS:
         deployment.setStatus(Status.CREATE_COMPLETE);
@@ -108,8 +112,10 @@ public class DeploymentStatusHelperImpl implements DeploymentStatusHelper {
         deployment.setStatus(Status.DELETE_COMPLETE);
         break;
       default:
-        LOG.error("updateOnSuccess: unsupported deployment status: {}. Setting status to {}",
-            deployment.getStatus(), Status.UNKNOWN.toString());
+        LOG.error(
+            "updateOnSuccess: unsupported deployment status: {}. Setting status to {}",
+            deployment.getStatus(),
+            Status.UNKNOWN.toString());
         deployment.setStatus(Status.UNKNOWN);
         break;
     }

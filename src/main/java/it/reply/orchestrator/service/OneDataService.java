@@ -32,11 +32,11 @@ public interface OneDataService {
 
   public UserSpaces getUserSpacesId(String oneZoneEndpoint, String oneDataToken);
 
-  public SpaceDetails getSpaceDetailsFromId(String oneZoneEndpoint, String oneDataToken,
-      String oneSpaceId);
+  public SpaceDetails getSpaceDetailsFromId(
+      String oneZoneEndpoint, String oneDataToken, String oneSpaceId);
 
-  public ProviderDetails getProviderDetailsFromId(String oneZoneEndpoint, String oneDataToken,
-      String oneProviderId);
+  public ProviderDetails getProviderDetailsFromId(
+      String oneZoneEndpoint, String oneDataToken, String oneProviderId);
 
   Tokens getOneDataTokens(String oneZoneEndpoint, OidcTokenId oidcTokenId);
 
@@ -44,9 +44,9 @@ public interface OneDataService {
 
   String getOrGenerateOneDataToken(String oneZoneEndpoint, OidcTokenId oidcTokenId);
 
-  public OneData populateProviderInfo(OneData oneDataParameter,
+  public OneData populateProviderInfo(
+      OneData oneDataParameter,
       Map<String, CloudProvider> cloudProviders,
       @Nullable OidcTokenId requestedWithToken,
       String deploymentId);
-
 }

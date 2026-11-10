@@ -49,17 +49,16 @@ public class SlamServiceLocalImpl implements SlamService {
   /**
    * Creates a new SlamServiceLocalImpl.
    *
-   * @param slamProperties
-   *          the slamProperties
-   * @param oauth2TokenService
-   *          the oauth2TokenService
-   * @param objectMapper
-   *          the objectMapper
-   * @param resourceLoader
-   *          the ResourceLoader
+   * @param slamProperties the slamProperties
+   * @param oauth2TokenService the oauth2TokenService
+   * @param objectMapper the objectMapper
+   * @param resourceLoader the ResourceLoader
    */
-  public SlamServiceLocalImpl(SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,
-      ObjectMapper objectMapper, ResourceLoader resourceLoader)  {
+  public SlamServiceLocalImpl(
+      SlamProperties slamProperties,
+      OAuth2TokenService oauth2TokenService,
+      ObjectMapper objectMapper,
+      ResourceLoader resourceLoader) {
     this.oauth2TokenService = oauth2TokenService;
     this.slamProperties = slamProperties;
     this.objectMapper = objectMapper;
@@ -68,11 +67,10 @@ public class SlamServiceLocalImpl implements SlamService {
 
   private Map<String, SlamPreferences> loadData() {
     String location = slamProperties.getUrl().toString();
-    Resource serializedPreferences = resourceLoader
-        .getResource(location);
+    Resource serializedPreferences = resourceLoader.getResource(location);
     try (InputStream is = serializedPreferences.getInputStream()) {
-      TypeReference<HashMap<String, SlamPreferences>> typeRef
-          = new TypeReference<HashMap<String, SlamPreferences>>() {};
+      TypeReference<HashMap<String, SlamPreferences>> typeRef =
+          new TypeReference<HashMap<String, SlamPreferences>>() {};
       return objectMapper.readValue(is, typeRef);
     } catch (IOException e) {
       throw new OrchestratorException("Error loading local SLAM preferences from " + location, e);
@@ -81,8 +79,8 @@ public class SlamServiceLocalImpl implements SlamService {
 
   @Override
   public SlamPreferences getCustomerPreferences(OidcTokenId tokenId, @Nullable String userGroup) {
-    String slamCustomer = Optional.ofNullable(userGroup)
-        .orElse(oauth2TokenService.getOrganization(tokenId));
+    String slamCustomer =
+        Optional.ofNullable(userGroup).orElse(oauth2TokenService.getOrganization(tokenId));
 
     return loadData().get(slamCustomer);
   }

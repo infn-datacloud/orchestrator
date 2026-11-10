@@ -45,50 +45,52 @@ import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Choose Cloud Provider and update Deployment/Message with the selected one data.
- */
+/** Choose Cloud Provider and update Deployment/Message with the selected one data. */
 @Component(WorkflowConstants.Delegate.UPDATE_DEPLOYMENT)
 @Slf4j
 public class UpdateDeployment extends BaseDeployCommand {
 
   private static final String DELIMITER = "\n" + StringUtils.repeat("-", 64) + "\n";
 
-  @Autowired
-  private CloudProviderEndpointServiceImpl cloudProviderEndpointService;
+  @Autowired private CloudProviderEndpointServiceImpl cloudProviderEndpointService;
 
   @Override
   public void execute(DelegateExecution execution, DeploymentMessage deploymentMessage) {
 
     RankCloudProvidersMessage rankCloudProvidersMessage =
-        getRequiredParameter(execution, WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
+        getRequiredParameter(
+            execution,
+            WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
             RankCloudProvidersMessage.class);
 
     CloudServicesOrderedIterator servicesIt = deploymentMessage.getCloudServicesOrderedIterator();
     if (servicesIt == null) {
-      servicesIt = cloudProviderEndpointService
-          .generateCloudProvidersOrderedIterator(rankCloudProvidersMessage,
-              deploymentMessage.getMaxProvidersRetry());
+      servicesIt =
+          cloudProviderEndpointService.generateCloudProvidersOrderedIterator(
+              rankCloudProvidersMessage, deploymentMessage.getMaxProvidersRetry());
       deploymentMessage.setCloudServicesOrderedIterator(servicesIt);
     }
     if (!servicesIt.hasNext()) {
       if (servicesIt.getSize() == 0) {
-        throw new BusinessWorkflowException(ErrorCode.RUNTIME_ERROR,
-            "No cloud provider meets the deployment requirements");
+        throw new BusinessWorkflowException(
+            ErrorCode.RUNTIME_ERROR, "No cloud provider meets the deployment requirements");
       } else {
         servicesIt.reset();
-        String causes = CommonUtils
-            .iteratorToStream(servicesIt)
-            .map(wfService -> new StringBuilder()
-                .append("Cloud Provider <")
-                .append(wfService.getCloudService().getProviderId())
-                .append(">\nCloud Provider Service <")
-                .append(wfService.getCloudService().getId())
-                .append(">\n\n")
-                .append(wfService.getLastErrorCause()))
-            .collect(Collectors.joining(DELIMITER, DELIMITER, ""));
+        String causes =
+            CommonUtils.iteratorToStream(servicesIt)
+                .map(
+                    wfService ->
+                        new StringBuilder()
+                            .append("Cloud Provider <")
+                            .append(wfService.getCloudService().getProviderId())
+                            .append(">\nCloud Provider Service <")
+                            .append(wfService.getCloudService().getId())
+                            .append(">\n\n")
+                            .append(wfService.getLastErrorCause()))
+                .collect(Collectors.joining(DELIMITER, DELIMITER, ""));
 
-        throw new BusinessWorkflowException(ErrorCode.RUNTIME_ERROR,
+        throw new BusinessWorkflowException(
+            ErrorCode.RUNTIME_ERROR,
             "Retries on cloud providers exhausted. Error list is:\n" + causes);
       }
     }
@@ -109,9 +111,11 @@ public class UpdateDeployment extends BaseDeployCommand {
     // FIXME Set/update all required selected CP data
 
     // FIXME Generate CP Endpoint
-    CloudProviderEndpoint chosenCloudProviderEndpoint = cloudProviderEndpointService
-        .getCloudProviderEndpoint(currentCloudService,
-            rankCloudProvidersMessage.getPlacementPolicies(), deploymentMessage.isHybrid());
+    CloudProviderEndpoint chosenCloudProviderEndpoint =
+        cloudProviderEndpointService.getCloudProviderEndpoint(
+            currentCloudService,
+            rankCloudProvidersMessage.getPlacementPolicies(),
+            deploymentMessage.isHybrid());
     deploymentMessage.setChosenCloudProviderEndpoint(chosenCloudProviderEndpoint);
     LOG.debug("Generated Cloud Provider Endpoint is: {}", chosenCloudProviderEndpoint);
 
@@ -129,27 +133,30 @@ public class UpdateDeployment extends BaseDeployCommand {
       }
     }
 
-    DeploymentProvider deploymentProvider = cloudProviderEndpointService
-        .getDeploymentProvider(deploymentMessage.getDeploymentType(), currentCloudService);
+    DeploymentProvider deploymentProvider =
+        cloudProviderEndpointService.getDeploymentProvider(
+            deploymentMessage.getDeploymentType(), currentCloudService);
     deployment.setDeploymentProvider(deploymentProvider);
 
-    deploymentMessage.setOneDataParameters(generateOneDataParameters(currentCloudService,
-        rankCloudProvidersMessage.getOneDataRequirements()));
+    deploymentMessage.setOneDataParameters(
+        generateOneDataParameters(
+            currentCloudService, rankCloudProvidersMessage.getOneDataRequirements()));
   }
 
   protected @NonNull Map<String, OneData> generateOneDataParameters(
-      @NonNull CloudService cloudService,
-      @NonNull Map<String, OneData> oneDataRequirements) {
+      @NonNull CloudService cloudService, @NonNull Map<String, OneData> oneDataRequirements) {
     Map<String, OneData> oneDataParameters = new HashMap<>();
 
-    oneDataRequirements
-        .forEach((name, oneDataRequirement) -> {
-          Optional<OneDataProviderInfo> localOneProvider = oneDataRequirement
-              .getOneproviders()
-              .stream()
-              .filter(oneDataProviderInfo -> cloudService.getProviderId()
-                  .equals(oneDataProviderInfo.getCloudProviderId()))
-              .findAny();
+    oneDataRequirements.forEach(
+        (name, oneDataRequirement) -> {
+          Optional<OneDataProviderInfo> localOneProvider =
+              oneDataRequirement.getOneproviders().stream()
+                  .filter(
+                      oneDataProviderInfo ->
+                          cloudService
+                              .getProviderId()
+                              .equals(oneDataProviderInfo.getCloudProviderId()))
+                  .findAny();
           final OneDataProviderInfo selectedOneProvider;
           if (localOneProvider.isPresent()) {
             selectedOneProvider = localOneProvider.get();
@@ -170,5 +177,4 @@ public class UpdateDeployment extends BaseDeployCommand {
   protected String getErrorMessagePrefix() {
     return "Error setting selected cloud providers";
   }
-
 }

@@ -20,7 +20,6 @@ package it.reply.orchestrator.service.security;
 import static org.assertj.core.api.Assertions.*;
 
 import it.reply.orchestrator.config.properties.OidcProperties;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -29,11 +28,9 @@ import org.mockito.Spy;
 
 public class OAuth2TokenServiceTest {
 
-  @InjectMocks
-  private OAuth2TokenService oAuth2TokenService = new OAuth2TokenService();
+  @InjectMocks private OAuth2TokenService oAuth2TokenService = new OAuth2TokenService();
 
-  @Spy
-  private OidcProperties oidcProperties;
+  @Spy private OidcProperties oidcProperties;
 
   @Before
   public void setup() {
@@ -55,5 +52,4 @@ public class OAuth2TokenServiceTest {
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("User is not authenticated");
   }
-
 }

@@ -18,10 +18,8 @@
 package it.reply.orchestrator.config.properties;
 
 import java.net.URI;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -30,12 +28,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class VaultProperties {
 
-  @Nullable
-  private URI url;
+  @Nullable private URI url;
 
   private String path = "/services_credential/";
 
   private String role;
-
 }
-

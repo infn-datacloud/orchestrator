@@ -29,12 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * This integration test makes real request to the SLAM APIs.
  *
  * @author l.biava
- *
  */
 public class SlamServiceIT extends WebAppConfigurationAwareIT {
 
-  @Autowired
-  private SlamService service;
+  @Autowired private SlamService service;
 
   @Test
   @Ignore
@@ -42,5 +40,4 @@ public class SlamServiceIT extends WebAppConfigurationAwareIT {
     SlamPreferences pref = service.getCustomerPreferences(null, null);
     assertEquals("4401ac5dc8cfbbb737b0a02575ee3b58", pref.getSla().get(0).getId());
   }
-
 }

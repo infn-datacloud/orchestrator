@@ -20,15 +20,13 @@ package it.reply.orchestrator.service;
 import static org.junit.Assert.assertEquals;
 
 import it.reply.orchestrator.config.specific.WebAppConfigurationAwareIT;
-import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.cmdb.CloudProvider;
+import it.reply.orchestrator.dto.cmdb.CloudService;
 import it.reply.orchestrator.dto.cmdb.CloudServiceType;
 import it.reply.orchestrator.dto.cmdb.Flavor;
 import it.reply.orchestrator.dto.cmdb.Image;
 import it.reply.orchestrator.dto.cmdb.Tenant;
-
 import java.util.List;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * This integration test makes real request to the CMDB APIs.
  *
  * @author l.biava
- *
  */
 public class CmdbServiceIT extends WebAppConfigurationAwareIT {
 
@@ -58,13 +55,14 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   public void getServiceTest() throws Exception {
 
     CloudService serviceRecas = service.getServiceById(recasId);
-    CloudService serviceMock = CloudService.builder()
-        .serviceType("eu.egi.cloud.vm-management.openstack")
-        .endpoint("https://cloud.recas.ba.infn.it:5000/v3")
-        .providerId("provider-RECAS-BARI")
-        .type(CloudServiceType.COMPUTE)
-        .region("recas-cloud")
-        .build();
+    CloudService serviceMock =
+        CloudService.builder()
+            .serviceType("eu.egi.cloud.vm-management.openstack")
+            .endpoint("https://cloud.recas.ba.infn.it:5000/v3")
+            .providerId("provider-RECAS-BARI")
+            .type(CloudServiceType.COMPUTE)
+            .region("recas-cloud")
+            .build();
 
     assertEquals(serviceMock, serviceRecas);
   }
@@ -73,11 +71,8 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
   @Ignore
   public void getProviderTest() throws Exception {
     CloudProvider providerRecas = service.getProviderById(recasProviderName);
-    CloudProvider provider = CloudProvider
-        .builder()
-        .id(recasProviderName)
-        .name("RECAS-BARI")
-        .build();
+    CloudProvider provider =
+        CloudProvider.builder().id(recasProviderName).name("RECAS-BARI").build();
 
     assertEquals(provider, providerRecas);
   }
@@ -148,5 +143,4 @@ public class CmdbServiceIT extends WebAppConfigurationAwareIT {
     @SuppressWarnings("unused")
     Flavor flavor = service.getFlavorById(flavorId);
   }
-
 }

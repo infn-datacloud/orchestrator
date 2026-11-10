@@ -40,8 +40,8 @@ public class MonitoringServiceImpl implements MonitoringService {
 
   private RestTemplate restTemplate;
 
-  public MonitoringServiceImpl(MonitoringProperties monitoringProperties,
-      RestTemplateBuilder restTemplateBuilder) {
+  public MonitoringServiceImpl(
+      MonitoringProperties monitoringProperties, RestTemplateBuilder restTemplateBuilder) {
     this.monitoringProperties = monitoringProperties;
     this.restTemplate = restTemplateBuilder.build();
   }
@@ -49,25 +49,26 @@ public class MonitoringServiceImpl implements MonitoringService {
   @Override
   public Group getProviderData(String providerId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(monitoringProperties.getUrl() + monitoringProperties.getProviderMetricsPath())
-        .buildAndExpand(providerId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                monitoringProperties.getUrl() + monitoringProperties.getProviderMetricsPath())
+            .buildAndExpand(providerId)
+            .normalize()
+            .toUri();
 
     try {
       ResponseEntity<MonitoringResponse> response =
           restTemplate.getForEntity(requestUri, MonitoringResponse.class);
-      return Optional
-          .ofNullable(response.getBody().getResult())
+      return Optional.ofNullable(response.getBody().getResult())
           .map(MonitoringWrappedResponsePaas::getGroups)
           .flatMap(groups -> groups.stream().findFirst())
-          .orElseThrow(() -> new DeploymentException(
-              "No metrics available for provider <" + providerId + ">"));
+          .orElseThrow(
+              () ->
+                  new DeploymentException(
+                      "No metrics available for provider <" + providerId + ">"));
     } catch (RestClientException ex) {
       throw new DeploymentException(
           "Error fetching monitoring data for provider <" + providerId + ">", ex);
     }
   }
-
 }

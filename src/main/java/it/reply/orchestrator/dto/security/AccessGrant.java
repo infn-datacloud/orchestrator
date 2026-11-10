@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
@@ -44,14 +43,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -105,18 +101,18 @@ public class AccessGrant implements Serializable {
   /**
    * Check if the grant is expiring in the specified {@link TemporalAmount}.
    *
-   * @param temporalAmount
-   *     the temporalAmount for the expiration evaluation
+   * @param temporalAmount the temporalAmount for the expiration evaluation
    * @return true if expired, false otherwise
    */
   @JsonIgnore
   public boolean isExpiringIn(TemporalAmount temporalAmount) {
-    return Optional
-        .ofNullable(expiration)
+    return Optional.ofNullable(expiration)
         .map(Date::toInstant)
-        .map(instant -> instant
-            // if expiring in less of the temporalAmount -> return true
-            .minus(temporalAmount))
+        .map(
+            instant ->
+                instant
+                    // if expiring in less of the temporalAmount -> return true
+                    .minus(temporalAmount))
         .filter(Instant.now()::isAfter)
         .isPresent();
   }
@@ -131,8 +127,7 @@ public class AccessGrant implements Serializable {
 
     @Override
     public Date deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
-      return Optional
-          .ofNullable(_parseLong(parser, ctxt))
+      return Optional.ofNullable(_parseLong(parser, ctxt))
           .map(Instant.now()::plusSeconds)
           .map(Date::from)
           .orElse(null);

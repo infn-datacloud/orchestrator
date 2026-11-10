@@ -21,9 +21,7 @@ import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.resource.DeploymentResource;
 import it.reply.orchestrator.resource.DeploymentResourceAssembler;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -42,14 +40,12 @@ public class CallbackServiceImpl implements CallbackService {
   /**
    * Creates a new CallbackServiceImpl.
    *
-   * @param deploymentRepository
-   *          the DeploymentRepository to use
-   * @param deploymentResourceAssembler
-   *          the DeploymentResourceAssembler to use
-   * @param restTemplateBuilder
-   *          the RestTemplateBuilder to use
+   * @param deploymentRepository the DeploymentRepository to use
+   * @param deploymentResourceAssembler the DeploymentResourceAssembler to use
+   * @param restTemplateBuilder the RestTemplateBuilder to use
    */
-  public CallbackServiceImpl(DeploymentRepository deploymentRepository,
+  public CallbackServiceImpl(
+      DeploymentRepository deploymentRepository,
       DeploymentResourceAssembler deploymentResourceAssembler,
       RestTemplateBuilder restTemplateBuilder) {
     this.deploymentRepository = deploymentRepository;
@@ -76,5 +72,4 @@ public class CallbackServiceImpl implements CallbackService {
     }
     return false;
   }
-
 }

@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.security;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.IamProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.OidcClientProperties;
@@ -35,11 +34,9 @@ import it.reply.orchestrator.function.ThrowingConsumer;
 import it.reply.orchestrator.function.ThrowingFunction;
 import it.reply.orchestrator.utils.CommonUtils;
 import it.reply.orchestrator.utils.JwtUtils;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,14 +46,11 @@ import org.springframework.web.client.HttpClientErrorException;
 @Service
 public class OAuth2TokenService {
 
-  @Autowired
-  private OidcProperties oidcProperties;
+  @Autowired private OidcProperties oidcProperties;
 
-  @Autowired
-  private OAuth2TokenCacheService oauth2TokenCacheService;
+  @Autowired private OAuth2TokenCacheService oauth2TokenCacheService;
 
-  @Autowired
-  private OidcEntityRepository oidcEntityRepository;
+  @Autowired private OidcEntityRepository oidcEntityRepository;
 
   private void handleSecurityDisabled() {
     oidcProperties.throwIfSecurityDisabled();
@@ -69,8 +63,7 @@ public class OAuth2TokenService {
    */
   public IndigoOAuth2Authentication getCurrentAuthentication() {
     handleSecurityDisabled();
-    return Optional
-        .ofNullable(SecurityContextHolder.getContext().getAuthentication())
+    return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
         .filter(IndigoOAuth2Authentication.class::isInstance)
         .map(IndigoOAuth2Authentication.class::cast)
         .orElseThrow(() -> new IllegalStateException("User is not authenticated"));
@@ -84,16 +77,15 @@ public class OAuth2TokenService {
    * Get the current OAuth2 token.
    *
    * @return the OAuth2 token.
-   * @throws IllegalStateException
-   *           if the security is disabled, the user is not authenticated or the call is made of an
-   *           HTTP session.
+   * @throws IllegalStateException if the security is disabled, the user is not authenticated or the
+   *     call is made of an HTTP session.
    */
   public String getOAuth2TokenFromCurrentAuth() {
     return getOAuth2TokenFromAutentication(getCurrentAuthentication());
   }
 
-  public static List<String>
-      getOAuth2ClientsFromAutentication(IndigoOAuth2Authentication authentication) {
+  public static List<String> getOAuth2ClientsFromAutentication(
+      IndigoOAuth2Authentication authentication) {
     return Lists.newArrayList(authentication.getOAuth2Request().getClientId());
   }
 
@@ -104,15 +96,12 @@ public class OAuth2TokenService {
   /**
    * Retrieve the CLUES IAM information from the OAuth2 access token.
    *
-   * @param accessToken
-   *          the accessToken
+   * @param accessToken the accessToken
    * @return the CLUES IAM information
    */
   public Optional<OidcClientProperties> getCluesInfo(String accessToken) {
     String iss = JwtUtils.getIssuer(JwtUtils.parseJwt(accessToken));
-    return oidcProperties
-        .getIamConfiguration(iss)
-        .flatMap(IamProperties::getClues);
+    return oidcProperties.getIamConfiguration(iss).flatMap(IamProperties::getClues);
   }
 
   /**
@@ -152,8 +141,10 @@ public class OAuth2TokenService {
     IndigoOAuth2Authentication autentication = getCurrentAuthentication();
     IamUserInfo userInfo = (IamUserInfo) autentication.getUserInfo();
     if (userInfo != null) {
-      String organization = Preconditions.checkNotNull(userInfo.getOrganizationName(),
-          "Organization name not found between the user info claims");
+      String organization =
+          Preconditions.checkNotNull(
+              userInfo.getOrganizationName(),
+              "Organization name not found between the user info claims");
       newEntity.setOrganization(organization);
     } else {
       throw new OrchestratorException("Client credentials grant not supported");
@@ -176,23 +167,22 @@ public class OAuth2TokenService {
   /**
    * Gets the user's organization from the token ID.
    *
-   * @param oidcTokenId
-   *     the token ID
+   * @param oidcTokenId the token ID
    * @return the user's organization
    */
   public String getOrganization(OidcTokenId oidcTokenId) {
-    return Optional
-        .ofNullable(oidcTokenId)
+    return Optional.ofNullable(oidcTokenId)
         .map(OidcTokenId::getOidcEntityId)
         .flatMap(oidcEntityRepository::findByOidcEntityId)
         .map(OidcEntity::getOrganization)
-        .orElseGet(() -> {
-          if (oidcProperties.isEnabled()) {
-            throw new DeploymentException("No user associated to deployment token found");
-          } else {
-            return "egi.eu";
-          }
-        });
+        .orElseGet(
+            () -> {
+              if (oidcProperties.isEnabled()) {
+                throw new DeploymentException("No user associated to deployment token found");
+              } else {
+                return "egi.eu";
+              }
+            });
   }
 
   /**
@@ -209,8 +199,7 @@ public class OAuth2TokenService {
   /**
    * Refresh an access token and put it into the cache.
    *
-   * @param id
-   *          the id of the token
+   * @param id the id of the token
    * @return the exchanged grant
    */
   public String getRefreshedAccessToken(OidcTokenId id) {
@@ -228,20 +217,17 @@ public class OAuth2TokenService {
    *
    * @param <R> the result object type
    * @param <E> the thrown exception type
-   * @param oidcTokenId
-   *     the token ID
-   * @param function
-   *     the {@link ThrowingFunction}
-   * @param tokenRefreshEvaluator
-   *     function evaluating whether a refresh token needs to be retrieved
+   * @param oidcTokenId the token ID
+   * @param function the {@link ThrowingFunction}
+   * @param tokenRefreshEvaluator function evaluating whether a refresh token needs to be retrieved
    * @return the {@link ThrowingFunction} result
-   * @throws E
-   *     the exception thrown by the {@link ThrowingFunction}
+   * @throws E the exception thrown by the {@link ThrowingFunction}
    */
   public <R, E extends Exception> R executeWithClientForResult(
       @Nullable OidcTokenId oidcTokenId,
       ThrowingFunction<String, R, E> function,
-      Predicate<Exception> tokenRefreshEvaluator) throws E {
+      Predicate<Exception> tokenRefreshEvaluator)
+      throws E {
     if (!oidcProperties.isEnabled()) {
       return function.apply(null);
     } else {
@@ -263,24 +249,24 @@ public class OAuth2TokenService {
    * Execute a {@link ThrowingConsumer}, handling the OAuth2 token.
    *
    * @param <E> the thrown exception type
-   * @param oidcTokenId
-   *     the token ID
-   * @param consumer
-   *     the {@link ThrowingConsumer}
-   * @param tokenRefreshEvaluator
-   *     function evaluating whether a refresh token needs to be retrieved
-   * @throws E
-   *     the exception thrown by the {@link ThrowingConsumer}
+   * @param oidcTokenId the token ID
+   * @param consumer the {@link ThrowingConsumer}
+   * @param tokenRefreshEvaluator function evaluating whether a refresh token needs to be retrieved
+   * @throws E the exception thrown by the {@link ThrowingConsumer}
    */
   public <E extends Exception> void executeWithClient(
       @Nullable OidcTokenId oidcTokenId,
       ThrowingConsumer<String, E> consumer,
-      Predicate<Exception> tokenRefreshEvaluator) throws E {
-    executeWithClientForResult(oidcTokenId,
-        accessToken -> consumer.asFunction().apply(accessToken), tokenRefreshEvaluator);
+      Predicate<Exception> tokenRefreshEvaluator)
+      throws E {
+    executeWithClientForResult(
+        oidcTokenId,
+        accessToken -> consumer.asFunction().apply(accessToken),
+        tokenRefreshEvaluator);
   }
 
   public static final Predicate<Exception> restTemplateTokenRefreshEvaluator =
-      ex -> ex instanceof HttpClientErrorException && ((HttpClientErrorException) ex)
-          .getRawStatusCode() == 401;
+      ex ->
+          ex instanceof HttpClientErrorException
+              && ((HttpClientErrorException) ex).getRawStatusCode() == 401;
 }

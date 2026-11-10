@@ -18,15 +18,12 @@
 package it.reply.orchestrator.utils;
 
 import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.MDC;
@@ -73,8 +70,7 @@ public class MdcUtils {
   /**
    * Sets the MDC context from the provided Business Key.
    *
-   * @param businessKey
-   *          the Business Key to use
+   * @param businessKey the Business Key to use
    */
   public static void fromBusinessKey(String businessKey) {
     if (businessKey != null) {
@@ -96,14 +92,11 @@ public class MdcUtils {
 
   public static class MdcCloseable implements AutoCloseable {
 
-    @NonNull
-    private final String keyName;
+    @NonNull private final String keyName;
 
-    @Nullable
-    private final String oldValue;
+    @Nullable private final String oldValue;
 
-    @Nullable
-    private final String newValue;
+    @Nullable private final String newValue;
 
     private MdcCloseable(String keyName, String newValue) {
       this.keyName = Objects.requireNonNull(keyName);
@@ -123,5 +116,4 @@ public class MdcUtils {
       }
     }
   }
-
 }

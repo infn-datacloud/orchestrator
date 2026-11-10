@@ -51,5 +51,4 @@ public class Service {
 
   @JsonProperty("region")
   private Region region;
-
 }

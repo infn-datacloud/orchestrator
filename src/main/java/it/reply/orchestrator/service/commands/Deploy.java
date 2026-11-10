@@ -38,5 +38,4 @@ public class Deploy extends BaseDeployCommand {
   protected String getErrorMessagePrefix() {
     return "Error deploying";
   }
-
 }

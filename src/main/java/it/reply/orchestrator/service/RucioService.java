@@ -61,29 +61,28 @@ public class RucioService {
   public static final String WHO_AM_I = "whoami";
   public static final String ENABLE_NOTIFICATIONS = "Y";
 
-  @Autowired
-  private RucioProperties rucioProperties;
+  @Autowired private RucioProperties rucioProperties;
 
-  @Autowired
-  private OAuth2TokenService oauth2Tokenservice;
+  @Autowired private OAuth2TokenService oauth2Tokenservice;
 
-  @Autowired
-  private DeploymentScheduleEventRepository deploymentScheduleEventRepository;
+  @Autowired private DeploymentScheduleEventRepository deploymentScheduleEventRepository;
 
-  @Autowired
-  private ReplicationRuleRepository replicationRuleRepository;
+  @Autowired private ReplicationRuleRepository replicationRuleRepository;
 
-  private <R> R executeWithClientForResult(OidcTokenId oidcTokenId,
-      RuntimeThrowingFunction<Rucio, R> function) {
+  private <R> R executeWithClientForResult(
+      OidcTokenId oidcTokenId, RuntimeThrowingFunction<Rucio, R> function) {
     return oauth2Tokenservice.executeWithClientForResult(
         oidcTokenId,
-        accessToken -> function.apply(
-            RucioClient.getInstanceWithOidcAuth(rucioProperties.getUrl().toString(), accessToken)),
+        accessToken ->
+            function.apply(
+                RucioClient.getInstanceWithOidcAuth(
+                    rucioProperties.getUrl().toString(), accessToken)),
         UnauthorizedException.class::isInstance);
   }
 
   /**
    * Create a replication rule.
+   *
    * @param oidcTokenId the token id
    * @param account the rucio account
    * @param scope the scope
@@ -92,8 +91,13 @@ public class RucioService {
    * @param copies the numper of copies
    * @return the rule id
    */
-  public String createReplicationRule(OidcTokenId oidcTokenId, String account, String scope,
-      String name, String replicationExpression, int copies) {
+  public String createReplicationRule(
+      OidcTokenId oidcTokenId,
+      String account,
+      String scope,
+      String name,
+      String replicationExpression,
+      int copies) {
     ArrayList<Did> did = Lists.newArrayList(new Did(scope, name));
     RuleCreation ruleCreation =
         new RuleCreation(did, account, copies, replicationExpression, ENABLE_NOTIFICATIONS, true);
@@ -108,6 +112,7 @@ public class RucioService {
 
   /**
    * Get the replication rules.
+   *
    * @param oidcTokenId the token id
    * @param account the rucio account
    * @param scope the scope
@@ -116,8 +121,13 @@ public class RucioService {
    * @param copies the numper of copies
    * @return the rules
    */
-  public List<RuleInformation> getReplicationRules(OidcTokenId oidcTokenId, String account,
-      String scope, String name, String replicationExpression, int copies) {
+  public List<RuleInformation> getReplicationRules(
+      OidcTokenId oidcTokenId,
+      String account,
+      String scope,
+      String name,
+      String replicationExpression,
+      int copies) {
     Map<String, String> params = new HashMap<>();
     params.put("account", account);
     params.put("name", name);
@@ -137,19 +147,23 @@ public class RucioService {
 
   /**
    * Set the lifetime of a rule.
+   *
    * @param oidcTokenId the token id
    * @param ruleId the rule id
    * @param lifetime the lifetime
    */
   public void setLifetime(OidcTokenId oidcTokenId, String ruleId, Integer lifetime) {
-    executeWithClientForResult(oidcTokenId, client -> {
-      client.updateRule(ruleId, new RuleUpdate(lifetime));
-      return null;
-    });
+    executeWithClientForResult(
+        oidcTokenId,
+        client -> {
+          client.updateRule(ruleId, new RuleUpdate(lifetime));
+          return null;
+        });
   }
 
   /**
    * Sync the temp replication rule with the DB.
+   *
    * @param oidcTokenId the token id
    * @param deploymentId the deployment id
    * @return the DB entity
@@ -162,6 +176,7 @@ public class RucioService {
 
   /**
    * Sync the main replication rule with the DB.
+   *
    * @param oidcTokenId the token id
    * @param deploymentId the deployment id
    * @return the DB entity
@@ -174,12 +189,13 @@ public class RucioService {
 
   /**
    * Sync a replication rule with the DB.
+   *
    * @param oidcTokenId the token id
    * @param replicationRule the entity
    * @return the DB entity
    */
-  public ReplicationRule syncReplicationRule(OidcTokenId oidcTokenId,
-      ReplicationRule replicationRule) {
+  public ReplicationRule syncReplicationRule(
+      OidcTokenId oidcTokenId, ReplicationRule replicationRule) {
     String ruleId = replicationRule.getRucioId();
     RuleInformation ruleInformation =
         executeWithClientForResult(oidcTokenId, client -> client.getRule(ruleId));
@@ -189,13 +205,14 @@ public class RucioService {
 
   /**
    * Create a main replication rule.
+   *
    * @param oidcTokenId the token id
    * @param deploymentId the deployment id
    * @return the replication rule
    */
   @Transactional
-  public ReplicationRule getOrCreateMainReplicationRule(OidcTokenId oidcTokenId,
-      String deploymentId) {
+  public ReplicationRule getOrCreateMainReplicationRule(
+      OidcTokenId oidcTokenId, String deploymentId) {
     DeploymentScheduleEvent deploymentScheduleEvent =
         deploymentScheduleEventRepository.findByDeploymentId(deploymentId);
     DeploymentSchedule deploymentSchedule = deploymentScheduleEvent.getDeploymentSchedule();
@@ -206,8 +223,8 @@ public class RucioService {
     Integer numberOfReplicas = deploymentSchedule.getNumberOfReplicas();
     OidcEntity owner = deploymentScheduleEvent.getOwner();
     ReplicationRule replicationRule =
-        getOrCreateReplicationRule(oidcTokenId, rucioAccount, scope, name, replicationExpression,
-            numberOfReplicas, owner);
+        getOrCreateReplicationRule(
+            oidcTokenId, rucioAccount, scope, name, replicationExpression, numberOfReplicas, owner);
     deploymentScheduleEvent.setMainReplicationRule(replicationRule);
     return replicationRule;
   }
@@ -219,14 +236,15 @@ public class RucioService {
 
   /**
    * Create a temp replication rule.
+   *
    * @param oidcTokenId the token id
    * @param deploymentId the deployment id
    * @param rse the rse
    * @return the replication rule
    */
   @Transactional
-  public ReplicationRule getOrCreateTempReplicationRule(OidcTokenId oidcTokenId,
-      String deploymentId, String rse) {
+  public ReplicationRule getOrCreateTempReplicationRule(
+      OidcTokenId oidcTokenId, String deploymentId, String rse) {
     DeploymentScheduleEvent deploymentScheduleEvent =
         deploymentScheduleEventRepository.findByDeploymentId(deploymentId);
     String rucioAccount = getRucioAccount(oidcTokenId).getAccount();
@@ -235,14 +253,15 @@ public class RucioService {
     Integer numberOfReplicas = 1;
     OidcEntity owner = deploymentScheduleEvent.getOwner();
     ReplicationRule replicationRule =
-        getOrCreateReplicationRule(oidcTokenId, rucioAccount, scope, name, rse, numberOfReplicas,
-            owner);
+        getOrCreateReplicationRule(
+            oidcTokenId, rucioAccount, scope, name, rse, numberOfReplicas, owner);
     deploymentScheduleEvent.setTempReplicationRule(replicationRule);
     return replicationRule;
   }
 
   /**
    * Get or create a rule on Rucio.
+   *
    * @param oidcTokenId the token id
    * @param whoAmI the rucio account
    * @param scope the scope
@@ -253,12 +272,18 @@ public class RucioService {
    * @return the replication rule
    */
   @Transactional
-  protected ReplicationRule getOrCreateReplicationRule(OidcTokenId oidcTokenId, String whoAmI,
-      String scope, String name, String replicationExpression, Integer numberOfReplicas,
+  protected ReplicationRule getOrCreateReplicationRule(
+      OidcTokenId oidcTokenId,
+      String whoAmI,
+      String scope,
+      String name,
+      String replicationExpression,
+      Integer numberOfReplicas,
       OidcEntity owner) {
     try {
-      String ruleId = createReplicationRule(oidcTokenId, whoAmI, scope, name, replicationExpression,
-          numberOfReplicas);
+      String ruleId =
+          createReplicationRule(
+              oidcTokenId, whoAmI, scope, name, replicationExpression, numberOfReplicas);
       RuleInformation ruleInformation = getReplicationRule(oidcTokenId, ruleId);
       ReplicationRule replicationRule = new ReplicationRule();
       fillFromRuleInformation(replicationRule, ruleInformation);
@@ -266,8 +291,9 @@ public class RucioService {
       return replicationRuleRepository.save(replicationRule);
     } catch (DuplicateRuleException ex) {
       RuleInformation ruleInformation =
-          getReplicationRules(oidcTokenId, whoAmI, scope, name, replicationExpression,
-              numberOfReplicas).get(0);
+          getReplicationRules(
+                  oidcTokenId, whoAmI, scope, name, replicationExpression, numberOfReplicas)
+              .get(0);
       String ruleId = ruleInformation.getId();
       if (ruleInformation.getExpiresAt() != null) {
         restoreReplicationRule(oidcTokenId, ruleId);
@@ -289,11 +315,12 @@ public class RucioService {
 
   /**
    * Decrease the usage count and delete a replication rule if unused.
+   *
    * @param oidcTokenId the token id
    * @param replicationRule the replication rule
    */
-  public void deleteReplicationRuleIfUnused(OidcTokenId oidcTokenId,
-      ReplicationRule replicationRule) {
+  public void deleteReplicationRuleIfUnused(
+      OidcTokenId oidcTokenId, ReplicationRule replicationRule) {
     replicationRule.setUsageCount(Math.max(replicationRule.getUsageCount() - 1, 0));
     String ruleId = replicationRule.getRucioId();
     if (replicationRule.getUsageCount() == 0) {
@@ -306,8 +333,8 @@ public class RucioService {
     }
   }
 
-  private void fillFromRuleInformation(ReplicationRule replicationRule,
-      RuleInformation ruleInformation) {
+  private void fillFromRuleInformation(
+      ReplicationRule replicationRule, RuleInformation ruleInformation) {
     replicationRule.setRucioId(ruleInformation.getId());
     replicationRule.setScope(ruleInformation.getScope());
     replicationRule.setName(ruleInformation.getName());
@@ -328,27 +355,25 @@ public class RucioService {
         replicationRule.setStatusReason(null);
         break;
       default:
-        throw new OrchestratorException("Unknown replication rule status "
-            + ruleInformation.getState());
+        throw new OrchestratorException(
+            "Unknown replication rule status " + ruleInformation.getState());
     }
   }
 
   /**
    * Get the pfn of a replica in a rse if present.
+   *
    * @param oidcTokenId the token id
    * @param scope the scope
    * @param name the name
    * @param desiredRse the rse
    * @return the optional pfn
    */
-  public Optional<String> getPfnFromReplica(OidcTokenId oidcTokenId, String scope, String name,
-      String desiredRse) {
+  public Optional<String> getPfnFromReplica(
+      OidcTokenId oidcTokenId, String scope, String name, String desiredRse) {
     ReplicaInformation replicaInformation =
         executeWithClientForResult(oidcTokenId, client -> client.getReplica(scope, name));
-    return replicaInformation
-        .getRses()
-        .entrySet()
-        .stream()
+    return replicaInformation.getRses().entrySet().stream()
         .filter(entry -> desiredRse.equals(entry.getKey()))
         .flatMap(entry -> entry.getValue().stream())
         .findFirst();

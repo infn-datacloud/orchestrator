@@ -17,6 +17,17 @@
 
 package it.reply.orchestrator.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.Lists;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
@@ -34,6 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import junitparams.JUnitParamsRunner;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -48,54 +60,38 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpStatusCodeException;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import junitparams.JUnitParamsRunner;
 
 @RunWith(JUnitParamsRunner.class)
 @RestClientTest(DynafedServiceImpl.class)
 public class DynafedServiceTest {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @Autowired
-  private DynafedServiceImpl dynafedService;
+  @Autowired private DynafedServiceImpl dynafedService;
 
-  @Autowired
-  private MockRestServiceServer mockServer;
+  @Autowired private MockRestServiceServer mockServer;
 
   private static XmlMapper mapper = new XmlMapper();
 
-  @MockBean
-  private OAuth2TokenService oauth2TokenService;
+  @MockBean private OAuth2TokenService oauth2TokenService;
 
   private static final OidcTokenId oidcTokenId = new OidcTokenId();
 
-  private final static String dynafedBasePath = "http://dynafed.example.com/";
+  private static final String dynafedBasePath = "http://dynafed.example.com/";
 
-  private final static String goodStorageHostname = "storage1.example.com";
-  private final static String goodStorageBasePath = "http://" + goodStorageHostname + "/";
+  private static final String goodStorageHostname = "storage1.example.com";
+  private static final String goodStorageBasePath = "http://" + goodStorageHostname + "/";
 
-  private final static String badStorageHostname = "storage2.example.com";
-  private final static String badStorageBasePath = "http://" + badStorageHostname + "/";
+  private static final String badStorageHostname = "storage2.example.com";
+  private static final String badStorageBasePath = "http://" + badStorageHostname + "/";
 
-  private final static String accessToken = "AccessToken";
-  private final static String fileName = "fileName";
+  private static final String accessToken = "AccessToken";
+  private static final String fileName = "fileName";
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-@Before
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  @Before
   public void setup() throws Exception {
 
     when(oauth2TokenService.executeWithClientForResult(eq(oidcTokenId), any(), any()))
@@ -104,13 +100,10 @@ public class DynafedServiceTest {
 
   @Test
   public void testFailPopulateDynafedHttpError() {
-    Dynafed dyanfedRequirement = Dynafed
-        .builder()
-        .files(Lists.newArrayList(File
-            .builder()
-            .endpoint(dynafedBasePath + fileName)
-            .build()))
-        .build();
+    Dynafed dyanfedRequirement =
+        Dynafed.builder()
+            .files(Lists.newArrayList(File.builder().endpoint(dynafedBasePath + fileName).build()))
+            .build();
 
     mockServer
         .expect(requestTo(dynafedBasePath + fileName + "?metalink"))
@@ -121,7 +114,8 @@ public class DynafedServiceTest {
     Map<String, CloudProvider> cloudProviders = generateCloudProviders();
 
     assertThatCode(
-        () -> dynafedService.populateDyanfedData(dyanfedRequirement, cloudProviders, oidcTokenId))
+            () ->
+                dynafedService.populateDyanfedData(dyanfedRequirement, cloudProviders, oidcTokenId))
         .isInstanceOf(DeploymentException.class)
         .hasMessageStartingWith("Error retrieving metalink of file " + dynafedBasePath + fileName)
         .hasCauseInstanceOf(HttpStatusCodeException.class);
@@ -131,26 +125,25 @@ public class DynafedServiceTest {
 
   @Test
   public void testSuccessPopulateDynafed() throws IOException {
-    Dynafed dyanfedRequirement = Dynafed
-        .builder()
-        .files(Lists.newArrayList(File
-            .builder()
-            .endpoint(dynafedBasePath + fileName)
-            .build()))
-        .build();
-    Metalink metalink = Metalink
-        .builder()
-        .files(Lists.newArrayList(Metalink.File
-            .builder()
-            .name(fileName)
-            .size(1L)
-            .urls(Lists.newArrayList(Url
-                .builder()
-                .type("http")
-                .value(URI.create(goodStorageBasePath + fileName))
-                .build()))
-            .build()))
-        .build();
+    Dynafed dyanfedRequirement =
+        Dynafed.builder()
+            .files(Lists.newArrayList(File.builder().endpoint(dynafedBasePath + fileName).build()))
+            .build();
+    Metalink metalink =
+        Metalink.builder()
+            .files(
+                Lists.newArrayList(
+                    Metalink.File.builder()
+                        .name(fileName)
+                        .size(1L)
+                        .urls(
+                            Lists.newArrayList(
+                                Url.builder()
+                                    .type("http")
+                                    .value(URI.create(goodStorageBasePath + fileName))
+                                    .build()))
+                        .build()))
+            .build();
 
     mockServer
         .expect(requestTo(dynafedBasePath + fileName + "?metalink"))
@@ -175,26 +168,25 @@ public class DynafedServiceTest {
 
   @Test
   public void testFailPopulateDynafedServiceNotFound() throws IOException {
-    Dynafed dyanfedRequirement = Dynafed
-        .builder()
-        .files(Lists.newArrayList(File
-            .builder()
-            .endpoint(dynafedBasePath + fileName)
-            .build()))
-        .build();
-    Metalink metalink = Metalink
-        .builder()
-        .files(Lists.newArrayList(Metalink.File
-            .builder()
-            .name(fileName)
-            .size(1L)
-            .urls(Lists.newArrayList(Url
-                .builder()
-                .type("http")
-                .value(URI.create(badStorageBasePath + fileName))
-                .build()))
-            .build()))
-        .build();
+    Dynafed dyanfedRequirement =
+        Dynafed.builder()
+            .files(Lists.newArrayList(File.builder().endpoint(dynafedBasePath + fileName).build()))
+            .build();
+    Metalink metalink =
+        Metalink.builder()
+            .files(
+                Lists.newArrayList(
+                    Metalink.File.builder()
+                        .name(fileName)
+                        .size(1L)
+                        .urls(
+                            Lists.newArrayList(
+                                Url.builder()
+                                    .type("http")
+                                    .value(URI.create(badStorageBasePath + fileName))
+                                    .build()))
+                        .build()))
+            .build();
 
     mockServer
         .expect(requestTo(dynafedBasePath + fileName + "?metalink"))
@@ -205,10 +197,11 @@ public class DynafedServiceTest {
     Map<String, CloudProvider> cloudProviders = generateCloudProviders();
 
     assertThatCode(
-        () -> dynafedService.populateDyanfedData(dyanfedRequirement, cloudProviders, oidcTokenId))
+            () ->
+                dynafedService.populateDyanfedData(dyanfedRequirement, cloudProviders, oidcTokenId))
         .isInstanceOf(DeploymentException.class)
-        .hasMessage("No registered storage service available for file %s",
-            dynafedBasePath + fileName);
+        .hasMessage(
+            "No registered storage service available for file %s", dynafedBasePath + fileName);
 
     mockServer.verify();
   }
@@ -216,48 +209,47 @@ public class DynafedServiceTest {
   private Map<String, CloudProvider> generateCloudProviders() {
     Map<String, CloudService> cloudServices = new HashMap<>();
 
-    CloudService storageService = CloudService
-        .builder()
-        .id("storage-service-id")
-        .providerId("cloud-provider-id")
-        .endpoint(goodStorageBasePath)
-        .serviceType(CloudService.CDMI_STORAGE_SERVICE)
-        .type(CloudServiceType.STORAGE)
-        .hostname(goodStorageHostname)
-        .build();
+    CloudService storageService =
+        CloudService.builder()
+            .id("storage-service-id")
+            .providerId("cloud-provider-id")
+            .endpoint(goodStorageBasePath)
+            .serviceType(CloudService.CDMI_STORAGE_SERVICE)
+            .type(CloudServiceType.STORAGE)
+            .hostname(goodStorageHostname)
+            .build();
     cloudServices.put(storageService.getId(), storageService);
 
-    CloudService oneProviderService = CloudService
-        .builder()
-        .id("oneprovider-service-id")
-        .providerId("cloud-provider-id")
-        .endpoint(goodStorageBasePath)
-        .serviceType(CloudService.ONEPROVIDER_STORAGE_SERVICE)
-        .type(CloudServiceType.STORAGE)
-        .hostname(goodStorageHostname)
-        .build();
+    CloudService oneProviderService =
+        CloudService.builder()
+            .id("oneprovider-service-id")
+            .providerId("cloud-provider-id")
+            .endpoint(goodStorageBasePath)
+            .serviceType(CloudService.ONEPROVIDER_STORAGE_SERVICE)
+            .type(CloudServiceType.STORAGE)
+            .hostname(goodStorageHostname)
+            .build();
     cloudServices.put(oneProviderService.getId(), oneProviderService);
 
-    CloudService computeService = CloudService
-        .builder()
-        .id("compute-service-id")
-        .providerId("cloud-provider-id")
-        .endpoint(goodStorageBasePath)
-        .serviceType(CloudService.OPENSTACK_COMPUTE_SERVICE)
-        .type(CloudServiceType.COMPUTE)
-        .hostname(goodStorageHostname)
-        .build();
+    CloudService computeService =
+        CloudService.builder()
+            .id("compute-service-id")
+            .providerId("cloud-provider-id")
+            .endpoint(goodStorageBasePath)
+            .serviceType(CloudService.OPENSTACK_COMPUTE_SERVICE)
+            .type(CloudServiceType.COMPUTE)
+            .hostname(goodStorageHostname)
+            .build();
     cloudServices.put(oneProviderService.getId(), computeService);
 
     Map<String, CloudProvider> cloudProviders = new HashMap<>();
-    CloudProvider cloudProvider = CloudProvider
-        .builder()
-        .id("cloud-provider-id")
-        .name("cloud-provider-name")
-        .services(cloudServices)
-        .build();
+    CloudProvider cloudProvider =
+        CloudProvider.builder()
+            .id("cloud-provider-id")
+            .name("cloud-provider-name")
+            .services(cloudServices)
+            .build();
     cloudProviders.put(cloudProvider.getId(), cloudProvider);
     return cloudProviders;
   }
-
 }

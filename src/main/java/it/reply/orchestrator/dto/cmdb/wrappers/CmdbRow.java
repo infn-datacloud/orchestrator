@@ -18,17 +18,13 @@
 package it.reply.orchestrator.dto.cmdb.wrappers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.dto.cmdb.CmdbIdentifiable;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -46,5 +42,4 @@ public class CmdbRow<T extends CmdbIdentifiable> {
   @NonNull
   @NotNull
   private CmdbDataWrapper<T> doc;
-
 }

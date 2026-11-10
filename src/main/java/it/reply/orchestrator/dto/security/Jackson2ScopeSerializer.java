@@ -20,11 +20,9 @@ package it.reply.orchestrator.dto.security;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
-
 import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.util.StringUtils;
 
 public class Jackson2ScopeSerializer extends NonTypedScalarSerializerBase<Set<String>> {
@@ -37,21 +35,17 @@ public class Jackson2ScopeSerializer extends NonTypedScalarSerializerBase<Set<St
 
   @Override
   public boolean isEmpty(SerializerProvider provider, Set<String> value) {
-    return value == null || value
-        .stream()
-        .filter(StringUtils::hasText)
-        .map(String::trim)
-        .count() == 0;
+    return value == null
+        || value.stream().filter(StringUtils::hasText).map(String::trim).count() == 0;
   }
 
   @Override
   public void serialize(Set<String> value, JsonGenerator gen, SerializerProvider provider)
       throws IOException {
-    gen.writeString(value
-        .stream()
-        .filter(StringUtils::hasText)
-        .map(String::trim)
-        .collect(Collectors.joining(" ")));
+    gen.writeString(
+        value.stream()
+            .filter(StringUtils::hasText)
+            .map(String::trim)
+            .collect(Collectors.joining(" ")));
   }
-
 }

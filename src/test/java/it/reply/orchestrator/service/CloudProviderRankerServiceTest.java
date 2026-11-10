@@ -48,21 +48,17 @@ import org.springframework.web.client.HttpStatusCodeException;
 @RestClientTest(CloudProviderRankerService.class)
 public class CloudProviderRankerServiceTest {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
   @Autowired
   @Qualifier(value = "cloudProviderRankerServiceLocalImpl")
   private CloudProviderRankerService cloudProviderRankerService;
 
-  @Mock
-  private CprProperties cprProperties;
+  @Mock private CprProperties cprProperties;
 
-  @Autowired
-  private MockRestServiceServer mockServer;
+  @Autowired private MockRestServiceServer mockServer;
 
   private void mockRequest(CloudProviderRankerRequest cprr, DefaultResponseCreator response)
       throws JsonProcessingException {
@@ -75,22 +71,19 @@ public class CloudProviderRankerServiceTest {
 
   public static List<RankedCloudService> generateMockedRankedServices() {
     return Lists.newArrayList(
-        RankedCloudService
-            .builder()
+        RankedCloudService.builder()
             .provider("provider-RECAS-BARI")
             .serviceId("provider-RECAS-BARI-service-1")
             .rank(2)
             .ranked(true)
             .build(),
-        RankedCloudService
-            .builder()
+        RankedCloudService.builder()
             .provider("provider-RECAS-BARI")
             .serviceId("provider-RECAS-BARI-service-2")
             .rank(3)
             .ranked(true)
             .build(),
-        RankedCloudService
-            .builder()
+        RankedCloudService.builder()
             .provider("provider-UPV-GRyCAP")
             .serviceId("provider-UPV-GRyCAP-service-1")
             .rank(1)
@@ -121,9 +114,9 @@ public class CloudProviderRankerServiceTest {
     assertThatCode(() -> cloudProviderRankerService.getProviderServicesRanking(cprr))
         .isInstanceOf(DeploymentException.class)
         .hasCauseInstanceOf(HttpStatusCodeException.class)
-        .hasMessage("Error retrieving cloud provider ranking data; nested exception is "
-            + "org.springframework.web.client.HttpServerErrorException: 500 Internal Server Error");
+        .hasMessage(
+            "Error retrieving cloud provider ranking data; nested exception is "
+                + "org.springframework.web.client.HttpServerErrorException: 500 Internal Server Error");
     mockServer.verify();
   }
-
 }

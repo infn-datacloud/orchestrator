@@ -18,9 +18,7 @@
 package it.reply.orchestrator.workflow;
 
 import java.util.UUID;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.ignite.Ignite;
 import org.apache.ignite.lang.IgniteBiPredicate;
 import org.flowable.common.engine.impl.interceptor.EngineConfigurationConstants;
@@ -43,29 +41,32 @@ public class HistoryJobMessageListener implements IgniteBiPredicate<UUID, String
   /**
    * Creates a new HistoryJobMessageListener.
    *
-   * @param processEngineConfiguration
-   *          the ProcessEngineConfiguration to use
-   * @param ignite
-   *          the Ignite instance to use
+   * @param processEngineConfiguration the ProcessEngineConfiguration to use
+   * @param ignite the Ignite instance to use
    */
-  public HistoryJobMessageListener(ProcessEngineConfiguration processEngineConfiguration,
-      Ignite ignite) {
+  public HistoryJobMessageListener(
+      ProcessEngineConfiguration processEngineConfiguration, Ignite ignite) {
     this.exceptionHandler = new UnacquireAsyncHistoryJobExceptionHandler();
-    this.jobServiceConfiguration = (JobServiceConfiguration) processEngineConfiguration
-        .getServiceConfigurations()
-        .get(EngineConfigurationConstants.KEY_JOB_SERVICE_CONFIG);
+    this.jobServiceConfiguration =
+        (JobServiceConfiguration)
+            processEngineConfiguration
+                .getServiceConfigurations()
+                .get(EngineConfigurationConstants.KEY_JOB_SERVICE_CONFIG);
     ignite.message().localListen(MessageBasedJobManager.HISTORY_JOBS_TOPIC, this);
   }
 
   @Override
   public boolean apply(UUID nodeId, String jobId) {
     try {
-      new ExecuteAsyncRunnable(jobId, jobServiceConfiguration,
-          jobServiceConfiguration.getHistoryJobEntityManager(), exceptionHandler).run();
+      new ExecuteAsyncRunnable(
+              jobId,
+              jobServiceConfiguration,
+              jobServiceConfiguration.getHistoryJobEntityManager(),
+              exceptionHandler)
+          .run();
     } catch (RuntimeException e) {
       LOG.error("Exception when handling message from job queue", e);
     }
     return true;
   }
-
 }

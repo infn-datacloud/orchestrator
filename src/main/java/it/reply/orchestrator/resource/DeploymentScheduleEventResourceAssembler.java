@@ -50,18 +50,21 @@ public class DeploymentScheduleEventResourceAssembler
   private DeploymentScheduleEventResource getDeploymentScheduleResource(
       DeploymentScheduleEvent entity) {
     String replicationStatus =
-        Optional.ofNullable(entity.getMainReplicationRule()).map(ReplicationRule::getStatus)
-            .map(Objects::toString).orElse(null);
-    DeploymentScheduleEventResource resource = DeploymentScheduleEventResource.builder()
-        .uuid(entity.getId())
-        .creationTime(entity.getCreatedAt())
-        .updateTime(entity.getUpdatedAt())
-        .name(entity.getName())
-        .scope(entity.getScope())
-        .replicationStatus(replicationStatus)
-        .deployment(deploymentResourceAssembler.getDeploymentResource(entity.getDeployment(), true))
-        .build();
+        Optional.ofNullable(entity.getMainReplicationRule())
+            .map(ReplicationRule::getStatus)
+            .map(Objects::toString)
+            .orElse(null);
+    DeploymentScheduleEventResource resource =
+        DeploymentScheduleEventResource.builder()
+            .uuid(entity.getId())
+            .creationTime(entity.getCreatedAt())
+            .updateTime(entity.getUpdatedAt())
+            .name(entity.getName())
+            .scope(entity.getScope())
+            .replicationStatus(replicationStatus)
+            .deployment(
+                deploymentResourceAssembler.getDeploymentResource(entity.getDeployment(), true))
+            .build();
     return resource;
   }
-
 }

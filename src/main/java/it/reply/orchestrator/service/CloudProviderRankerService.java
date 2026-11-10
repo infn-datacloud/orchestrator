@@ -19,12 +19,10 @@ package it.reply.orchestrator.service;
 
 import it.reply.orchestrator.dto.ranker.CloudProviderRankerRequest;
 import it.reply.orchestrator.dto.ranker.RankedCloudService;
-
 import java.util.List;
 
 public interface CloudProviderRankerService {
 
   public List<RankedCloudService> getProviderServicesRanking(
       CloudProviderRankerRequest cloudProviderRankerRequest);
-
 }

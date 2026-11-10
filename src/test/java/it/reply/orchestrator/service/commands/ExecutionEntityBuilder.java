@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 
 public class ExecutionEntityBuilder {
@@ -57,12 +56,13 @@ public class ExecutionEntityBuilder {
   }
 
   private Object handleMessages(Object value) {
-//    if (value instanceof BaseWorkflowMessage) {
-//      return JsonUtils.toJsonNode(value);
-//    } else {
+    //    if (value instanceof BaseWorkflowMessage) {
+    //      return JsonUtils.toJsonNode(value);
+    //    } else {
     return value;
-//    }
+    //    }
   }
+
   public ExecutionEntity build() {
     return execution;
   }

@@ -20,13 +20,11 @@ package it.reply.orchestrator.utils;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.onedata.OneData;
 import it.reply.orchestrator.service.IndigoInputsPreProcessorService.RuntimeProperties;
-
 import java.util.Map;
 
 public class OneDataUtils {
 
-  private OneDataUtils() {
-  }
+  private OneDataUtils() {}
 
   /**
    * Extract OneData parameters from DeploymentMessage.
@@ -37,16 +35,17 @@ public class OneDataUtils {
   public static RuntimeProperties getOneDataRuntimeProperties(DeploymentMessage deploymentMessage) {
     Map<String, OneData> odParameters = deploymentMessage.getOneDataParameters();
     RuntimeProperties runtimeProperties = new RuntimeProperties();
-    odParameters.forEach((nodeName, odParameter) -> {
-      runtimeProperties.put(odParameter.getOnezone(), nodeName, "onezone");
-      runtimeProperties.put(odParameter.getToken(), nodeName, "token");
-      runtimeProperties
-        .put(odParameter.getSelectedOneprovider().getEndpoint(), nodeName, "selected_provider");
-      if (odParameter.isServiceSpace()) {
-        runtimeProperties.put(odParameter.getSpace(), nodeName, "space");
-        runtimeProperties.put(odParameter.getPath(), nodeName, "path");
-      }
-    });
+    odParameters.forEach(
+        (nodeName, odParameter) -> {
+          runtimeProperties.put(odParameter.getOnezone(), nodeName, "onezone");
+          runtimeProperties.put(odParameter.getToken(), nodeName, "token");
+          runtimeProperties.put(
+              odParameter.getSelectedOneprovider().getEndpoint(), nodeName, "selected_provider");
+          if (odParameter.isServiceSpace()) {
+            runtimeProperties.put(odParameter.getSpace(), nodeName, "space");
+            runtimeProperties.put(odParameter.getPath(), nodeName, "path");
+          }
+        });
     return runtimeProperties;
   }
 }

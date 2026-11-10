@@ -31,6 +31,7 @@ public class ReactorConfig {
 
   /**
    * Generated an {@link EventLoopGroup}.
+   *
    * @return the EventLoopGroup
    */
   @Bean(destroyMethod = "shutdownGracefully")
@@ -44,5 +45,4 @@ public class ReactorConfig {
   public Environment reactorEnvironment() {
     return new Environment();
   }
-
 }

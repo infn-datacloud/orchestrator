@@ -33,11 +33,11 @@ import org.jetbrains.annotations.NotNull;
 @AllArgsConstructor
 public class Flavor implements CmdbIdentifiable, Comparable<Flavor> {
 
-  private static final Comparator<Flavor> COMPARATOR = Comparator
-      .comparing(Flavor::getNumGpus, Comparator.nullsFirst(Comparator.naturalOrder()))
-      .thenComparing(Flavor::getNumCpus, Comparator.nullsFirst(Comparator.naturalOrder()))
-      .thenComparing(Flavor::getMemSize, Comparator.nullsFirst(Comparator.naturalOrder()))
-      .thenComparing(Flavor::getDiskSize, Comparator.nullsFirst(Comparator.naturalOrder()));
+  private static final Comparator<Flavor> COMPARATOR =
+      Comparator.comparing(Flavor::getNumGpus, Comparator.nullsFirst(Comparator.naturalOrder()))
+          .thenComparing(Flavor::getNumCpus, Comparator.nullsFirst(Comparator.naturalOrder()))
+          .thenComparing(Flavor::getMemSize, Comparator.nullsFirst(Comparator.naturalOrder()))
+          .thenComparing(Flavor::getDiskSize, Comparator.nullsFirst(Comparator.naturalOrder()));
 
   @JsonProperty("id")
   @Nullable

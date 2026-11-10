@@ -18,7 +18,6 @@
 package it.reply.orchestrator.enums;
 
 public enum Status {
-
   CREATE_IN_PROGRESS,
   CREATE_COMPLETE,
   CREATE_FAILED,
@@ -29,5 +28,4 @@ public enum Status {
   DELETE_COMPLETE,
   DELETE_FAILED,
   UNKNOWN;
-
 }

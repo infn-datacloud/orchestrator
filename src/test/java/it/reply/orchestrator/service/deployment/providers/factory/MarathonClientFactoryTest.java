@@ -17,14 +17,16 @@
 
 package it.reply.orchestrator.service.deployment.providers.factory;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.dto.CloudProviderEndpoint.IaaSType;
 import it.reply.orchestrator.dto.security.GenericServiceCredential;
 import it.reply.orchestrator.service.deployment.providers.CredentialProviderService;
-
 import java.net.URISyntaxException;
 import java.util.UUID;
-
+import junitparams.JUnitParamsRunner;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -38,25 +40,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 
-import junitparams.JUnitParamsRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @RunWith(JUnitParamsRunner.class)
 public class MarathonClientFactoryTest {
 
-  @Rule
-  public MockitoRule rule = MockitoJUnit.rule();
+  @Rule public MockitoRule rule = MockitoJUnit.rule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @MockBean
-  private CredentialProviderService credProvServ;
+  @MockBean private CredentialProviderService credProvServ;
 
   private MarathonClientFactory clientFactory;
 
@@ -69,17 +62,17 @@ public class MarathonClientFactoryTest {
   @Test
   public void testgetClientSuccessfulNoIam() throws URISyntaxException {
 
-    CloudProviderEndpoint cloudProviderEndpoint = CloudProviderEndpoint
-        .builder()
-        .cpEndpoint("http://example.com")
-        .cpComputeServiceId(UUID.randomUUID().toString())
-        .iaasType(IaaSType.MARATHON)
-        .build();
+    CloudProviderEndpoint cloudProviderEndpoint =
+        CloudProviderEndpoint.builder()
+            .cpEndpoint("http://example.com")
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .iaasType(IaaSType.MARATHON)
+            .build();
 
     String serviceId = cloudProviderEndpoint.getCpComputeServiceId();
 
-    Mockito
-        .when(credProvServ.credentialProvider(serviceId, "token", GenericServiceCredential.class))
+    Mockito.when(
+            credProvServ.credentialProvider(serviceId, "token", GenericServiceCredential.class))
         .thenReturn(new GenericServiceCredential("username", "password"));
 
     assertThat(clientFactory.build(cloudProviderEndpoint, "token"))
@@ -90,19 +83,19 @@ public class MarathonClientFactoryTest {
   @Test
   public void testgetClientSuccessful() throws URISyntaxException {
 
-    CloudProviderEndpoint cloudProviderEndpoint = CloudProviderEndpoint
-        .builder()
-        .cpEndpoint("http://example.com")
-        .cpComputeServiceId(UUID.randomUUID().toString())
-        .iaasType(IaaSType.MARATHON)
-        .iamEnabled(true)
-        .idpProtocol("oidc")
-        .build();
+    CloudProviderEndpoint cloudProviderEndpoint =
+        CloudProviderEndpoint.builder()
+            .cpEndpoint("http://example.com")
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .iaasType(IaaSType.MARATHON)
+            .iamEnabled(true)
+            .idpProtocol("oidc")
+            .build();
 
     String serviceId = cloudProviderEndpoint.getCpComputeServiceId();
 
-    Mockito
-        .when(credProvServ.credentialProvider(serviceId, "token", GenericServiceCredential.class))
+    Mockito.when(
+            credProvServ.credentialProvider(serviceId, "token", GenericServiceCredential.class))
         .thenReturn(new GenericServiceCredential("username", "password"));
 
     assertThat(clientFactory.build(cloudProviderEndpoint, "token"))
@@ -112,26 +105,26 @@ public class MarathonClientFactoryTest {
 
   @Test
   public void testgetClientErrorNoIam() {
-    CloudProviderEndpoint cloudProviderEndpoint = CloudProviderEndpoint
-        .builder()
-        .cpEndpoint("http://example.com")
-        .cpComputeServiceId(UUID.randomUUID().toString())
-        .iaasType(IaaSType.MARATHON)
-        .build();
+    CloudProviderEndpoint cloudProviderEndpoint =
+        CloudProviderEndpoint.builder()
+            .cpEndpoint("http://example.com")
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .iaasType(IaaSType.MARATHON)
+            .build();
     assertThatThrownBy(() -> clientFactory.build(cloudProviderEndpoint, null))
         .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   public void testgetClientError() {
-    CloudProviderEndpoint cloudProviderEndpoint = CloudProviderEndpoint
-        .builder()
-        .cpEndpoint("http://example.com")
-        .cpComputeServiceId(UUID.randomUUID().toString())
-        .iaasType(IaaSType.MARATHON)
-        .iamEnabled(true)
-        .idpProtocol("oidc")
-        .build();
+    CloudProviderEndpoint cloudProviderEndpoint =
+        CloudProviderEndpoint.builder()
+            .cpEndpoint("http://example.com")
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .iaasType(IaaSType.MARATHON)
+            .iamEnabled(true)
+            .idpProtocol("oidc")
+            .build();
     assertThatThrownBy(() -> clientFactory.build(cloudProviderEndpoint, null))
         .isInstanceOf(NullPointerException.class);
   }

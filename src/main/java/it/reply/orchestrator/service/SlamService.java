@@ -24,5 +24,4 @@ import javax.annotation.Nullable;
 public interface SlamService {
 
   public SlamPreferences getCustomerPreferences(OidcTokenId tokenId, @Nullable String userGroup);
-
 }

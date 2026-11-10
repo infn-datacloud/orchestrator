@@ -27,29 +27,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseDeployCommand extends BaseWorkflowCommand<DeploymentMessage> {
 
-  @Autowired
-  private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
+  @Autowired private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Override
   protected DeploymentMessage getMessage(DelegateExecution execution) {
-    return getRequiredParameter(execution, WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-        DeploymentMessage.class);
+    return getRequiredParameter(
+        execution, WorkflowConstants.Param.DEPLOYMENT_MESSAGE, DeploymentMessage.class);
   }
 
   @Override
   protected void setMessage(DeploymentMessage message, DelegateExecution execution) {
-    execution
-        .setVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, objectMapper.valueToTree(message),
-            false);
+    execution.setVariable(
+        WorkflowConstants.Param.DEPLOYMENT_MESSAGE, objectMapper.valueToTree(message), false);
   }
 
   protected DeploymentProviderService getDeploymentProviderService(
       DeploymentMessage deploymentMessage) {
-    return deploymentProviderServiceRegistry
-        .getDeploymentProviderService(deploymentMessage.getDeploymentId());
+    return deploymentProviderServiceRegistry.getDeploymentProviderService(
+        deploymentMessage.getDeploymentId());
   }
-
 }

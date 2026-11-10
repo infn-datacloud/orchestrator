@@ -29,11 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public abstract class AbstractDeploymentProviderService implements DeploymentProviderService {
 
-  @Autowired
-  private DeploymentRepository deploymentRepository;
+  @Autowired private DeploymentRepository deploymentRepository;
 
-  @Autowired
-  private DeploymentStatusHelper deploymentStatusHelper;
+  @Autowired private DeploymentStatusHelper deploymentStatusHelper;
 
   protected Deployment getDeployment(DeploymentMessage deploymentMessage) {
     return deploymentRepository.findOne(deploymentMessage.getDeploymentId());
@@ -46,7 +44,7 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
   /**
    * updateOnError.
    *
-   * @param deploymentUuid  the deploymentUuid
+   * @param deploymentUuid the deploymentUuid
    * @param throwable the throwable object
    */
   public void updateOnError(String deploymentUuid, Throwable throwable) {
@@ -67,10 +65,8 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
   /**
    * Update the status of the deployment with an error message.
    *
-   * @param deploymentUuid
-   *          the deployment id
-   * @param message
-   *          the error message
+   * @param deploymentUuid the deployment id
+   * @param message the error message
    */
   public void updateOnError(String deploymentUuid, String message) {
     deploymentStatusHelper.updateOnError(deploymentUuid, message);
@@ -78,7 +74,6 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
 
   /**
    * Update the status of a deployment successfully.
-   *
    *
    * @param deploymentUuid the deployment UUID
    */
@@ -105,14 +100,16 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
     try {
       return getAdditionalErrorInfoInternal(deploymentMessage);
     } catch (RuntimeException ex) {
-      LOG.error("Error while retrieving additional error info for deployment {}",
-          deploymentMessage.getDeploymentId(), ex);
+      LOG.error(
+          "Error while retrieving additional error info for deployment {}",
+          deploymentMessage.getDeploymentId(),
+          ex);
       return Optional.empty();
     }
   }
 
-  protected abstract Optional<String>
-      getAdditionalErrorInfoInternal(DeploymentMessage deploymentMessage);
+  protected abstract Optional<String> getAdditionalErrorInfoInternal(
+      DeploymentMessage deploymentMessage);
 
   @Override
   public Optional<String> getDeploymentLog(DeploymentMessage deploymentMessage) {
@@ -120,14 +117,15 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
     try {
       return getDeploymentLogInternal(deploymentMessage);
     } catch (RuntimeException ex) {
-      LOG.error("Error while retrieving infrastructure log for deployment {}",
-          deploymentMessage.getDeploymentId(), ex);
+      LOG.error(
+          "Error while retrieving infrastructure log for deployment {}",
+          deploymentMessage.getDeploymentId(),
+          ex);
       return Optional.empty();
     }
   }
 
-  protected abstract Optional<String>
-      getDeploymentLogInternal(DeploymentMessage deploymentMessage);
+  protected abstract Optional<String> getDeploymentLogInternal(DeploymentMessage deploymentMessage);
 
   @Override
   public Optional<String> getDeploymentExtendedInfo(DeploymentMessage deploymentMessage) {
@@ -135,12 +133,14 @@ public abstract class AbstractDeploymentProviderService implements DeploymentPro
     try {
       return getDeploymentExtendedInfoInternal(deploymentMessage);
     } catch (RuntimeException ex) {
-      LOG.error("Error while retrieving additional info for deployment {}",
-          deploymentMessage.getDeploymentId(), ex);
+      LOG.error(
+          "Error while retrieving additional info for deployment {}",
+          deploymentMessage.getDeploymentId(),
+          ex);
       return Optional.empty();
     }
   }
 
-  protected abstract Optional<String>
-      getDeploymentExtendedInfoInternal(DeploymentMessage deploymentMessage);
+  protected abstract Optional<String> getDeploymentExtendedInfoInternal(
+      DeploymentMessage deploymentMessage);
 }

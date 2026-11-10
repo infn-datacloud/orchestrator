@@ -32,17 +32,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
     property = "event_type",
     defaultImpl = GenericEvent.class,
     visible = true,
-    include = JsonTypeInfo.As.EXISTING_PROPERTY
-)
+    include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes({
-    @JsonSubTypes.Type(
-        value = RuleOkEvent.class,
-        name = RuleOkEvent.EVENT_TYPE
-    ),
-    @JsonSubTypes.Type(
-        value = TransferFailedEvent.class,
-        name = TransferFailedEvent.EVENT_TYPE
-    )
+  @JsonSubTypes.Type(value = RuleOkEvent.class, name = RuleOkEvent.EVENT_TYPE),
+  @JsonSubTypes.Type(value = TransferFailedEvent.class, name = TransferFailedEvent.EVENT_TYPE)
 })
 @Data
 @AllArgsConstructor
@@ -63,6 +56,4 @@ public abstract class Event<T extends EventPayload> {
   @NonNull
   @NotNull
   private T payload;
-
 }
-

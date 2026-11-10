@@ -49,10 +49,14 @@ public interface CmdbService {
 
   public Flavor getFlavorById(String flavorId);
 
-  public CloudProvider fillCloudProviderInfo(String providerId, Set<String> servicesWithSla,
-      String organisation, RankCloudProvidersMessage rankCloudProvidersMessage);
-
-  public CloudProvider getUpdatedCloudProviderInfo(Deployment deployment, String organisation,
+  public CloudProvider fillCloudProviderInfo(
+      String providerId,
+      Set<String> servicesWithSla,
+      String organisation,
       RankCloudProvidersMessage rankCloudProvidersMessage);
 
+  public CloudProvider getUpdatedCloudProviderInfo(
+      Deployment deployment,
+      String organisation,
+      RankCloudProvidersMessage rankCloudProvidersMessage);
 }

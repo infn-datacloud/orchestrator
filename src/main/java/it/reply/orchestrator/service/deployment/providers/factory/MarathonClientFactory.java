@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.deployment.providers.factory;
 
 import com.google.gson.annotations.SerializedName;
-
 import feign.Feign;
 import feign.Logger.Level;
 import feign.RequestInterceptor;
@@ -28,26 +27,20 @@ import feign.codec.ErrorDecoder;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.slf4j.Slf4jLogger;
-
 import it.reply.orchestrator.dto.cmdb.MarathonService;
 import it.reply.orchestrator.service.deployment.providers.CredentialProviderService;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
 import mesosphere.client.common.ModelUtils;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonException;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +48,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class MarathonClientFactory extends
-    MesosFrameworkClientFactory<MarathonService, Marathon> {
+public class MarathonClientFactory extends MesosFrameworkClientFactory<MarathonService, Marathon> {
 
   public MarathonClientFactory(CredentialProviderService credProvServ) {
     super(credProvServ);
@@ -105,23 +97,24 @@ public class MarathonClientFactory extends
     @Override
     public Exception decode(String methodKey, Response response) {
 
-      String message = Optional
-          .ofNullable(response.body())
-          .map(body -> {
-            Reader reader = null;
-            try {
-              reader = body.asReader();
-              return ModelUtils.GSON.fromJson(reader, ErrorResponse.class);
-            } catch (IOException | RuntimeException ex) {
-              LOG.trace("Error deserializing error response", ex);
-              return null;
-            } finally {
-              Util.ensureClosed(reader);
-            }
-          })
-          .filter(errorResponse -> errorResponse.getMessage() != null)
-          .map(errorResponse -> errorResponse.toString())
-          .orElseGet(response::reason);
+      String message =
+          Optional.ofNullable(response.body())
+              .map(
+                  body -> {
+                    Reader reader = null;
+                    try {
+                      reader = body.asReader();
+                      return ModelUtils.GSON.fromJson(reader, ErrorResponse.class);
+                    } catch (IOException | RuntimeException ex) {
+                      LOG.trace("Error deserializing error response", ex);
+                      return null;
+                    } finally {
+                      Util.ensureClosed(reader);
+                    }
+                  })
+              .filter(errorResponse -> errorResponse.getMessage() != null)
+              .map(errorResponse -> errorResponse.toString())
+              .orElseGet(response::reason);
       return new MarathonException(response.status(), message);
     }
   }
@@ -130,18 +123,18 @@ public class MarathonClientFactory extends
   public Marathon build(String marathonEndpoint, RequestInterceptor authInterceptor) {
     LOG.info("Generating Marathon client with endpoint {}", marathonEndpoint);
 
-    return Feign
-        .builder()
+    return Feign.builder()
         .encoder(new GsonEncoder(ModelUtils.GSON))
         .decoder(new GsonDecoder(ModelUtils.GSON))
         .logger(new Slf4jLogger(Marathon.class))
         .logLevel(Level.FULL)
         .errorDecoder(new DeserializingMarathonErrorDecoder())
         .requestInterceptor(authInterceptor)
-        .requestInterceptor(template -> {
-          template.header(HttpHeaders.ACCEPT, "application/json");
-          template.header(HttpHeaders.CONTENT_TYPE, "application/json");
-        })
+        .requestInterceptor(
+            template -> {
+              template.header(HttpHeaders.ACCEPT, "application/json");
+              template.header(HttpHeaders.CONTENT_TYPE, "application/json");
+            })
         .target(Marathon.class, marathonEndpoint);
   }
 }

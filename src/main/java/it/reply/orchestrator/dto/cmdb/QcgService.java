@@ -24,45 +24,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class QcgService extends  CloudService {
+public class QcgService extends CloudService {
 
   /**
    * Create a new QcgService.
-   * @param id
-   *     the id of the service
-   * @param serviceType
-   *     the serviceType of the service
-   * @param endpoint
-   *     the endpoint of the service
-   * @param providerId
-   *     the providerId of the service
-   * @param type
-   *     the type of the service
-   * @param publicService
-   *     the publicService of the service
-   * @param region
-   *     the region of the service
-   * @param tenant
-   *     the tenant
-   * @param hostname
-   *     the hostname of the service
-   * @param parentServiceId
-   *     the parentServiceId of the service
-   * @param iamEnabled
-   *     the iamEnabled flag
-   * @param idpProtocol
-   *     the IDP protocol name
-   * @param publicIpAssignable
-   *     the publicIpAssignable flag
-   * @param supportedIdps
-   *     the supportedIdps
+   *
+   * @param id the id of the service
+   * @param serviceType the serviceType of the service
+   * @param endpoint the endpoint of the service
+   * @param providerId the providerId of the service
+   * @param type the type of the service
+   * @param publicService the publicService of the service
+   * @param region the region of the service
+   * @param tenant the tenant
+   * @param hostname the hostname of the service
+   * @param parentServiceId the parentServiceId of the service
+   * @param iamEnabled the iamEnabled flag
+   * @param idpProtocol the IDP protocol name
+   * @param publicIpAssignable the publicIpAssignable flag
+   * @param supportedIdps the supportedIdps
    */
   @Builder(builderMethodName = "qcgBuilder")
   public QcgService(
@@ -81,8 +67,22 @@ public class QcgService extends  CloudService {
       @NonNull String idpProtocol,
       boolean publicIpAssignable,
       @NonNull List<SupportedIdp> supportedIdps) {
-    super(id, serviceType, endpoint, microversion, providerId, type, publicService,
-          tenant, region, hostname, parentServiceId, iamEnabled, idpProtocol,
-          publicIpAssignable, supportedIdps, Collections.<VolumeType>emptyList());
+    super(
+        id,
+        serviceType,
+        endpoint,
+        microversion,
+        providerId,
+        type,
+        publicService,
+        tenant,
+        region,
+        hostname,
+        parentServiceId,
+        iamEnabled,
+        idpProtocol,
+        publicIpAssignable,
+        supportedIdps,
+        Collections.<VolumeType>emptyList());
   }
 }

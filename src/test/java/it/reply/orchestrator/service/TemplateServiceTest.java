@@ -20,7 +20,7 @@ package it.reply.orchestrator.service;
 import it.reply.orchestrator.controller.ControllerTestUtils;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.exception.http.NotFoundException;
-
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,17 +28,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.UUID;
-
 public class TemplateServiceTest {
 
   private TemplateService templateService;
 
-  @Mock
-  private DeploymentService deploymentService;
+  @Mock private DeploymentService deploymentService;
 
-  @Mock
-  private DeploymentScheduleServiceImpl deploymentScheduleService;
+  @Mock private DeploymentScheduleServiceImpl deploymentScheduleService;
 
   @Before
   public void setup() {
@@ -53,7 +49,8 @@ public class TemplateServiceTest {
 
     Mockito.when(deploymentService.getDeployment(deploymentId)).thenReturn(deployment);
 
-    Assert.assertEquals(templateService.getDeploymentTemplate(deploymentId), deployment.getTemplate());
+    Assert.assertEquals(
+        templateService.getDeploymentTemplate(deploymentId), deployment.getTemplate());
   }
 
   @Test(expected = NotFoundException.class)
@@ -63,5 +60,4 @@ public class TemplateServiceTest {
         .thenThrow(new NotFoundException(deploymentId));
     templateService.getDeploymentTemplate(deploymentId);
   }
-
 }

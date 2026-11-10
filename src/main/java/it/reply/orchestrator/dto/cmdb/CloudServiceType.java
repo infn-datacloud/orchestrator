@@ -21,12 +21,17 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public enum CloudServiceType {
-
-  @JsonProperty("compute") COMPUTE,
-  @JsonProperty("storage") STORAGE,
-  @JsonProperty("block-storage") BLOCK_STORAGE,
-  @JsonProperty("object-store") OBJECT_STORE,
-  @JsonProperty("network") NETWORK,
-  @JsonEnumDefaultValue @JsonProperty("unknown") UNKNOWN;
-
+  @JsonProperty("compute")
+  COMPUTE,
+  @JsonProperty("storage")
+  STORAGE,
+  @JsonProperty("block-storage")
+  BLOCK_STORAGE,
+  @JsonProperty("object-store")
+  OBJECT_STORE,
+  @JsonProperty("network")
+  NETWORK,
+  @JsonEnumDefaultValue
+  @JsonProperty("unknown")
+  UNKNOWN;
 }

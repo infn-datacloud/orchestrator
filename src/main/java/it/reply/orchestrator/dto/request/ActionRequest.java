@@ -18,14 +18,11 @@
 package it.reply.orchestrator.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -40,7 +37,5 @@ public class ActionRequest {
 
   @SuppressWarnings("null")
   @Deprecated
-  protected ActionRequest() {
-  }
-
+  protected ActionRequest() {}
 }

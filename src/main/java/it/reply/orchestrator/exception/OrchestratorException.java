@@ -30,5 +30,4 @@ public class OrchestratorException extends NestedRuntimeException {
   public OrchestratorException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

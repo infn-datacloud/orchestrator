@@ -18,7 +18,6 @@
 package it.reply.orchestrator.controller;
 
 import it.reply.orchestrator.config.properties.OidcProperties;
-//import it.reply.orchestrator.dal.entity.OidcEntity;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
 import it.reply.orchestrator.dal.entity.Resource;
 import it.reply.orchestrator.dto.request.ActionRequest;
@@ -56,37 +55,32 @@ public class ResourceController {
   private static final String OFFLINE_ACCESS_REQUIRED_CONDITION =
       "#oauth2.throwOnError(#oauth2.hasAnyScope('offline_access'))";
 
-  @Autowired
-  private ResourceService resourceService;
+  @Autowired private ResourceService resourceService;
 
-  @Autowired
-  BaseResourceAssembler baseResourceAssembler;
+  @Autowired BaseResourceAssembler baseResourceAssembler;
 
-  @Autowired
-  private OAuth2TokenService oauth2Tokenservice;
+  @Autowired private OAuth2TokenService oauth2Tokenservice;
 
-  @Autowired
-  private OidcProperties oidcProperties;
+  @Autowired private OidcProperties oidcProperties;
 
   /**
    * Get all resources associated to a deployment.
-   *
    *
    * @param deploymentId The deployment Id
    * @param type The resource tosca type to be used to filter the resource list
    * @param pageable The pageable object
    * @param pagedAssembler The PagedResourceAssembler object
-   *
    * @return the paged resources
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/resources", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/resources",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public PagedResources<BaseResource> getResources(
       @PathVariable("deploymentId") String deploymentId,
       @RequestParam("type") Optional<String> type,
-      @PageableDefault(sort = "createdAt",
-          direction = Direction.DESC) Pageable pageable,
+      @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Resource> pagedAssembler) {
 
     String stype = type.orElse("");
@@ -97,7 +91,6 @@ public class ResourceController {
     } else {
       List<Resource> resources = resourceService.getResources(deploymentId, stype);
       page = new PageImpl<Resource>(resources, pageable, resources.size());
-
     }
     return pagedAssembler.toResource(page, baseResourceAssembler);
   }
@@ -105,18 +98,17 @@ public class ResourceController {
   /**
    * Get resources associated to a deployment filtered by type.
    *
-   *
    * @param deploymentId The deployment Id
    * @param type The node type to filter the resources
-   *
    * @return the filtered resources
-  */
+   */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/resources/filter", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/resources/filter",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public List<BaseResource> getFilteredResources(
-      @PathVariable("deploymentId") String deploymentId,
-      @RequestParam("type") String type) {
+      @PathVariable("deploymentId") String deploymentId, @RequestParam("type") String type) {
 
     if (type.isEmpty()) {
       throw new BadRequestException("Required String parameter \'type\' cannot be empty");
@@ -132,19 +124,20 @@ public class ResourceController {
    *
    * @param deploymentId The deployment Id
    * @param resourceId The resource Id
-   *
    * @return the BaseResource object
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/resources/{resourceId}", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/resources/{resourceId}",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public BaseResource getResource(@PathVariable("deploymentId") String deploymentId,
+  public BaseResource getResource(
+      @PathVariable("deploymentId") String deploymentId,
       @PathVariable("resourceId") String resourceId) {
 
     Resource resource = resourceService.getResource(resourceId, deploymentId);
     return baseResourceAssembler.toResource(resource);
   }
-
 
   /**
    * Perform action on the deployment resource.
@@ -153,20 +146,21 @@ public class ResourceController {
    * @param resourceId The resource Id
    */
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @RequestMapping(value = "/resources/{resourceId}/actions", method = RequestMethod.POST,
+  @RequestMapping(
+      value = "/resources/{resourceId}/actions",
+      method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void performAction(@PathVariable("deploymentId") String deploymentId,
+  public void performAction(
+      @PathVariable("deploymentId") String deploymentId,
       @PathVariable("resourceId") String resourceId,
       @Valid @RequestBody ActionRequest request) {
-    //OidcEntity owner = null;
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
       requestedWithToken = oauth2Tokenservice.exchangeCurrentAccessToken();
     }
     resourceService.doAction(deploymentId, resourceId, request.getType(), requestedWithToken);
-
   }
-
 }

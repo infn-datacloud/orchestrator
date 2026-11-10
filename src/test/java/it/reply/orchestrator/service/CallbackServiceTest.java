@@ -26,7 +26,6 @@ import it.reply.orchestrator.controller.ControllerTestUtils;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.resource.DeploymentResourceAssembler;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,30 +44,23 @@ public class CallbackServiceTest {
 
   private static final String CALLBACK_URL = "http://example.com";
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @Autowired
-  private CallbackService callbackService;
+  @Autowired private CallbackService callbackService;
 
-  @Autowired
-  private MockRestServiceServer mockServer;
+  @Autowired private MockRestServiceServer mockServer;
 
-  @MockBean
-  private DeploymentRepository deploymentRepository;
+  @MockBean private DeploymentRepository deploymentRepository;
 
-  @SpyBean
-  private DeploymentResourceAssembler deploymentResourceAssembler;
+  @SpyBean private DeploymentResourceAssembler deploymentResourceAssembler;
 
   private boolean doCallback(String url, HttpStatus status) {
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setCallback(url);
 
-    when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
+    when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
 
     if (status != null) {
       mockServer
@@ -105,5 +97,4 @@ public class CallbackServiceTest {
     boolean result = doCallback(null, null);
     assertThat(result).isFalse();
   }
-
 }

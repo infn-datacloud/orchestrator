@@ -27,21 +27,17 @@ import it.reply.orchestrator.exception.OrchestratorException;
 import it.reply.orchestrator.utils.JwtUtils;
 import it.reply.orchestrator.utils.MdcUtils;
 import it.reply.orchestrator.utils.MdcUtils.MdcCloseable;
-
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-
 import javax.cache.Cache;
 import javax.cache.Cache.Entry;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.MutableEntry;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
@@ -79,8 +75,7 @@ public class OAuth2TokenCacheService {
   /**
    * Creates a new OAuth2TokenCacheService.
    *
-   * @param ignite
-   *          the {@link Ignite} instance.
+   * @param ignite the {@link Ignite} instance.
    */
   public OAuth2TokenCacheService(@NonNull Ignite ignite) {
 
@@ -102,26 +97,28 @@ public class OAuth2TokenCacheService {
    * Exchanges an access token, puts the refresh token in DB and the exchanged access token in
    * cache.
    *
-   * @param id
-   *          the ID of the access token in the cache
-   * @param accessToken
-   *          the access token to exchange
+   * @param id the ID of the access token in the cache
+   * @param accessToken the access token to exchange
    * @return the received access grant
    */
   public AccessGrant exchangeAccessToken(OidcTokenId id, String accessToken) {
-    oauth2TokensCache.invoke(id, exchangeEntryProcessor(), MdcUtils.getRequestId(),
-        MdcUtils.getDeploymentId(), accessToken);
+    oauth2TokensCache.invoke(
+        id,
+        exchangeEntryProcessor(),
+        MdcUtils.getRequestId(),
+        MdcUtils.getDeploymentId(),
+        accessToken);
     return get(id);
   }
 
   public AccessGrant get(OidcTokenId id) {
-    return oauth2TokensCache.invoke(id, getEntryProcessor(), MdcUtils.getRequestId(),
-        MdcUtils.getDeploymentId());
+    return oauth2TokensCache.invoke(
+        id, getEntryProcessor(), MdcUtils.getRequestId(), MdcUtils.getDeploymentId());
   }
 
   public AccessGrant getNew(OidcTokenId id) {
-    return oauth2TokensCache.invoke(id, getNewEntryProcessor(), MdcUtils.getRequestId(),
-        MdcUtils.getDeploymentId());
+    return oauth2TokensCache.invoke(
+        id, getNewEntryProcessor(), MdcUtils.getRequestId(), MdcUtils.getDeploymentId());
   }
 
   protected EntryProcessor<OidcTokenId, AccessGrant, AccessGrant> exchangeEntryProcessor() {
@@ -140,8 +137,8 @@ public class OAuth2TokenCacheService {
   public static class ExchangeEntryProcessor extends AbstractGetEntryProcessor {
 
     @Override
-    public AccessGrant processInternal(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        Object... arguments) {
+    public AccessGrant processInternal(
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, Object... arguments) {
       String accessToken = (String) arguments[0];
       return exchange(entry, accessToken);
     }
@@ -151,8 +148,8 @@ public class OAuth2TokenCacheService {
   public static class GetEntryProcessor extends AbstractGetEntryProcessor {
 
     @Override
-    public AccessGrant processInternal(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        Object... arguments) {
+    public AccessGrant processInternal(
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, Object... arguments) {
       OidcTokenId id = entry.getKey();
       LOG.debug("Retrieving access token for {} from cache", id);
       AccessGrant oldGrant = entry.getValue();
@@ -163,7 +160,8 @@ public class OAuth2TokenCacheService {
       } else if (oldGrant.isExpiringIn(expirationDuration)) {
         LOG.info(
             "Refreshing access token for {} because the one in cache is expiring in less than {}",
-            id, expirationDuration);
+            id,
+            expirationDuration);
         return refresh(entry);
       } else {
         return oldGrant;
@@ -175,8 +173,8 @@ public class OAuth2TokenCacheService {
   public static class GetNewEntryProcessor extends AbstractGetEntryProcessor {
 
     @Override
-    public AccessGrant processInternal(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        Object... arguments) {
+    public AccessGrant processInternal(
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, Object... arguments) {
       OidcTokenId id = entry.getKey();
       LOG.info("Force refesh of access token for {}", id);
       entry.remove();
@@ -187,87 +185,101 @@ public class OAuth2TokenCacheService {
   public abstract static class AbstractGetEntryProcessor
       implements EntryProcessor<OidcTokenId, AccessGrant, AccessGrant> {
 
-    @Autowired
-    private OidcTokenRepository oidcTokenRepository;
+    @Autowired private OidcTokenRepository oidcTokenRepository;
 
-    @Autowired
-    private OidcProperties oidcProperties;
+    @Autowired private OidcProperties oidcProperties;
 
-    @Autowired
-    private CustomOAuth2TemplateFactory customOAuth2TemplateFactory;
+    @Autowired private CustomOAuth2TemplateFactory customOAuth2TemplateFactory;
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    @Autowired private PlatformTransactionManager transactionManager;
 
     protected AccessGrant refresh(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry) {
       OidcTokenId id = entry.getKey();
       CustomOAuth2Template template = customOAuth2TemplateFactory.generateOAuth2Template(id);
-      AccessGrant newGrant = generateTransactionTemplate().execute(transactionStatus -> {
-        OidcRefreshToken refreshToken =
-            oidcTokenRepository
-                .findByOidcTokenId(id)
-                .orElseThrow(
-                    () -> new OrchestratorException("No refresh token found for " + id));
-        AccessGrant grant =
-            //template.refreshToken(refreshToken.getValue(), OidcProperties.REQUIRED_SCOPES);
-            template.refreshToken(refreshToken.getValue(),
-                            oidcProperties.getOrchestratorScopes(
-                                 id.getOidcEntityId().getIssuer()));
-        LOG.info("Access token for {} refreshed", id);
-        String newRefreshToken = grant.getRefreshToken();
-        if (newRefreshToken != null && !newRefreshToken.equals(refreshToken.getValue())) {
-          LOG.info("New refesh token received for {}", id);
-          refreshToken.updateFromAccessGrant(grant);
-        }
-        return grant;
-      });
+      AccessGrant newGrant =
+          generateTransactionTemplate()
+              .execute(
+                  transactionStatus -> {
+                    OidcRefreshToken refreshToken =
+                        oidcTokenRepository
+                            .findByOidcTokenId(id)
+                            .orElseThrow(
+                                () ->
+                                    new OrchestratorException("No refresh token found for " + id));
+                    AccessGrant grant =
+                        // template.refreshToken(refreshToken.getValue(),
+                        // OidcProperties.REQUIRED_SCOPES);
+                        template.refreshToken(
+                            refreshToken.getValue(),
+                            oidcProperties.getOrchestratorScopes(id.getOidcEntityId().getIssuer()));
+                    LOG.info("Access token for {} refreshed", id);
+                    String newRefreshToken = grant.getRefreshToken();
+                    if (newRefreshToken != null
+                        && !newRefreshToken.equals(refreshToken.getValue())) {
+                      LOG.info("New refesh token received for {}", id);
+                      refreshToken.updateFromAccessGrant(grant);
+                    }
+                    return grant;
+                  });
       entry.setValue(newGrant);
       return newGrant;
     }
 
-    protected AccessGrant exchange(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        String accessToken) {
+    protected AccessGrant exchange(
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, String accessToken) {
       OidcTokenId id = entry.getKey();
       AccessGrant oldGrant = entry.getValue();
       CustomOAuth2Template template = customOAuth2TemplateFactory.generateOAuth2Template(id);
-      return generateTransactionTemplate().execute(transactionStatus -> {
-        Optional<OidcRefreshToken> refreshToken = oidcTokenRepository.findByOidcTokenId(id);
-        if (refreshToken.isPresent()) {
-          boolean isActive = refreshToken
-              .map(token -> template.introspectToken(token.getValue()))
-              .filter(TokenIntrospectionResponse::isActive)
-              .isPresent();
-          if (!isActive) {
-            LOG.info(
-                "Refresh token for {} isn't active anymore."
-                    + " Getting a new one exchanging access token with jti={}",
-                id, JwtUtils.getJti(JwtUtils.parseJwt(accessToken)));
+      return generateTransactionTemplate()
+          .execute(
+              transactionStatus -> {
+                Optional<OidcRefreshToken> refreshToken = oidcTokenRepository.findByOidcTokenId(id);
+                if (refreshToken.isPresent()) {
+                  boolean isActive =
+                      refreshToken
+                          .map(token -> template.introspectToken(token.getValue()))
+                          .filter(TokenIntrospectionResponse::isActive)
+                          .isPresent();
+                  if (!isActive) {
+                    LOG.info(
+                        "Refresh token for {} isn't active anymore."
+                            + " Getting a new one exchanging access token with jti={}",
+                        id,
+                        JwtUtils.getJti(JwtUtils.parseJwt(accessToken)));
 
-            //AccessGrant grant =
-            // template.exchangeToken(accessToken, OidcProperties.REQUIRED_SCOPES);
-            AccessGrant grant = template.exchangeToken(accessToken,
+                    // AccessGrant grant =
+                    // template.exchangeToken(accessToken, OidcProperties.REQUIRED_SCOPES);
+                    AccessGrant grant =
+                        template.exchangeToken(
+                            accessToken,
                             oidcProperties.getOrchestratorScopes(id.getOidcEntityId().getIssuer()));
-            refreshToken.get().updateFromAccessGrant(grant);
-            entry.setValue(grant);
-            return grant;
-          } else {
-            LOG.info(
-                "A valid refresh token for {} is already available. Not exchanging the current one",
-                id);
-            return oldGrant;
-          }
-        } else {
-          LOG.info("No refresh token found for {}. Exchanging access token with jti={}",
-              id, JwtUtils.getJti(JwtUtils.parseJwt(accessToken)));
-          //AccessGrant grant = template.exchangeToken(accessToken, OidcProperties.REQUIRED_SCOPES);
-          AccessGrant grant = template.exchangeToken(accessToken,
-                   oidcProperties.getOrchestratorScopes(id.getOidcEntityId().getIssuer()));
-          OidcRefreshToken token = OidcRefreshToken.createFromAccessGrant(grant, entry.getKey());
-          oidcTokenRepository.save(token);
-          entry.setValue(grant);
-          return grant;
-        }
-      });
+                    refreshToken.get().updateFromAccessGrant(grant);
+                    entry.setValue(grant);
+                    return grant;
+                  } else {
+                    LOG.info(
+                        "A valid refresh token for {} is already available. Not exchanging the current one",
+                        id);
+                    return oldGrant;
+                  }
+                } else {
+                  LOG.info(
+                      "No refresh token found for {}. Exchanging access token with jti={}",
+                      id,
+                      JwtUtils.getJti(JwtUtils.parseJwt(accessToken)));
+                  // AccessGrant grant = template.exchangeToken(accessToken,
+                  // OidcProperties.REQUIRED_SCOPES);
+                  AccessGrant grant =
+                      template.exchangeToken(
+                          accessToken,
+                          oidcProperties.getOrchestratorScopes(id.getOidcEntityId().getIssuer()));
+                  OidcRefreshToken token =
+                      OidcRefreshToken.createFromAccessGrant(grant, entry.getKey());
+                  oidcTokenRepository.save(token);
+                  entry.setValue(grant);
+                  return grant;
+                }
+              });
     }
 
     private TransactionTemplate generateTransactionTemplate() {
@@ -278,14 +290,15 @@ public class OAuth2TokenCacheService {
     }
 
     @Override
-    public AccessGrant process(@NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        Object... arguments) throws EntryProcessorException {
+    public AccessGrant process(
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, Object... arguments)
+        throws EntryProcessorException {
       return processInternal(entry, arguments);
     }
 
     public abstract AccessGrant processInternal(
-        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry,
-        Object... arguments) throws EntryProcessorException;
+        @NonNull MutableEntry<OidcTokenId, AccessGrant> entry, Object... arguments)
+        throws EntryProcessorException;
   }
 
   // TODO transform in aspect
@@ -297,8 +310,7 @@ public class OAuth2TokenCacheService {
 
     private final Class<E> delegateClass;
 
-    @SpringApplicationContextResource
-    private transient ApplicationContext springCtx;
+    @SpringApplicationContextResource private transient ApplicationContext springCtx;
 
     public EntryProcessorMdcDecorator(@NonNull Class<E> delegateClass) {
       this.delegateClass = Objects.requireNonNull(delegateClass);
@@ -320,6 +332,5 @@ public class OAuth2TokenCacheService {
         }
       }
     }
-
   }
 }

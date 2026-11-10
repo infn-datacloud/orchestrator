@@ -18,15 +18,13 @@
 package it.reply.orchestrator.exception.service;
 
 import it.reply.orchestrator.exception.OrchestratorException;
-
 import lombok.Getter;
 
 public class WorkflowException extends OrchestratorException {
 
   private static final long serialVersionUID = 1L;
 
-  @Getter
-  private final String errorCode;
+  @Getter private final String errorCode;
 
   public WorkflowException(String errorCode, String message) {
     super(message);
@@ -37,5 +35,4 @@ public class WorkflowException extends OrchestratorException {
     super(message, ex);
     this.errorCode = errorCode;
   }
-
 }

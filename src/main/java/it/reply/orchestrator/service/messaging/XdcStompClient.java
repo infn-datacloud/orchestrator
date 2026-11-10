@@ -63,14 +63,18 @@ public class XdcStompClient implements SmartLifecycle {
 
   /**
    * Crfeate a new XdcStompClient.
+   *
    * @param xdcClientProperties the xdcClientProperties
    * @param eventLoopGroup the eventLoopGroup
    * @param environment the Reactor environment
    * @param rucioMessageHandlerFactory the rucioMessageHandlerFactory
    * @param xdcMessageHandlerFactory the xdcMessageHandlerFactory
    */
-  public XdcStompClient(XdcClientProperties xdcClientProperties, EventLoopGroup eventLoopGroup,
-      Environment environment, RucioMessageHandlerFactory rucioMessageHandlerFactory,
+  public XdcStompClient(
+      XdcClientProperties xdcClientProperties,
+      EventLoopGroup eventLoopGroup,
+      Environment environment,
+      RucioMessageHandlerFactory rucioMessageHandlerFactory,
       XdcMessageHandlerFactory xdcMessageHandlerFactory) {
     this.xdcClientProperties = xdcClientProperties;
     this.eventLoopGroup = eventLoopGroup;
@@ -82,60 +86,77 @@ public class XdcStompClient implements SmartLifecycle {
 
   /**
    * Create a new Stomp Session.
+   *
    * @param host the host
    * @param port the port
    * @return the session
    */
   public StompSession newStompSession(String host, int port) {
-    Reactor2TcpStompClient stompClient = new Reactor2TcpStompClient(new Reactor2TcpClient<>(
-        new StompTcpClientSpecFactory(host, port, eventLoopGroup, environment)));
+    Reactor2TcpStompClient stompClient =
+        new Reactor2TcpStompClient(
+            new Reactor2TcpClient<>(
+                new StompTcpClientSpecFactory(host, port, eventLoopGroup, environment)));
 
     stompClient.setMessageConverter(new StringMessageConverter());
 
-    StompSessionHandler connectionHandler = new StompSessionHandlerAdapter() {
-      @Override
-      public void handleException(StompSession session, StompCommand command, StompHeaders headers,
-          byte[] payload, Throwable exception) {
-        LOG.error("Error handling STOMP command {} with headers {}", command, headers, exception);
-        if (headers.getAck() != null) {
-          session.acknowledge(headers.getAck(), false);
-        }
-      }
+    StompSessionHandler connectionHandler =
+        new StompSessionHandlerAdapter() {
+          @Override
+          public void handleException(
+              StompSession session,
+              StompCommand command,
+              StompHeaders headers,
+              byte[] payload,
+              Throwable exception) {
+            LOG.error(
+                "Error handling STOMP command {} with headers {}", command, headers, exception);
+            if (headers.getAck() != null) {
+              session.acknowledge(headers.getAck(), false);
+            }
+          }
 
-      @Override
-      public void handleTransportError(StompSession session, Throwable exception) {
-        LOG.error("Transport error for session {}", session.getSessionId(), exception);
-        resetSession(host, session);
-      }
+          @Override
+          public void handleTransportError(StompSession session, Throwable exception) {
+            LOG.error("Transport error for session {}", session.getSessionId(), exception);
+            resetSession(host, session);
+          }
 
-      @Override
-      public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-        subscribe(session, xdcClientProperties.getRucioDestination(),
-            rucioMessageHandlerFactory.getObject(session));
-        subscribe(session, xdcClientProperties.getXdcDestination(),
-            xdcMessageHandlerFactory.getObject(session));
-      }
+          @Override
+          public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+            subscribe(
+                session,
+                xdcClientProperties.getRucioDestination(),
+                rucioMessageHandlerFactory.getObject(session));
+            subscribe(
+                session,
+                xdcClientProperties.getXdcDestination(),
+                xdcMessageHandlerFactory.getObject(session));
+          }
 
-      private void subscribe(StompSession session, String destination,
-          StompFrameHandler messageHandler) {
-        StompHeaders stompHeaders = new StompHeaders();
-        stompHeaders.setDestination(destination);
-        stompHeaders.setAck("client-individual");
-        stompHeaders.set("activemq.prefetchSize", "1");
-        session.subscribe(stompHeaders, messageHandler);
-        LOG.info("STOMP session with id: {} subscribed to destination: {}", session.getSessionId(),
-            destination);
-      }
-
-    };
+          private void subscribe(
+              StompSession session, String destination, StompFrameHandler messageHandler) {
+            StompHeaders stompHeaders = new StompHeaders();
+            stompHeaders.setDestination(destination);
+            stompHeaders.setAck("client-individual");
+            stompHeaders.set("activemq.prefetchSize", "1");
+            session.subscribe(stompHeaders, messageHandler);
+            LOG.info(
+                "STOMP session with id: {} subscribed to destination: {}",
+                session.getSessionId(),
+                destination);
+          }
+        };
 
     StompHeaders auth = new StompHeaders();
     auth.setLogin(xdcClientProperties.getUsername());
     auth.setPasscode(xdcClientProperties.getPassword());
     try {
       StompSession session = stompClient.connect(auth, connectionHandler).get(2, TimeUnit.SECONDS);
-      LOG.info("STOMP session with id: {} created for host: {}, port: {}, ", session.getSessionId(),
-          host, port);
+      LOG.info(
+          "STOMP session with id: {} created for host: {}, port: {}, ",
+          session.getSessionId(),
+          host,
+          port);
       return session;
     } catch (InterruptedException | ExecutionException | TimeoutException ex) {
       if (ex instanceof InterruptedException) {
@@ -147,8 +168,10 @@ public class XdcStompClient implements SmartLifecycle {
   }
 
   private boolean disconnectSession(String address, StompSession session) {
-    LOG.info("Disconnecting STOMP session with id: {} from broker address: {}",
-        session.getSessionId(), address);
+    LOG.info(
+        "Disconnecting STOMP session with id: {} from broker address: {}",
+        session.getSessionId(),
+        address);
     if (session.isConnected()) {
       try {
         session.disconnect();
@@ -175,54 +198,67 @@ public class XdcStompClient implements SmartLifecycle {
     synchronized (lifecycleMonitor) {
       if (isRunning) {
         if (retry) {
-          LOG.info("Retrying connection to STOMP broker {}:{}", xdcClientProperties.getHost(),
+          LOG.info(
+              "Retrying connection to STOMP broker {}:{}",
+              xdcClientProperties.getHost(),
               xdcClientProperties.getPort());
         } else {
-          LOG.info("Connecting to STOMP broker {}:{}", xdcClientProperties.getHost(),
+          LOG.info(
+              "Connecting to STOMP broker {}:{}",
+              xdcClientProperties.getHost(),
               xdcClientProperties.getPort());
         }
         final Set<String> addresses;
         try {
-          addresses = Arrays
-              .stream(InetAddress.getAllByName(xdcClientProperties.getHost()))
-              .filter(Inet4Address.class::isInstance)
-              .map(InetAddress::getHostAddress)
-              .collect(Collectors.toSet());
+          addresses =
+              Arrays.stream(InetAddress.getAllByName(xdcClientProperties.getHost()))
+                  .filter(Inet4Address.class::isInstance)
+                  .map(InetAddress::getHostAddress)
+                  .collect(Collectors.toSet());
         } catch (UnknownHostException ex) {
           if (retry) {
-            LOG.info("Error connecting to STOMP broker {}:{}, retrying in 10 seconds",
-                xdcClientProperties.getHost(), xdcClientProperties.getPort(), ex);
+            LOG.info(
+                "Error connecting to STOMP broker {}:{}, retrying in 10 seconds",
+                xdcClientProperties.getHost(),
+                xdcClientProperties.getPort(),
+                ex);
             this.eventLoopGroup.schedule(() -> resetSessions(true), 10, TimeUnit.SECONDS);
           }
           throw new OrchestratorException("Error resolving broker domain name", ex);
         }
         Map<String, StompSession> newSessions = new HashMap<>();
-        this.stompSessions.forEach((address, session) -> {
-          if (addresses.contains(address)) {
-            if (session.isConnected()) {
-              newSessions.put(address, session);
-            } else {
-              try {
-                newSessions.put(address, newStompSession(address, xdcClientProperties.getPort()));
-              } catch (RuntimeException ex) {
-                if (retry) {
-                  LOG.info("Error connecting to STOMP broker {}:{}, retrying in 10 seconds",
-                      xdcClientProperties.getHost(), xdcClientProperties.getPort(), ex);
-                  this.eventLoopGroup.schedule(() -> resetSessions(true), 10, TimeUnit.SECONDS);
+        this.stompSessions.forEach(
+            (address, session) -> {
+              if (addresses.contains(address)) {
+                if (session.isConnected()) {
+                  newSessions.put(address, session);
+                } else {
+                  try {
+                    newSessions.put(
+                        address, newStompSession(address, xdcClientProperties.getPort()));
+                  } catch (RuntimeException ex) {
+                    if (retry) {
+                      LOG.info(
+                          "Error connecting to STOMP broker {}:{}, retrying in 10 seconds",
+                          xdcClientProperties.getHost(),
+                          xdcClientProperties.getPort(),
+                          ex);
+                      this.eventLoopGroup.schedule(() -> resetSessions(true), 10, TimeUnit.SECONDS);
+                    }
+                    throw ex;
+                  }
                 }
-                throw ex;
+              } else {
+                disconnectSession(address, session);
               }
-            }
-          } else {
-            disconnectSession(address, session);
-          }
-        });
+            });
 
-        addresses.forEach(address -> {
-          if (!newSessions.containsKey(address)) {
-            newSessions.put(address, newStompSession(address, xdcClientProperties.getPort()));
-          }
-        });
+        addresses.forEach(
+            address -> {
+              if (!newSessions.containsKey(address)) {
+                newSessions.put(address, newStompSession(address, xdcClientProperties.getPort()));
+              }
+            });
         this.stompSessions.clear();
         this.stompSessions.putAll(newSessions);
       }

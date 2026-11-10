@@ -38,5 +38,4 @@ public class Undeploy extends BaseDeployCommand {
 
     deploymentMessage.setDeleteComplete(deleteComplete);
   }
-
 }

@@ -48,5 +48,4 @@ public class DidRegisteredEvent extends GenericEvent {
   @NonNull
   @NotNull
   private String name;
-
 }

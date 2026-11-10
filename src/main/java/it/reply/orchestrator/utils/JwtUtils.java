@@ -21,11 +21,9 @@ import com.google.common.base.Preconditions;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
-
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Optional;
-
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -34,8 +32,7 @@ public class JwtUtils {
   /**
    * Parse a String in a {@link JWT}.
    *
-   * @param jwtToken
-   *          the string to parse
+   * @param jwtToken the string to parse
    * @return the parsed JWT
    */
   public static JWT parseJwt(String jwtToken) {
@@ -49,8 +46,7 @@ public class JwtUtils {
   /**
    * Extract the claims from a {@link JWT}.
    *
-   * @param jwtToken
-   *          the JWT token
+   * @param jwtToken the JWT token
    * @return the JWT's claims
    */
   public static JWTClaimsSet getJwtClaimsSet(JWT jwtToken) {
@@ -65,39 +61,33 @@ public class JwtUtils {
   /**
    * Extract the issuer claim from a {@link JWT}.
    *
-   * @param jwtToken
-   *          the JWT token
+   * @param jwtToken the JWT token
    * @return the issuer claim
    */
   public static String getIssuer(JWT jwtToken) {
-    return Optional
-        .ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getIssuer())
+    return Optional.ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getIssuer())
         .orElseThrow(() -> new IllegalArgumentException("No issuer claim found in JWT"));
   }
 
   /**
    * Extract the subject claim from a {@link JWT}.
    *
-   * @param jwtToken
-   *          the JWT token
+   * @param jwtToken the JWT token
    * @return the subject claim
    */
   public static String getSubject(JWT jwtToken) {
-    return Optional
-        .ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getSubject())
+    return Optional.ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getSubject())
         .orElseThrow(() -> new IllegalArgumentException("No subject claim found in JWT"));
   }
 
   /**
    * Extract the jti claim from a {@link JWT}.
    *
-   * @param jwtToken
-   *          the JWT token
+   * @param jwtToken the JWT token
    * @return the jti claim
    */
   public static String getJti(JWT jwtToken) {
-    return Optional
-        .ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getJWTID())
+    return Optional.ofNullable(JwtUtils.getJwtClaimsSet(jwtToken).getJWTID())
         .orElseThrow(() -> new IllegalArgumentException("No jti claim found in JWT"));
   }
 
@@ -108,8 +98,7 @@ public class JwtUtils {
   /**
    * Checks if a {@link JWT} is expired.
    *
-   * @param jwtToken
-   *          the JWT token
+   * @param jwtToken the JWT token
    * @return true if the JWT is expired, false otherwise
    */
   public static boolean isJtwTokenExpired(JWT jwtToken) {
@@ -117,5 +106,4 @@ public class JwtUtils {
         .filter(expirationDate -> expirationDate.before(new Date()))
         .isPresent();
   }
-
 }

@@ -31,17 +31,13 @@ import org.mockito.MockitoAnnotations;
 
 public class UserInfoIntrospectingTokenServiceTest {
 
-  @InjectMocks
-  private UserInfoIntrospectingTokenService userInfoIntrospectingTokenService;
+  @InjectMocks private UserInfoIntrospectingTokenService userInfoIntrospectingTokenService;
 
-  @Mock
-  private OAuth2ConfigurationsService oauth2ConfigurationsService;
+  @Mock private OAuth2ConfigurationsService oauth2ConfigurationsService;
 
-  @Mock
-  private UserInfoFetcher userInfoFetcher;
+  @Mock private UserInfoFetcher userInfoFetcher;
 
-  @Mock
-  private JWKSetCacheService validationServices;
+  @Mock private JWKSetCacheService validationServices;
 
   @Before
   public void setup() {
@@ -74,11 +70,9 @@ public class UserInfoIntrospectingTokenServiceTest {
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZSIsImlzcyI6Imh0dHBzOi8vYzJpZC5jb20iLCJleHAiOjE0ODg1NTIyNzIxOTV9.3c7wkuOXGjXxVLJXcsaZ259HK07jtwVCQZcwN_fhF3M";
 
     ServerConfiguration serverConfiguration = new ServerConfiguration();
-    Mockito
-        .when(oauth2ConfigurationsService.getServerConfiguration("https://c2id.com"))
+    Mockito.when(oauth2ConfigurationsService.getServerConfiguration("https://c2id.com"))
         .thenReturn(serverConfiguration);
 
     assertThat(userInfoIntrospectingTokenService.loadAuthentication(stringToken)).isNull();
   }
-
 }

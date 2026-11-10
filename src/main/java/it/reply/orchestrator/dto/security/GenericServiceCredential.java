@@ -19,14 +19,11 @@ package it.reply.orchestrator.dto.security;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -44,5 +41,4 @@ public class GenericServiceCredential implements ServiceCredential {
   @NonNull
   @NotNull
   private String password;
-
 }

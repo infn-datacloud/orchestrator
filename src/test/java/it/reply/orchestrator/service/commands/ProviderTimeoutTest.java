@@ -23,13 +23,12 @@ import static org.mockito.Mockito.verify;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
 import junitparams.JUnitParamsRunner;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JUnitParamsRunner.class)
-public class ProviderTimeoutTest  extends BaseDeployCommandTest<ProviderTimeout> {
+public class ProviderTimeoutTest extends BaseDeployCommandTest<ProviderTimeout> {
 
   public ProviderTimeoutTest() {
     super(new ProviderTimeout());
@@ -38,13 +37,13 @@ public class ProviderTimeoutTest  extends BaseDeployCommandTest<ProviderTimeout>
   @Test
   public void testProviderTimeoutSuccessful() {
     DeploymentMessage dm = new DeploymentMessage();
-    ExecutionEntity execution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
-        .build();
+    ExecutionEntity execution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
+            .build();
 
     command.execute(execution);
 
     verify(deploymentProviderService, times(1)).doProviderTimeout(dm);
   }
-
 }

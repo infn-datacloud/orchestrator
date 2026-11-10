@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.security;
 
 import it.reply.orchestrator.dal.entity.OidcTokenId;
-
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.config.ServerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +28,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomOAuth2TemplateFactory {
 
-  @Autowired
-  private OAuth2ConfigurationsService oauth2ConfigurationsService;
+  @Autowired private OAuth2ConfigurationsService oauth2ConfigurationsService;
 
-  @Autowired
-  private RestTemplateBuilder restTemplateBuilder;
+  @Autowired private RestTemplateBuilder restTemplateBuilder;
 
   public CustomOAuth2Template generateOAuth2Template(OidcTokenId tokenId) {
     return generateOAuth2Template(tokenId.getOidcEntityId().getIssuer());
@@ -42,8 +39,7 @@ public class CustomOAuth2TemplateFactory {
   /**
    * Generates a OAuth2Template for a specific issuer.
    *
-   * @param issuer
-   *          the issuer for which generate the {@link OAuth2Template}
+   * @param issuer the issuer for which generate the {@link OAuth2Template}
    * @return the OAuth2Template
    */
   public CustomOAuth2Template generateOAuth2Template(String issuer) {
@@ -51,8 +47,10 @@ public class CustomOAuth2TemplateFactory {
         oauth2ConfigurationsService.getServerConfiguration(issuer);
     RegisteredClient clientConfiguration =
         oauth2ConfigurationsService.getClientConfiguration(serverConfiguration);
-    return new CustomOAuth2Template(serverConfiguration, clientConfiguration,
-        restTemplateBuilder, oauth2ConfigurationsService.getAudience(issuer));
-
+    return new CustomOAuth2Template(
+        serverConfiguration,
+        clientConfiguration,
+        restTemplateBuilder,
+        oauth2ConfigurationsService.getAudience(issuer));
   }
 }

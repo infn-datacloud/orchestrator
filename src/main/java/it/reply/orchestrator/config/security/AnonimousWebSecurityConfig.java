@@ -18,7 +18,6 @@
 package it.reply.orchestrator.config.security;
 
 import it.reply.orchestrator.config.properties.OidcProperties;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -27,17 +26,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
 @Configuration
-@ConditionalOnProperty(value = OidcProperties.SECURITY_ENABLED_PROPERTY, havingValue = "false",
+@ConditionalOnProperty(
+    value = OidcProperties.SECURITY_ENABLED_PROPERTY,
+    havingValue = "false",
     matchIfMissing = true)
 public class AnonimousWebSecurityConfig extends BaseWebSecurityConfig {
 
   @Override
   public void configure(@NonNull HttpSecurity http) throws Exception {
     super.configure(http);
-    http
-        .authorizeRequests()
-        .anyRequest()
-        .anonymous();
+    http.authorizeRequests().anyRequest().anonymous();
   }
 
   @Bean

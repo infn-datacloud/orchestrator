@@ -37,50 +37,49 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_CMDB_DATA_DEPLOY)
 public class GetCmdbDataDeploy extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private CmdbService cmdbService;
+  @Autowired private CmdbService cmdbService;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
 
     Map<String, Set<String>> servicesWithSla = new HashMap<>();
 
-    //String organisation = oauth2TokenService.getOrganization(
+    // String organisation = oauth2TokenService.getOrganization(
     //    rankCloudProvidersMessage.getRequestedWithToken());
-    String organisation = Optional.ofNullable(getDeployment(rankCloudProvidersMessage)
-        .getUserGroup()).orElse(oauth2TokenService.getOrganization(rankCloudProvidersMessage
-            .getRequestedWithToken()));
+    String organisation =
+        Optional.ofNullable(getDeployment(rankCloudProvidersMessage).getUserGroup())
+            .orElse(
+                oauth2TokenService.getOrganization(
+                    rankCloudProvidersMessage.getRequestedWithToken()));
 
     rankCloudProvidersMessage
         .getSlamPreferences()
         .getSla()
-        .forEach(sla -> {
-          String providerId = sla.getCloudProviderId();
-          servicesWithSla
-              .computeIfAbsent(providerId, id -> new HashSet<>())
-              .addAll(sla
-                  .getServices()
-                  .stream()
-                  .map(Service::getServiceId)
-                  .collect(Collectors.toSet()));
-        });
-    Map<String, CloudProvider> cloudProviders = servicesWithSla
-        .entrySet()
-        .stream()
-        .map(entry -> cmdbService.fillCloudProviderInfo(entry.getKey(),
-            entry.getValue(), organisation, rankCloudProvidersMessage))
-        .collect(Collectors.toMap(CloudProvider::getId, Function.identity()));
+        .forEach(
+            sla -> {
+              String providerId = sla.getCloudProviderId();
+              servicesWithSla
+                  .computeIfAbsent(providerId, id -> new HashSet<>())
+                  .addAll(
+                      sla.getServices().stream()
+                          .map(Service::getServiceId)
+                          .collect(Collectors.toSet()));
+            });
+    Map<String, CloudProvider> cloudProviders =
+        servicesWithSla.entrySet().stream()
+            .map(
+                entry ->
+                    cmdbService.fillCloudProviderInfo(
+                        entry.getKey(), entry.getValue(), organisation, rankCloudProvidersMessage))
+            .collect(Collectors.toMap(CloudProvider::getId, Function.identity()));
     rankCloudProvidersMessage.setCloudProviders(cloudProviders);
-
   }
 
   @Override
   protected String getErrorMessagePrefix() {
     return "Error retrieving info from CMDB";
   }
-
 }

@@ -19,18 +19,14 @@ package it.reply.orchestrator.dto.workflow;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.apache.commons.collections4.ResettableListIterator;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -39,8 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
     getterVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE,
     setterVisibility = Visibility.NONE,
-    creatorVisibility = Visibility.NONE
-)
+    creatorVisibility = Visibility.NONE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 @EqualsAndHashCode
@@ -48,9 +43,7 @@ public abstract class WorkflowListIterator<T> implements ResettableListIterator<
 
   private static final int INITIAL_INDEX = -1;
 
-  @NonNull
-  @NotNull
-  private List<T> items = new ArrayList<>();
+  @NonNull @NotNull private List<T> items = new ArrayList<>();
 
   private int currentIndex = INITIAL_INDEX;
 
@@ -89,7 +82,7 @@ public abstract class WorkflowListIterator<T> implements ResettableListIterator<
    * time.)
    *
    * @return {@code true} if the list iterator have been traversed at least one time in the forward
-   *      direction
+   *     direction
    */
   public boolean hasCurrent() {
     return indexInValidRange(currentIndex());
@@ -100,8 +93,7 @@ public abstract class WorkflowListIterator<T> implements ResettableListIterator<
    * element repeatedly.)
    *
    * @return the current element in the list
-   * @throws NoSuchElementException
-   *     if the iteration has no current element
+   * @throws NoSuchElementException if the iteration has no current element
    */
   public T current() {
     if (!hasCurrent()) {
@@ -169,5 +161,4 @@ public abstract class WorkflowListIterator<T> implements ResettableListIterator<
   public void add(T s) {
     throw new UnsupportedOperationException("add() method is not supported");
   }
-
 }

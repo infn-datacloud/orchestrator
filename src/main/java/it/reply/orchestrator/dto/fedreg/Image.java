@@ -75,5 +75,4 @@ public class Image {
   @JsonProperty("uid")
   @NotNull
   private String uid;
-
 }

@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.dto.deployment.ActionMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +27,8 @@ public class PollAction extends BaseActionCommand {
 
   @Override
   public void execute(DelegateExecution execution, ActionMessage deploymentMessage) {
-    boolean pollComplete = getDeploymentProviderService(deploymentMessage)
-        .isActionComplete(deploymentMessage);
+    boolean pollComplete =
+        getDeploymentProviderService(deploymentMessage).isActionComplete(deploymentMessage);
     deploymentMessage.setPollComplete(pollComplete);
   }
 
@@ -37,5 +36,4 @@ public class PollAction extends BaseActionCommand {
   protected String getErrorMessagePrefix() {
     return "Error polling action";
   }
-
 }

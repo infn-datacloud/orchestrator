@@ -39,12 +39,11 @@ public class CleanFailedUpdate extends BaseDeployCommand {
     if (csIterartor != null) {
       CloudServiceWf cloudServiceWf = csIterartor.current();
       if (cloudServiceWf.getLastErrorCause() == null) {
-        Exception exception = getRequiredParameter(execution, WorkflowConstants.Param.EXCEPTION,
-            Exception.class);
+        Exception exception =
+            getRequiredParameter(execution, WorkflowConstants.Param.EXCEPTION, Exception.class);
         cloudServiceWf.setLastErrorCause(exception.getMessage());
       }
     }
     getDeploymentProviderService(deploymentMessage).cleanFailedUpdate(deploymentMessage);
   }
-
 }

@@ -54,26 +54,19 @@ public class DeploymentScheduleServiceImpl {
 
   private static final Pattern OWNER_PATTERN = Pattern.compile("([^@]+)@([^@]+)");
 
-  @Autowired
-  private DeploymentService deploymentService;
+  @Autowired private DeploymentService deploymentService;
 
-  @Autowired
-  private ToscaService toscaService;
+  @Autowired private ToscaService toscaService;
 
-  @Autowired
-  private OidcProperties oidcProperties;
+  @Autowired private OidcProperties oidcProperties;
 
-  @Autowired
-  private DeploymentScheduleEventRepository deploymentScheduleEventRepository;
+  @Autowired private DeploymentScheduleEventRepository deploymentScheduleEventRepository;
 
-  @Autowired
-  private DeploymentScheduleRepository deploymentScheduleRepository;
+  @Autowired private DeploymentScheduleRepository deploymentScheduleRepository;
 
-  @Autowired
-  private OAuth2TokenService oauth2Tokenservice;
+  @Autowired private OAuth2TokenService oauth2Tokenservice;
 
-  @Autowired
-  private OidcTokenRepository oidcTokenRepository;
+  @Autowired private OidcTokenRepository oidcTokenRepository;
 
   private boolean isAdmin() {
     boolean isAdmin = false;
@@ -131,21 +124,24 @@ public class DeploymentScheduleServiceImpl {
    * @return the deployment schedule event
    */
   @Transactional
-  public DeploymentScheduleEvent createDeploymentScheduleEvent(DeploymentSchedule schedule,
-      String fileScope, String fileName) {
-    try (MdcUtils.MdcCloseable requestId = MdcUtils
-        .setRequestIdCloseable(UUID.randomUUID().toString())) {
-      DeploymentScheduleRequest deploymentRequest = DeploymentScheduleRequest
-          .deploymentScheduleBuilder()
-          .callback(schedule.getCallback())
-          .parameters(new HashMap<>(schedule.getParameters()))
-          .template(schedule.getTemplate())
-          .build();
+  public DeploymentScheduleEvent createDeploymentScheduleEvent(
+      DeploymentSchedule schedule, String fileScope, String fileName) {
+    try (MdcUtils.MdcCloseable requestId =
+        MdcUtils.setRequestIdCloseable(UUID.randomUUID().toString())) {
+      DeploymentScheduleRequest deploymentRequest =
+          DeploymentScheduleRequest.deploymentScheduleBuilder()
+              .callback(schedule.getCallback())
+              .parameters(new HashMap<>(schedule.getParameters()))
+              .template(schedule.getTemplate())
+              .build();
 
-      OidcTokenId requestedWithToken = Optional.ofNullable(schedule.getRequestedWithToken())
-          .map(OidcRefreshToken::getOidcTokenId).orElse(null);
-      Deployment deployment = deploymentService
-          .createDeployment(deploymentRequest, schedule.getOwner(), requestedWithToken);
+      OidcTokenId requestedWithToken =
+          Optional.ofNullable(schedule.getRequestedWithToken())
+              .map(OidcRefreshToken::getOidcTokenId)
+              .orElse(null);
+      Deployment deployment =
+          deploymentService.createDeployment(
+              deploymentRequest, schedule.getOwner(), requestedWithToken);
 
       DeploymentScheduleEvent event = new DeploymentScheduleEvent();
       event.setScope(fileScope);
@@ -167,16 +163,19 @@ public class DeploymentScheduleServiceImpl {
   @Transactional
   public void createDeploymentScheduleEvents(String scope, String name) {
     String did = String.format("%s:%s", scope, name);
-    deploymentScheduleRepository
-        .findAll()
-        .stream()
+    deploymentScheduleRepository.findAll().stream()
         // TODO filter with a query DB-side
-        .filter(s -> did.matches(s.getFileExpression())
-            && s.getStatus() == DeploymentScheduleStatus.RUNNING)
-        .filter(s -> s.getScheduleEvents().stream()
-            .noneMatch(e -> scope.equals(e.getScope()) && name.equals(e.getName())))
-        .forEach(deploymentSchedule -> this
-            .createDeploymentScheduleEvent(deploymentSchedule, scope, name));
+        .filter(
+            s ->
+                did.matches(s.getFileExpression())
+                    && s.getStatus() == DeploymentScheduleStatus.RUNNING)
+        .filter(
+            s ->
+                s.getScheduleEvents().stream()
+                    .noneMatch(e -> scope.equals(e.getScope()) && name.equals(e.getName())))
+        .forEach(
+            deploymentSchedule ->
+                this.createDeploymentScheduleEvent(deploymentSchedule, scope, name));
   }
 
   /**
@@ -245,6 +244,4 @@ public class DeploymentScheduleServiceImpl {
   public Page<DeploymentScheduleEvent> getDeploymentScheduleEvents(String id, Pageable pageable) {
     return deploymentScheduleEventRepository.findByDeploymentSchedule_Id(id, pageable);
   }
-
 }
-

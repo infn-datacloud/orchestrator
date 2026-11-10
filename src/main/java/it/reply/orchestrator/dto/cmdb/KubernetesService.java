@@ -38,38 +38,23 @@ public class KubernetesService extends CloudService {
 
   /**
    * Create a new KubernetesService.
-   * @param id
-   *     the id of the service
-   * @param serviceType
-   *     the serviceType of the service
-   * @param endpoint
-   *     the endpoint of the service
-   * @param providerId
-   *     the providerId of the service
-   * @param type
-   *     the type of the service
-   * @param publicService
-   *     the publicService of the service
-   * @param region
-   *     the region of the service
-   * @param tenant
-   *     the tenant
-   * @param hostname
-   *     the hostname of the service
-   * @param parentServiceId
-   *     the parentServiceId of the service
-   * @param iamEnabled
-   *     the iamEnabled flag
-   * @param idpProtocol
-   *     the IDP protocol name
-   * @param publicIpAssignable
-   *     the publicIpAssignable flag
-   * @param supportedIdps
-   *     the supportedIdps
-   * @param volumeTypes
-   *     the volumeTypes
-   * @param workerNodesIp
-   *     the workerNodesIp
+   *
+   * @param id the id of the service
+   * @param serviceType the serviceType of the service
+   * @param endpoint the endpoint of the service
+   * @param providerId the providerId of the service
+   * @param type the type of the service
+   * @param publicService the publicService of the service
+   * @param region the region of the service
+   * @param tenant the tenant
+   * @param hostname the hostname of the service
+   * @param parentServiceId the parentServiceId of the service
+   * @param iamEnabled the iamEnabled flag
+   * @param idpProtocol the IDP protocol name
+   * @param publicIpAssignable the publicIpAssignable flag
+   * @param supportedIdps the supportedIdps
+   * @param volumeTypes the volumeTypes
+   * @param workerNodesIp the workerNodesIp
    */
   @Builder(builderMethodName = "kubernetesBuilder")
   public KubernetesService(
@@ -90,9 +75,23 @@ public class KubernetesService extends CloudService {
       @NonNull List<SupportedIdp> supportedIdps,
       @NonNull List<VolumeType> volumeTypes,
       @NonNull List<String> workerNodesIp) {
-    super(id, serviceType, endpoint, microversion, providerId, type, publicService,
-            tenant, region, hostname, parentServiceId, iamEnabled, idpProtocol,
-            publicIpAssignable, supportedIdps, volumeTypes);
+    super(
+        id,
+        serviceType,
+        endpoint,
+        microversion,
+        providerId,
+        type,
+        publicService,
+        tenant,
+        region,
+        hostname,
+        parentServiceId,
+        iamEnabled,
+        idpProtocol,
+        publicIpAssignable,
+        supportedIdps,
+        volumeTypes);
     this.workerNodesIp = workerNodesIp;
   }
 

@@ -18,18 +18,14 @@
 package it.reply.orchestrator.dto.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.dto.cmdb.CloudService;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -52,5 +48,4 @@ public class CloudServiceWf {
   @JsonProperty("rucio_rse")
   @Nullable
   private String rucioRse;
-
 }

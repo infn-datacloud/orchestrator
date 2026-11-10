@@ -20,23 +20,18 @@ package it.reply.orchestrator.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.dto.cmdb.CloudService.SupportedIdp;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -59,53 +54,30 @@ public class CloudProviderEndpoint {
     KUBERNETES;
   }
 
-  @Nullable
-  private String imEndpoint;
+  @Nullable private String imEndpoint;
 
-  @NonNull
-  @NotNull
-  private String cpEndpoint;
+  @NonNull @NotNull private String cpEndpoint;
 
-  @NonNull
-  @NotNull
-  private String cpComputeServiceId;
+  @NonNull @NotNull private String cpComputeServiceId;
 
-  @NonNull
-  @NotNull
-  private IaaSType iaasType;
+  @NonNull @NotNull private IaaSType iaasType;
 
-  @Nullable
-  @JsonProperty
-  private String microversion;
+  @Nullable @JsonProperty private String microversion;
 
-  @Nullable
-  @JsonProperty
-  private String tenant;
+  @Nullable @JsonProperty private String tenant;
 
-  @Nullable
-  @JsonProperty
-  private String region;
+  @Nullable @JsonProperty private String region;
 
-  @Nullable
-  @JsonProperty
-  private String iaasHeaderId;
+  @Nullable @JsonProperty private String iaasHeaderId;
 
-  @Nullable
-  private String vaultEndpoint;
+  @Nullable private String vaultEndpoint;
 
-  @NonNull
-  @NotNull
-  @Builder.Default
+  @NonNull @NotNull @Builder.Default
   private Map<String, CloudProviderEndpoint> hybridCloudProviderEndpoints = new HashMap<>();
 
-  @Builder.Default
-  @JsonProperty
-  private boolean iamEnabled = true;
+  @Builder.Default @JsonProperty private boolean iamEnabled = true;
 
-  @NonNull
-  @NotNull
-  @Builder.Default
-  @JsonProperty
+  @NonNull @NotNull @Builder.Default @JsonProperty
   private List<SupportedIdp> supportedIdps = new ArrayList<>();
 
   @Builder.Default
@@ -129,9 +101,9 @@ public class CloudProviderEndpoint {
     return (supportedIdps == null) ? new ArrayList<>() : supportedIdps;
   }
 
-
   /**
    * getIdpProtocol.
+   *
    * @return the name of Idp Protocol
    */
   @JsonIgnore
@@ -169,5 +141,4 @@ public class CloudProviderEndpoint {
     returnList.addAll(hybridCloudProviderEndpoints.values());
     return returnList;
   }
-
 }

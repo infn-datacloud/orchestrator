@@ -41,77 +41,70 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_PROVIDERS_RANK)
 public class GetProvidersRank extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private CloudProviderRankerService cprService;
+  @Autowired private CloudProviderRankerService cprService;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
 
     // Prepare Ranker's request
-    List<Monitoring> monitoring = rankCloudProvidersMessage
-        .getCloudProvidersMonitoringData()
-        .entrySet()
-        .stream()
-        .map(e -> generateMonitoringInfo(rankCloudProvidersMessage, e.getKey(), e.getValue()))
-        .collect(Collectors.toList());
+    List<Monitoring> monitoring =
+        rankCloudProvidersMessage.getCloudProvidersMonitoringData().entrySet().stream()
+            .map(e -> generateMonitoringInfo(rankCloudProvidersMessage, e.getKey(), e.getValue()))
+            .collect(Collectors.toList());
 
-    List<PreferenceCustomer> preferences = rankCloudProvidersMessage
-        .getSlamPreferences()
-        .getPreferences()
-        .stream()
-        .map(Preference::getPreferences)
-        .flatMap(List::stream)
-        .collect(Collectors.toList());
+    List<PreferenceCustomer> preferences =
+        rankCloudProvidersMessage.getSlamPreferences().getPreferences().stream()
+            .map(Preference::getPreferences)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
 
-    CloudProviderRankerRequest cprr = CloudProviderRankerRequest
-        .builder()
-        .preferences(preferences)
-        .sla(rankCloudProvidersMessage.getSlamPreferences().getSla())
-        .monitoring(monitoring)
-        .deploymentId(rankCloudProvidersMessage.getDeploymentId())
-        .cloudProviders(rankCloudProvidersMessage.getCloudProviders())
-        .build();
+    CloudProviderRankerRequest cprr =
+        CloudProviderRankerRequest.builder()
+            .preferences(preferences)
+            .sla(rankCloudProvidersMessage.getSlamPreferences().getSla())
+            .monitoring(monitoring)
+            .deploymentId(rankCloudProvidersMessage.getDeploymentId())
+            .cloudProviders(rankCloudProvidersMessage.getCloudProviders())
+            .build();
 
     // Get provider rank and save in message
     List<RankedCloudService> ranking = cprService.getProviderServicesRanking(cprr);
     rankCloudProvidersMessage.setRankedCloudServices(ranking);
   }
 
-  private Monitoring generateMonitoringInfo(RankCloudProvidersMessage rankCloudProvidersMessage,
-      String providerId, List<PaasMachine> paasMachines) {
-    List<MonitoringService> monitoringServices = paasMachines
-        .stream()
-        .map(paasMachine -> generateMonitoringService(rankCloudProvidersMessage, providerId,
-            paasMachine))
-        .collect(Collectors.toList());
-    return Monitoring
-        .builder()
-        .provider(providerId)
-        .services(monitoringServices)
-        .build();
+  private Monitoring generateMonitoringInfo(
+      RankCloudProvidersMessage rankCloudProvidersMessage,
+      String providerId,
+      List<PaasMachine> paasMachines) {
+    List<MonitoringService> monitoringServices =
+        paasMachines.stream()
+            .map(
+                paasMachine ->
+                    generateMonitoringService(rankCloudProvidersMessage, providerId, paasMachine))
+            .collect(Collectors.toList());
+    return Monitoring.builder().provider(providerId).services(monitoringServices).build();
   }
 
   private MonitoringService generateMonitoringService(
-      RankCloudProvidersMessage rankCloudProvidersMessage, String providerId,
+      RankCloudProvidersMessage rankCloudProvidersMessage,
+      String providerId,
       PaasMachine paasMachine) {
 
     String serviceType = paasMachine.getServiceCategory();
     String serviceId = paasMachine.getMachineName();
-    String parentServiceId = CommonUtils
-        .getFromOptionalMap(rankCloudProvidersMessage.getCloudProviders(), providerId)
-        .map(CloudProvider::getServices)
-        .map(cloudServices -> cloudServices.get(serviceId))
-        .map(CloudService::getParentServiceId)
-        .orElse(null);
-    List<PaaSMetric> metrics = paasMachine
-        .getServices()
-        .stream()
-        .map(Service::getPaasMetrics)
-        .flatMap(List::stream)
-        .collect(Collectors.toList());
-    return MonitoringService
-        .builder()
+    String parentServiceId =
+        CommonUtils.getFromOptionalMap(rankCloudProvidersMessage.getCloudProviders(), providerId)
+            .map(CloudProvider::getServices)
+            .map(cloudServices -> cloudServices.get(serviceId))
+            .map(CloudService::getParentServiceId)
+            .orElse(null);
+    List<PaaSMetric> metrics =
+        paasMachine.getServices().stream()
+            .map(Service::getPaasMetrics)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    return MonitoringService.builder()
         .serviceId(serviceId)
         .parentServiceId(parentServiceId)
         .type(serviceType)

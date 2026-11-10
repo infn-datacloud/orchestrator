@@ -47,5 +47,4 @@ public class TemplateServiceImpl implements TemplateService {
     DeploymentSchedule deploymentSchedule = deploymentScheduleService.getDeploymentSchedule(uuid);
     return deploymentSchedule.getTemplate();
   }
-
 }

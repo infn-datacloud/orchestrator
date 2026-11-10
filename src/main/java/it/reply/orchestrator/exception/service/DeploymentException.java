@@ -30,5 +30,4 @@ public class DeploymentException extends OrchestratorException {
   public DeploymentException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

@@ -37,8 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public abstract class BaseJavaDelegate implements JavaDelegate {
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Override
   public final void execute(DelegateExecution execution) {
@@ -47,10 +46,10 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
     MdcUtils.fromBusinessKey(businessKey);
     ObjectNode logData = objectMapper.createObjectNode();
 
-    String taskName = Optional
-        .ofNullable(execution.getCurrentFlowElement())
-        .map(FlowElement::getName)
-        .orElseGet(() -> getClass().getSimpleName());
+    String taskName =
+        Optional.ofNullable(execution.getCurrentFlowElement())
+            .map(FlowElement::getName)
+            .orElseGet(() -> getClass().getSimpleName());
 
     try {
       LOG.info("Task {} - STARTED", taskName);
@@ -78,8 +77,8 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
 
   protected abstract void customExecute(DelegateExecution execution);
 
-  protected <C> Optional<C> getOptionalParameter(DelegateExecution execution,
-      String parameterName, Class<C> clazz) {
+  protected <C> Optional<C> getOptionalParameter(
+      DelegateExecution execution, String parameterName, Class<C> clazz) {
     Object variable = execution.getVariable(parameterName, false);
     if (variable == null) {
       LOG.warn("Parameter with name {} is null", parameterName);
@@ -94,18 +93,21 @@ public abstract class BaseJavaDelegate implements JavaDelegate {
         return Optional.empty();
       }
     } else {
-      LOG.warn("Parameter with name {} of type {} can't be de-serialized", parameterName,
+      LOG.warn(
+          "Parameter with name {} of type {} can't be de-serialized",
+          parameterName,
           variable.getClass());
       return Optional.empty();
     }
   }
 
-  protected <C> C getRequiredParameter(DelegateExecution execution, String parameterName,
-      Class<C> clazz) {
-    return this
-        .<C>getOptionalParameter(execution, parameterName, clazz)
-        .orElseThrow(() -> new IllegalArgumentException(
-            "WF parameter with name <" + parameterName + "> not found"));
+  protected <C> C getRequiredParameter(
+      DelegateExecution execution, String parameterName, Class<C> clazz) {
+    return this.<C>getOptionalParameter(execution, parameterName, clazz)
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "WF parameter with name <" + parameterName + "> not found"));
   }
 
   private void logErrors(ObjectNode logData, Exception ex, String deploymentId) {

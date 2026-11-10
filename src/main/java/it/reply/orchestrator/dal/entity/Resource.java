@@ -42,11 +42,12 @@ import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
-@Table(indexes = {
-    @Index(columnList = "toscaNodeName"),
-    @Index(columnList = "deployment_id"),
-    @Index(columnList = "createdAt")
-})
+@Table(
+    indexes = {
+      @Index(columnList = "toscaNodeName"),
+      @Index(columnList = "deployment_id"),
+      @Index(columnList = "createdAt")
+    })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -56,8 +57,7 @@ public class Resource extends AbstractResourceEntity {
   @Column(nullable = false)
   private NodeStates state;
 
-  @Nullable
-  private String iaasId;
+  @Nullable private String iaasId;
 
   @Column(nullable = false)
   private String toscaNodeType;
@@ -65,8 +65,10 @@ public class Resource extends AbstractResourceEntity {
   @Column(nullable = false)
   private String toscaNodeName;
 
-  @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  @JoinTable(name = "resource_required_by", joinColumns = @JoinColumn(name = "resource_id"),
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(
+      name = "resource_required_by",
+      joinColumns = @JoinColumn(name = "resource_id"),
       inverseJoinColumns = @JoinColumn(name = "required_by", nullable = false))
   private Set<Resource> requiredBy = new HashSet<>();
 

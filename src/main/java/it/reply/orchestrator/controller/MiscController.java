@@ -28,13 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MiscController {
 
-  @Autowired
-  private ServerProperties serverProperties;
+  @Autowired private ServerProperties serverProperties;
 
   @ResponseStatus(HttpStatus.OK)
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public String getRoot() {
     return serverProperties.getDisplayName();
   }
-
 }

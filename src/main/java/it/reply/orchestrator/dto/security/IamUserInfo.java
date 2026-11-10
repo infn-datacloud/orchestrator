@@ -21,20 +21,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.mitre.openid.connect.model.DefaultUserInfo;
@@ -52,18 +47,14 @@ public class IamUserInfo extends DefaultUserInfo {
   private static final String EDUPERSON_ENTITLEMENT = "eduperson_entitlement";
   private static final String EDUPERSON_UNIQUE_ID = "edu_person_unique_id";
 
-  @NonNull
-  @NotNull
-  private List<String> groups = new ArrayList<>();
+  @NonNull @NotNull private List<String> groups = new ArrayList<>();
 
-  @Nullable
-  private String organizationName;
+  @Nullable private String organizationName;
 
   /**
    * Create an IndigoUserInfo copying the fields from a {@link UserInfo} object.
    *
-   * @param other
-   *          the {@link UserInfo} to copy from.
+   * @param other the {@link UserInfo} to copy from.
    */
   public IamUserInfo(UserInfo other) {
     this.setSub(other.getSub());
@@ -95,25 +86,25 @@ public class IamUserInfo extends DefaultUserInfo {
 
   @Override
   public JsonObject toJson() {
-    return Optional.ofNullable(this.getSource()).orElseGet(() -> {
-      JsonObject result = super.toJson();
-      JsonArray groupsJson = new JsonArray();
-      groups.forEach(g -> groupsJson.add(new JsonPrimitive(g)));
-      result.add(GROUPS_KEY, groupsJson);
+    return Optional.ofNullable(this.getSource())
+        .orElseGet(
+            () -> {
+              JsonObject result = super.toJson();
+              JsonArray groupsJson = new JsonArray();
+              groups.forEach(g -> groupsJson.add(new JsonPrimitive(g)));
+              result.add(GROUPS_KEY, groupsJson);
 
-      Optional.ofNullable(organizationName)
-          .ifPresent(name -> result.addProperty(ORGANIZATION_NAME_KEY, name));
+              Optional.ofNullable(organizationName)
+                  .ifPresent(name -> result.addProperty(ORGANIZATION_NAME_KEY, name));
 
-      return result;
-    });
-
+              return result;
+            });
   }
 
   /**
    * Create a {@link UserInfo} from its JSON representation.
    *
-   * @param obj
-   *          {@link JsonObject} containing the JSON representation.
+   * @param obj {@link JsonObject} containing the JSON representation.
    * @return the UserInfo.
    */
   public static UserInfo fromJson(JsonObject obj) {
@@ -122,11 +113,10 @@ public class IamUserInfo extends DefaultUserInfo {
     if (obj.has(EDUPERSON_UNIQUE_ID)) {
       result.setOrganizationName("egi");
       if (obj.has(EDUPERSON_ENTITLEMENT)) {
-        result.setGroups(CommonUtils
-                  .iteratorToStream(obj.get(EDUPERSON_ENTITLEMENT).getAsJsonArray().iterator())
-                  .map(JsonElement::getAsString)
-                  .collect(Collectors.toList())
-        );
+        result.setGroups(
+            CommonUtils.iteratorToStream(obj.get(EDUPERSON_ENTITLEMENT).getAsJsonArray().iterator())
+                .map(JsonElement::getAsString)
+                .collect(Collectors.toList()));
       }
     } else {
       // get groups json array
@@ -152,5 +142,4 @@ public class IamUserInfo extends DefaultUserInfo {
         .map(groupJson -> groupJson.getAsString())
         .collect(Collectors.toList());
   }
-
 }

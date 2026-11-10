@@ -66,14 +66,12 @@ public class OneDataServiceImpl implements OneDataService {
   /**
    * Generate a new {@link OneDataServiceImpl}.
    *
-   * @param oneDataProperties
-   *     the oneDataProperties
-   * @param restTemplateBuilder
-   *     the restTemplateBuilder
-   * @param oauth2TokenService
-   *     the oauth2TokenService
+   * @param oneDataProperties the oneDataProperties
+   * @param restTemplateBuilder the restTemplateBuilder
+   * @param oauth2TokenService the oauth2TokenService
    */
-  public OneDataServiceImpl(OneDataProperties oneDataProperties,
+  public OneDataServiceImpl(
+      OneDataProperties oneDataProperties,
       RestTemplateBuilder restTemplateBuilder,
       OAuth2TokenService oauth2TokenService) {
     this.oneDataProperties = oneDataProperties;
@@ -84,11 +82,12 @@ public class OneDataServiceImpl implements OneDataService {
   @Override
   public UserSpaces getUserSpacesId(String oneZoneEndpoint, String oneDataToken) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/spaces")
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/spaces")
+            .build()
+            .normalize()
+            .toUri();
 
     try {
       return restTemplate
@@ -100,15 +99,17 @@ public class OneDataServiceImpl implements OneDataService {
   }
 
   @Override
-  public SpaceDetails getSpaceDetailsFromId(String oneZoneEndpoint, String oneDataToken,
-      String oneSpaceId) {
+  public SpaceDetails getSpaceDetailsFromId(
+      String oneZoneEndpoint, String oneDataToken, String oneSpaceId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(
-            oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/spaces/{oneSpaceId}")
-        .buildAndExpand(oneSpaceId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                oneZoneEndpoint
+                    + oneDataProperties.getOnezoneBasePath()
+                    + "/user/spaces/{oneSpaceId}")
+            .buildAndExpand(oneSpaceId)
+            .normalize()
+            .toUri();
 
     try {
       return restTemplate
@@ -120,20 +121,22 @@ public class OneDataServiceImpl implements OneDataService {
   }
 
   @Override
-  public ProviderDetails getProviderDetailsFromId(String oneZoneEndpoint, String oneDataToken,
-      String oneProviderId) {
+  public ProviderDetails getProviderDetailsFromId(
+      String oneZoneEndpoint, String oneDataToken, String oneProviderId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(
-            oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/providers/{oneProviderId}")
-        .buildAndExpand(oneProviderId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                oneZoneEndpoint
+                    + oneDataProperties.getOnezoneBasePath()
+                    + "/providers/{oneProviderId}")
+            .buildAndExpand(oneProviderId)
+            .normalize()
+            .toUri();
 
     try {
       return restTemplate
-          .exchange(requestUri, HttpMethod.GET, withOnedataToken(oneDataToken),
-              ProviderDetails.class)
+          .exchange(
+              requestUri, HttpMethod.GET, withOnedataToken(oneDataToken), ProviderDetails.class)
           .getBody();
     } catch (RestClientException ex) {
       throw new DeploymentException("Error retrieving details of provider " + oneProviderId, ex);
@@ -145,18 +148,21 @@ public class OneDataServiceImpl implements OneDataService {
 
     String organization = oauth2TokenService.getOrganization(oidcTokenId);
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(
-            oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/client_tokens")
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/client_tokens")
+            .build()
+            .normalize()
+            .toUri();
 
     try {
-      return oauth2TokenService.executeWithClientForResult(oidcTokenId,
-          token -> restTemplate.exchange(
-              requestUri, HttpMethod.GET, withOidcToken(organization, token), Tokens.class)
-              .getBody(),
+      return oauth2TokenService.executeWithClientForResult(
+          oidcTokenId,
+          token ->
+              restTemplate
+                  .exchange(
+                      requestUri, HttpMethod.GET, withOidcToken(organization, token), Tokens.class)
+                  .getBody(),
           OAuth2TokenService.restTemplateTokenRefreshEvaluator);
     } catch (RestClientException ex) {
       throw new DeploymentException("Error retrieving OneData tokens", ex);
@@ -168,18 +174,21 @@ public class OneDataServiceImpl implements OneDataService {
 
     String organization = oauth2TokenService.getOrganization(oidcTokenId);
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(
-            oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/client_tokens")
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                oneZoneEndpoint + oneDataProperties.getOnezoneBasePath() + "/user/client_tokens")
+            .build()
+            .normalize()
+            .toUri();
 
     try {
-      return oauth2TokenService.executeWithClientForResult(oidcTokenId,
-          token -> restTemplate.exchange(
-              requestUri, HttpMethod.POST, withOidcToken(organization, token), Token.class)
-              .getBody(),
+      return oauth2TokenService.executeWithClientForResult(
+          oidcTokenId,
+          token ->
+              restTemplate
+                  .exchange(
+                      requestUri, HttpMethod.POST, withOidcToken(organization, token), Token.class)
+                  .getBody(),
           OAuth2TokenService.restTemplateTokenRefreshEvaluator);
     } catch (RestClientException ex) {
       throw new DeploymentException("Error generating new OneData token", ex);
@@ -188,9 +197,7 @@ public class OneDataServiceImpl implements OneDataService {
 
   @Override
   public String getOrGenerateOneDataToken(String oneZoneEndpoint, OidcTokenId oidcTokenId) {
-    return getOneDataTokens(oneZoneEndpoint, oidcTokenId)
-        .getTokens()
-        .stream()
+    return getOneDataTokens(oneZoneEndpoint, oidcTokenId).getTokens().stream()
         .findAny()
         .orElseGet(() -> generateOneDataToken(oneZoneEndpoint, oidcTokenId).getToken());
   }
@@ -211,7 +218,8 @@ public class OneDataServiceImpl implements OneDataService {
   }
 
   @Override
-  public OneData populateProviderInfo(OneData oneDataParameter,
+  public OneData populateProviderInfo(
+      OneData oneDataParameter,
       Map<String, CloudProvider> cloudProviders,
       OidcTokenId requestedWithToken,
       String deploymentId) {
@@ -242,41 +250,42 @@ public class OneDataServiceImpl implements OneDataService {
       oneDataParameter.setToken(oneToken);
     }
 
-    Set<String> requestedProviders = oneDataParameter
-        .getOneproviders()
-        .stream()
-        .map(OneDataProviderInfo::getEndpoint)
-        .collect(Collectors.toSet());
+    Set<String> requestedProviders =
+        oneDataParameter.getOneproviders().stream()
+            .map(OneDataProviderInfo::getEndpoint)
+            .collect(Collectors.toSet());
 
     boolean useRequestedProviders = !requestedProviders.isEmpty();
 
     UserSpaces spaces = getUserSpacesId(oneZone, oneToken);
 
-    SpaceDetails spaceDetail = spaces
-        .getSpaces()
-        .stream()
-        .map(spaceId -> getSpaceDetailsFromId(oneZone, oneToken, spaceId))
-        .filter(tmpSpaceDetail -> Objects.equals(spaceName, tmpSpaceDetail.getName()))
-        .findAny()
-        .orElseThrow(() -> new DeploymentException(
-            "No OneData space with name " + spaceName + " could be found in oneZone " + oneZone));
+    SpaceDetails spaceDetail =
+        spaces.getSpaces().stream()
+            .map(spaceId -> getSpaceDetailsFromId(oneZone, oneToken, spaceId))
+            .filter(tmpSpaceDetail -> Objects.equals(spaceName, tmpSpaceDetail.getName()))
+            .findAny()
+            .orElseThrow(
+                () ->
+                    new DeploymentException(
+                        "No OneData space with name "
+                            + spaceName
+                            + " could be found in oneZone "
+                            + oneZone));
 
     List<OneDataProviderInfo> oneDataProviderInfos = new ArrayList<>();
     Iterator<String> providerIdIterator = spaceDetail.getProviders().keySet().iterator();
 
-    Map<String, CloudService> oneProviderCloudServices = cloudProviders
-        .values()
-        .stream()
-        .flatMap(provider -> provider.getServices().values().stream())
-        .filter(CloudService::isOneProviderStorageService)
-        .collect(Collectors.toMap(CloudService::getEndpoint, Function.identity()));
+    Map<String, CloudService> oneProviderCloudServices =
+        cloudProviders.values().stream()
+            .flatMap(provider -> provider.getServices().values().stream())
+            .filter(CloudService::isOneProviderStorageService)
+            .collect(Collectors.toMap(CloudService::getEndpoint, Function.identity()));
 
-    while (providerIdIterator.hasNext() && (!useRequestedProviders || !requestedProviders
-        .isEmpty())) {
+    while (providerIdIterator.hasNext()
+        && (!useRequestedProviders || !requestedProviders.isEmpty())) {
       String providerId = providerIdIterator.next();
-      OneDataProviderInfoBuilder oneDataProviderInfobuilder = OneDataProviderInfo
-          .builder()
-          .id(providerId);
+      OneDataProviderInfoBuilder oneDataProviderInfobuilder =
+          OneDataProviderInfo.builder().id(providerId);
 
       CloudService cloudService = oneProviderCloudServices.get(providerId);
       if (cloudService != null) {
@@ -295,8 +304,10 @@ public class OneDataServiceImpl implements OneDataService {
 
       if (cloudService == null && oneDataParameter.isSmartScheduling()) {
         if (useRequestedProviders) {
-          throw new DeploymentException("Requested OneProvider " + oneProviderEndpoint
-              + " not registered in CMDB hence not eligible for smart scheduling");
+          throw new DeploymentException(
+              "Requested OneProvider "
+                  + oneProviderEndpoint
+                  + " not registered in CMDB hence not eligible for smart scheduling");
         } else {
           continue;
         }
@@ -305,8 +316,10 @@ public class OneDataServiceImpl implements OneDataService {
     }
     if (!requestedProviders.isEmpty()) {
       throw new DeploymentException(
-          "These requested OneProviders are not supporting the space " + spaceName + ":\n" + Arrays
-              .toString(requestedProviders.toArray()));
+          "These requested OneProviders are not supporting the space "
+              + spaceName
+              + ":\n"
+              + Arrays.toString(requestedProviders.toArray()));
     }
     if (oneDataProviderInfos.isEmpty()) {
       throw new DeploymentException("No OneProviders available for the space " + spaceName);
@@ -314,5 +327,4 @@ public class OneDataServiceImpl implements OneDataService {
     oneDataParameter.setOneproviders(oneDataProviderInfos);
     return oneDataParameter;
   }
-
 }

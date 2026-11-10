@@ -48,28 +48,22 @@ public class CloudProviderEndpointServiceImpl {
   /**
    * Generates the {@link CloudServicesOrderedIterator}.
    *
-   * @param rankCloudProvidersMessage
-   *     the rankCloudProvidersMessage
-   * @param maxProvidersRetry
-   *     max num of cloud providers on which iterate
+   * @param rankCloudProvidersMessage the rankCloudProvidersMessage
+   * @param maxProvidersRetry max num of cloud providers on which iterate
    * @return the iterator
    */
   public CloudServicesOrderedIterator generateCloudProvidersOrderedIterator(
       RankCloudProvidersMessage rankCloudProvidersMessage, Integer maxProvidersRetry) {
 
-    Map<String, CloudService> cloudServices = rankCloudProvidersMessage
-        .getCloudProviders()
-        .values()
-        .stream()
-        .map(CloudProvider::getServices)
-        .map(Map::values)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toMap(CloudService::getId, Function.identity()));
+    Map<String, CloudService> cloudServices =
+        rankCloudProvidersMessage.getCloudProviders().values().stream()
+            .map(CloudProvider::getServices)
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toMap(CloudService::getId, Function.identity()));
 
     Stream<CloudServiceWf> orderedCloudServices =
-        rankCloudProvidersMessage
-            .getRankedCloudServices()
-            .stream()
+        rankCloudProvidersMessage.getRankedCloudServices().stream()
             // Choose the ones ranked
             .filter(RankedCloudService::isRanked)
             // and with the best rank
@@ -77,19 +71,17 @@ public class CloudProviderEndpointServiceImpl {
             .map(RankedCloudService::getServiceId)
             .map(cloudServices::get)
             .filter(Objects::nonNull)
-            .map(cloudService -> {
-              CloudServiceWf serviceWf = new CloudServiceWf(cloudService);
-              rankCloudProvidersMessage
-                  .getCloudProviders()
-                  .get(cloudService.getProviderId())
-                  .getServicesOfType(StorageService.class)
-                  .stream()
-                  .map(StorageService::getRucioRse)
-                  .filter(Objects::nonNull)
-                  .findFirst()
-                  .ifPresent(serviceWf::setRucioRse);
-              return serviceWf;
-            });
+            .map(
+                cloudService -> {
+                  CloudServiceWf serviceWf = new CloudServiceWf(cloudService);
+                  rankCloudProvidersMessage.getCloudProviders().get(cloudService.getProviderId())
+                      .getServicesOfType(StorageService.class).stream()
+                      .map(StorageService::getRucioRse)
+                      .filter(Objects::nonNull)
+                      .findFirst()
+                      .ifPresent(serviceWf::setRucioRse);
+                  return serviceWf;
+                });
     if (maxProvidersRetry != null) {
       orderedCloudServices = orderedCloudServices.limit(maxProvidersRetry);
     }
@@ -100,16 +92,13 @@ public class CloudProviderEndpointServiceImpl {
   /**
    * Generates the {@link CloudProviderEndpoint}.
    *
-   * @param computeService
-   *     the chosen {@link CloudService}
-   * @param placementPolicies
-   *     the placementPolicies
-   * @param isHybrid
-   *     true if the deployment id hybrid
+   * @param computeService the chosen {@link CloudService}
+   * @param placementPolicies the placementPolicies
+   * @param isHybrid true if the deployment id hybrid
    * @return the {@link CloudProviderEndpoint}
    */
-  public CloudProviderEndpoint getCloudProviderEndpoint(CloudService computeService,
-      Map<String, ToscaPolicy> placementPolicies, boolean isHybrid) {
+  public CloudProviderEndpoint getCloudProviderEndpoint(
+      CloudService computeService, Map<String, ToscaPolicy> placementPolicies, boolean isHybrid) {
 
     String imEndpoint = null;
     CloudProviderEndpointBuilder cpe = CloudProviderEndpoint.builder();
@@ -166,14 +155,12 @@ public class CloudProviderEndpointServiceImpl {
   /**
    * Infer the deployment provider from the deployment type and the cloud provider.
    *
-   * @param deploymentType
-   *     the deployment type
-   * @param cloudService
-   *     the cloud service
+   * @param deploymentType the deployment type
+   * @param cloudService the cloud service
    * @return the deployment provider
    */
-  public DeploymentProvider getDeploymentProvider(DeploymentType deploymentType,
-      CloudService cloudService) {
+  public DeploymentProvider getDeploymentProvider(
+      DeploymentType deploymentType, CloudService cloudService) {
     switch (deploymentType) {
       case CHRONOS:
         return DeploymentProvider.CHRONOS;
@@ -189,5 +176,4 @@ public class CloudProviderEndpointServiceImpl {
         throw new DeploymentException("Unknown DeploymentType: " + deploymentType.toString());
     }
   }
-
 }

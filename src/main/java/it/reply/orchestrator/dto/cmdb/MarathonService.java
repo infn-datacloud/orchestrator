@@ -18,21 +18,16 @@
 package it.reply.orchestrator.dto.cmdb;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.dto.cmdb.MarathonService.MarathonServiceProperties;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -41,10 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MarathonService extends MesosFrameworkService<MarathonServiceProperties> {
 
-  /**
-   * Create a new MarathonService.
-   * */
-
+  /** Create a new MarathonService. */
   @Builder(builderMethodName = "marathonBuilder")
   public MarathonService(
       @NonNull String id,
@@ -63,9 +55,23 @@ public class MarathonService extends MesosFrameworkService<MarathonServiceProper
       boolean publicIpAssignable,
       @NonNull List<SupportedIdp> supportedIdps,
       @NonNull MarathonServiceProperties properties) {
-    super(id, serviceType, endpoint, microversion, providerId, type, publicService,
-          tenant, region, hostname, parentServiceId, iamEnabled, idpProtocol,
-          publicIpAssignable, supportedIdps, properties);
+    super(
+        id,
+        serviceType,
+        endpoint,
+        microversion,
+        providerId,
+        type,
+        publicService,
+        tenant,
+        region,
+        hostname,
+        parentServiceId,
+        iamEnabled,
+        idpProtocol,
+        publicIpAssignable,
+        supportedIdps,
+        properties);
   }
 
   @Data
@@ -86,7 +92,9 @@ public class MarathonService extends MesosFrameworkService<MarathonServiceProper
         boolean gpuSupport,
         @NonNull List<String> persistentStorageDrivers,
         @NonNull List<String> loadBalancerIps) {
-      super(localVolumesHostBasePath, gpuSupport,
+      super(
+          localVolumesHostBasePath,
+          gpuSupport,
           CommonUtils.notNullOrDefaultValue(persistentStorageDrivers, ArrayList::new));
       this.loadBalancerIps = CommonUtils.notNullOrDefaultValue(loadBalancerIps, ArrayList::new);
     }
@@ -95,6 +103,5 @@ public class MarathonService extends MesosFrameworkService<MarathonServiceProper
     protected MarathonServiceProperties() {
       loadBalancerIps = new ArrayList<>();
     }
-
   }
 }

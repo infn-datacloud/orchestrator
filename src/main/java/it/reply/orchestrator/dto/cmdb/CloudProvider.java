@@ -59,17 +59,13 @@ public class CloudProvider implements CmdbIdentifiable {
   /**
    * Get all services instance of a specified class.
    *
-   * @param <T>
-   *     the object type
-   * @param clazz
-   *     the base class required
+   * @param <T> the object type
+   * @param clazz the base class required
    * @return the list of services
    */
   @JsonIgnore
   public <T extends CloudService> List<T> getServicesOfType(Class<T> clazz) {
-    return services
-        .values()
-        .stream()
+    return services.values().stream()
         .filter(clazz::isInstance)
         .map(clazz::cast)
         .collect(Collectors.toList());
@@ -78,15 +74,12 @@ public class CloudProvider implements CmdbIdentifiable {
   /**
    * Get all services instance of a specified {@link CloudServiceType}.
    *
-   * @param type
-   *     the required type
+   * @param type the required type
    * @return the list of services
    */
   @JsonIgnore
   public List<CloudService> getServicesOfType(CloudServiceType type) {
-    return services
-        .values()
-        .stream()
+    return services.values().stream()
         .filter(cs -> cs.getType().equals(type))
         .collect(Collectors.toList());
   }

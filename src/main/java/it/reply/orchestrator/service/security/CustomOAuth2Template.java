@@ -19,17 +19,17 @@ package it.reply.orchestrator.service.security;
 
 import it.reply.orchestrator.dto.security.AccessGrant;
 import it.reply.orchestrator.dto.security.TokenIntrospectionResponse;
-
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.mitre.oauth2.model.ClientDetailsEntity.AuthMethod;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.config.ServerConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -40,9 +40,12 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 public class CustomOAuth2Template {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CustomOAuth2Template.class);
 
   private static final String TOKEN_TYPE_ACCESS_TOKEN =
       "urn:ietf:params:oauth:token-type:access_token";
@@ -60,22 +63,22 @@ public class CustomOAuth2Template {
   /**
    * * Creates a new OAuth2Template.
    *
-   * @param serverConfiguration
-   *          the authorization server configuration
-   * @param clientConfiguration
-   *          the client configuration
-   * @param builder
-   *          the RestTemplate builder
-   * @param audience
-   *          the audience
+   * @param serverConfiguration the authorization server configuration
+   * @param clientConfiguration the client configuration
+   * @param builder the RestTemplate builder
+   * @param audience the audience
    */
-  public CustomOAuth2Template(@NonNull ServerConfiguration serverConfiguration,
-      @NonNull RegisteredClient clientConfiguration, @NonNull RestTemplateBuilder builder,
+  public CustomOAuth2Template(
+      @NonNull ServerConfiguration serverConfiguration,
+      @NonNull RegisteredClient clientConfiguration,
+      @NonNull RestTemplateBuilder builder,
       @NonNull String audience) {
     this.serverConfiguration = serverConfiguration;
     this.clientConfiguration = clientConfiguration;
 
-    builder.messageConverters(new FormHttpMessageConverter(), new FormHttpMessageConverter(),
+    builder.messageConverters(
+        new FormHttpMessageConverter(),
+        new FormHttpMessageConverter(),
         new MappingJackson2HttpMessageConverter());
     this.restTemplate = builder.build();
     this.audience = audience;
@@ -84,10 +87,8 @@ public class CustomOAuth2Template {
   /**
    * Exchange an access token for a new grant.
    *
-   * @param accessToken
-   *          the access token to exchange
-   * @param scopes
-   *          the scope to request
+   * @param accessToken the access token to exchange
+   * @param scopes the scope to request
    * @return the new grant
    */
   public AccessGrant exchangeToken(String accessToken, Set<String> scopes) {
@@ -101,10 +102,8 @@ public class CustomOAuth2Template {
   /**
    * Get a new access token (and maybe a refresh token) from an existing refresh token.
    *
-   * @param refreshToken
-   *          the refresh token to use
-   * @param scopes
-   *          the scope to request
+   * @param refreshToken the refresh token to use
+   * @param scopes the scope to request
    * @return the new grant
    */
   public AccessGrant refreshToken(String refreshToken, Set<String> scopes) {
@@ -117,37 +116,76 @@ public class CustomOAuth2Template {
   /**
    * Introspect an access token or a refresh token.
    *
-   * @param token
-   *          the token
+   * @param token the token
    * @return the introspection response
    */
   public TokenIntrospectionResponse introspectToken(String token) {
     MultiValueMap<String, String> params = generateParams(AuthMethod.SECRET_BASIC);
     params.set("token", token);
-    return postForObject(serverConfiguration.getIntrospectionEndpointUri(), AuthMethod.SECRET_BASIC,
-        params, TokenIntrospectionResponse.class);
+    return postForObject(
+        serverConfiguration.getIntrospectionEndpointUri(),
+        AuthMethod.SECRET_BASIC,
+        params,
+        TokenIntrospectionResponse.class);
   }
 
-  protected <T> T postForObject(String url, AuthMethod authMethod,
+  protected <T> T postForObject(
+      String url,
+      AuthMethod authMethod,
       MultiValueMap<String, String> params,
       Class<T> responseClass) {
     BodyBuilder request = RequestEntity.post(URI.create(url));
     if (AuthMethod.SECRET_BASIC.equals(authMethod)) {
-      request.header(HttpHeaders.AUTHORIZATION,
-          "Basic " + Base64Utils.encodeToString(
-              (clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret())
-                  .getBytes(Charset.forName("UTF-8"))));
+      request.header(
+          HttpHeaders.AUTHORIZATION,
+          "Basic "
+              + Base64Utils.encodeToString(
+                  (clientConfiguration.getClientId() + ":" + clientConfiguration.getClientSecret())
+                      .getBytes(Charset.forName("UTF-8"))));
     }
-    return restTemplate.exchange(request.body(params), responseClass).getBody();
+    try {
+      return restTemplate.exchange(request.body(params), responseClass).getBody();
+    } catch (HttpStatusCodeException ex) {
+      String responseBody = ex.getResponseBodyAsString();
+      String[] sensitiveValues = {
+        clientConfiguration.getClientSecret(),
+        params.getFirst("client_secret"),
+        params.getFirst("refresh_token"),
+        params.getFirst("subject_token"),
+        params.getFirst("token")
+      };
+      for (String value : sensitiveValues) {
+        if (StringUtils.hasText(value)) {
+          responseBody = responseBody.replace(value, "[REDACTED]");
+        }
+      }
+      responseBody = responseBody.replace('\r', ' ').replace('\n', ' ');
+      LOG.error(
+          "OAuth2 endpoint request failed: url={}, clientId={}, "
+              + "grantType={}, scope={}, audience={}, status={}, responseBody={}",
+          url,
+          clientConfiguration.getClientId(),
+          params.getFirst("grant_type"),
+          params.getFirst("scope"),
+          params.getFirst("audience"),
+          ex.getStatusCode().value(),
+          responseBody);
+      throw ex;
+    }
   }
 
-  protected AccessGrant postForAccessGrant(MultiValueMap<String, String> params,
-      Set<String> scopes, String grantType) {
+  protected AccessGrant postForAccessGrant(
+      MultiValueMap<String, String> params, Set<String> scopes, String grantType) {
     params.set("audience", audience);
     params.set("scope", scopeFromCollection(scopes));
     params.set("grant_type", grantType);
-    return validateAccessGrantScopes(postForObject(serverConfiguration.getTokenEndpointUri(),
-        clientConfiguration.getTokenEndpointAuthMethod(), params, AccessGrant.class), scopes);
+    return validateAccessGrantScopes(
+        postForObject(
+            serverConfiguration.getTokenEndpointUri(),
+            clientConfiguration.getTokenEndpointAuthMethod(),
+            params,
+            AccessGrant.class),
+        scopes);
   }
 
   private MultiValueMap<String, String> generateParams(AuthMethod authMethod) {
@@ -160,8 +198,7 @@ public class CustomOAuth2Template {
   }
 
   private String scopeFromCollection(Collection<String> scopes) {
-    return scopes
-        .stream()
+    return scopes.stream()
         .filter(StringUtils::hasText)
         .map(String::trim)
         .collect(Collectors.joining(" "));

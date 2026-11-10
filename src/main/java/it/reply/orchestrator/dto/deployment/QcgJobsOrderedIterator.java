@@ -19,14 +19,11 @@ package it.reply.orchestrator.dto.deployment;
 
 import it.reply.orchestrator.dto.workflow.WorkflowListIterator;
 import it.reply.orchestrator.service.deployment.providers.QcgServiceImpl.DeepJob;
-
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -37,5 +34,4 @@ public class QcgJobsOrderedIterator extends WorkflowListIterator<DeepJob> {
   public QcgJobsOrderedIterator(@NonNull List<DeepJob> items) {
     super(items);
   }
-
 }

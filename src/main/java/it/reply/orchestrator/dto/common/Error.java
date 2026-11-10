@@ -18,14 +18,11 @@
 package it.reply.orchestrator.dto.common;
 
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.http.HttpStatus;
 
@@ -33,38 +30,32 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Error {
 
-  @Nullable
-  private Integer code;
+  @Nullable private Integer code;
 
-  @Nullable
-  private String title;
+  @Nullable private String title;
 
-  @Nullable
-  private String message;
+  @Nullable private String message;
 
   /**
    * Generate an Error from an exception and a {@link HttpStatus}.
    *
-   * @param exception
-   *          the exception
-   * @param message
-   *          the message
-   * @param status
-   *          the HttpStatus
+   * @param exception the exception
+   * @param message the message
+   * @param status the HttpStatus
    */
   @Builder
-  protected Error(@Nullable Exception exception, @Nullable String message,
-      @Nullable HttpStatus status) {
-    Optional.ofNullable(status).map(CommonUtils::checkNotNull).ifPresent(safeStatus -> {
-      code = safeStatus.value();
-      title = safeStatus.getReasonPhrase();
-    });
-    this.message = Optional
-        .ofNullable(message)
-        .orElseGet(() -> Optional
-            .ofNullable(exception)
-            .map(Exception::getMessage)
-            .orElse(null));
+  protected Error(
+      @Nullable Exception exception, @Nullable String message, @Nullable HttpStatus status) {
+    Optional.ofNullable(status)
+        .map(CommonUtils::checkNotNull)
+        .ifPresent(
+            safeStatus -> {
+              code = safeStatus.value();
+              title = safeStatus.getReasonPhrase();
+            });
+    this.message =
+        Optional.ofNullable(message)
+            .orElseGet(
+                () -> Optional.ofNullable(exception).map(Exception::getMessage).orElse(null));
   }
-
 }

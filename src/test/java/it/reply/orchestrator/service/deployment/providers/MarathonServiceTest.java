@@ -17,8 +17,11 @@
 
 package it.reply.orchestrator.service.deployment.providers;
 
-import com.google.common.collect.Lists;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import it.reply.orchestrator.config.properties.OrchestratorProperties;
 import it.reply.orchestrator.config.specific.ToscaParserAwareTest;
 import it.reply.orchestrator.controller.ControllerTestUtils;
@@ -29,9 +32,9 @@ import it.reply.orchestrator.dal.repository.ResourceRepository;
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
 import it.reply.orchestrator.dto.CloudProviderEndpoint.IaaSType;
 import it.reply.orchestrator.dto.cmdb.CloudService;
+import it.reply.orchestrator.dto.cmdb.CloudServiceType;
 import it.reply.orchestrator.dto.cmdb.MarathonService;
 import it.reply.orchestrator.dto.cmdb.MarathonService.MarathonServiceProperties;
-import it.reply.orchestrator.dto.cmdb.CloudServiceType;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.workflow.CloudServiceWf;
 import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
@@ -44,11 +47,6 @@ import it.reply.orchestrator.service.ToscaServiceTest;
 import it.reply.orchestrator.service.VaultService;
 import it.reply.orchestrator.service.deployment.providers.factory.MarathonClientFactory;
 import it.reply.orchestrator.util.TestUtil;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -57,7 +55,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import mesosphere.client.common.ModelUtils;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.MarathonException;
@@ -69,7 +68,6 @@ import mesosphere.marathon.client.model.v2.LocalVolume;
 import mesosphere.marathon.client.model.v2.TaskFailure;
 import mesosphere.marathon.client.model.v2.VersionedApp;
 import mesosphere.marathon.client.model.v2.Volume;
-
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -83,46 +81,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 @RunWith(JUnitParamsRunner.class)
 public class MarathonServiceTest extends ToscaParserAwareTest {
 
-  @InjectMocks
-  private MarathonServiceImpl marathonServiceImpl;
+  @InjectMocks private MarathonServiceImpl marathonServiceImpl;
 
-  @SpyBean
-  @Autowired
-  protected ToscaService toscaService;
+  @SpyBean @Autowired protected ToscaService toscaService;
 
-  @MockBean
-  private ResourceRepository resourceRepository;
+  @MockBean private ResourceRepository resourceRepository;
 
-  @MockBean
-  private DeploymentRepository deploymentRepository;
+  @MockBean private DeploymentRepository deploymentRepository;
 
-  @MockBean
-  private MarathonClientFactory marathonClientFactory;
+  @MockBean private MarathonClientFactory marathonClientFactory;
 
-  @MockBean
-  private VaultService vaultService;
+  @MockBean private VaultService vaultService;
 
-  @MockBean
-  private Marathon marathonClient;
+  @MockBean private Marathon marathonClient;
 
-  @Mock
-  private OrchestratorProperties orchestratorProperties;
+  @Mock private OrchestratorProperties orchestratorProperties;
 
   private static final String defaultVaultEndpoint = "https://default.vault.com:8200";
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-@Before
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  @Before
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
-    Mockito
-        .when(oauth2tokenService.executeWithClientForResult(
-            Mockito.any(), Mockito.any(), Mockito.any()))
+    Mockito.when(
+            oauth2tokenService.executeWithClientForResult(
+                Mockito.any(), Mockito.any(), Mockito.any()))
         .thenAnswer(y -> ((ThrowingFunction) y.getArguments()[1]).apply("token"));
     when(orchestratorProperties.getUrl()).thenReturn(new URI("http://localhost:8080"));
   }
@@ -165,11 +151,12 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
 
   private Deployment generateDeployment() throws IOException {
     Deployment deployment = ControllerTestUtils.createDeployment();
-    deployment.setCloudProviderEndpoint(CloudProviderEndpoint.builder()
-        .cpComputeServiceId(UUID.randomUUID().toString())
-        .cpEndpoint("example.com")
-        .iaasType(IaaSType.MARATHON)
-        .build());
+    deployment.setCloudProviderEndpoint(
+        CloudProviderEndpoint.builder()
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .cpEndpoint("example.com")
+            .iaasType(IaaSType.MARATHON)
+            .build());
     deployment.setTemplate(
         TestUtil.getFileContentAsString(ToscaServiceTest.TEMPLATES_BASE_DIR + "marathon_app.yaml"));
 
@@ -190,14 +177,12 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
     app.addRequiredResource(runtime);
     deployment.getResources().add(app);
 
-    Mockito
-        .when(resourceRepository.findByToscaNodeNameAndDeployment_id("Docker",
-            deployment.getId()))
+    Mockito.when(
+            resourceRepository.findByToscaNodeNameAndDeployment_id("Docker", deployment.getId()))
         .thenReturn(Lists.newArrayList(runtime));
 
-    Mockito
-        .when(resourceRepository.findByToscaNodeNameAndDeployment_id("marathon",
-            deployment.getId()))
+    Mockito.when(
+            resourceRepository.findByToscaNodeNameAndDeployment_id("marathon", deployment.getId()))
         .thenReturn(Lists.newArrayList(app));
     return deployment;
   }
@@ -206,31 +191,28 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
   public void testCreateGroup() throws IOException {
     Deployment deployment = generateDeployment();
     DeploymentMessage dm = TestUtil.generateDeployDm(deployment);
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
-    Assertions
-        .assertThat(marathonServiceImpl.createGroup(dm, null))
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Assertions.assertThat(marathonServiceImpl.createGroup(dm, null))
         .isEqualToComparingFieldByFieldRecursively(
-            ModelUtils.GSON.fromJson(TestUtil.getFileContentAsString(
-                ToscaServiceTest.TEMPLATES_BASE_DIR + "marathon_app.json"), Group.class));
+            ModelUtils.GSON.fromJson(
+                TestUtil.getFileContentAsString(
+                    ToscaServiceTest.TEMPLATES_BASE_DIR + "marathon_app.json"),
+                Group.class));
   }
 
   private MarathonService buildService() {
-    MarathonService cs = MarathonService
-        .marathonBuilder()
-        .endpoint("example.com/marathon")
-        .serviceType(CloudService.MARATHON_COMPUTE_SERVICE)
-        .hostname("example.com")
-        .providerId("provider-1")
-        .id("provider-1-service-1")
-        .type(CloudServiceType.COMPUTE)
-        .supportedIdps(new ArrayList<>())
-        .properties(MarathonServiceProperties
-            .builder()
-            .localVolumesHostBasePath("/tmp/")
-            .build())
-        .build();
+    MarathonService cs =
+        MarathonService.marathonBuilder()
+            .endpoint("example.com/marathon")
+            .serviceType(CloudService.MARATHON_COMPUTE_SERVICE)
+            .hostname("example.com")
+            .providerId("provider-1")
+            .id("provider-1-service-1")
+            .type(CloudServiceType.COMPUTE)
+            .supportedIdps(new ArrayList<>())
+            .properties(
+                MarathonServiceProperties.builder().localVolumesHostBasePath("/tmp/").build())
+            .build();
     return cs;
   }
 
@@ -241,22 +223,17 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
 
     MarathonService cs = buildService();
 
-    CloudServicesOrderedIterator csi = new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(cs)));
+    CloudServicesOrderedIterator csi =
+        new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(cs)));
     csi.next();
     dm.setCloudServicesOrderedIterator(csi);
 
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
-    Mockito
-        .when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Mockito.when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
         .thenReturn(marathonClient);
-    Mockito
-        .when(vaultService.getServiceUri())
+    Mockito.when(vaultService.getServiceUri())
         .thenReturn(Optional.of(new URI(defaultVaultEndpoint)));
-    Assertions
-    .assertThat(marathonServiceImpl.doUndeploy(dm))
-    .isTrue();
+    Assertions.assertThat(marathonServiceImpl.doUndeploy(dm)).isTrue();
   }
 
   @Test
@@ -266,35 +243,27 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
 
     MarathonService cs = buildService();
 
-    CloudServicesOrderedIterator csi = new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(cs)));
+    CloudServicesOrderedIterator csi =
+        new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(cs)));
     csi.next();
     dm.setCloudServicesOrderedIterator(csi);
 
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
-    Mockito
-        .when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Mockito.when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
         .thenReturn(marathonClient);
-    Mockito
-        .when(vaultService.getServiceUri())
+    Mockito.when(vaultService.getServiceUri())
         .thenReturn(Optional.of(new URI(defaultVaultEndpoint)));
-    Assertions
-        .assertThat(marathonServiceImpl.doDeploy(dm))
-        .isTrue();
+    Assertions.assertThat(marathonServiceImpl.doDeploy(dm)).isTrue();
   }
 
   @Test
-  @Parameters({"true","false"})
+  @Parameters({"true", "false"})
   public void testIsUndeployed(boolean expected) {
     Deployment deployment = new Deployment();
     deployment.setId(UUID.randomUUID().toString());
     DeploymentMessage dm = TestUtil.generateDeployDm(deployment);
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
-    Mockito
-        .when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Mockito.when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
         .thenReturn(marathonClient);
     VersionedApp app = new VersionedApp();
     app.setId("appId");
@@ -303,45 +272,42 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
     group.setApps(Lists.newArrayList(app));
 
     if (!expected) {
-      Mockito
-          .when(marathonClient.getGroup(deployment.getId()))
-          .thenReturn(group);
+      Mockito.when(marathonClient.getGroup(deployment.getId())).thenReturn(group);
     } else {
-      Mockito
-          .when(marathonClient.getGroup(deployment.getId()))
+      Mockito.when(marathonClient.getGroup(deployment.getId()))
           .thenThrow(new MarathonException(404, "Deployment not found"));
     }
-    Assertions
-        .assertThat(marathonServiceImpl.isUndeployed(dm))
-        .isEqualTo(expected);
+    Assertions.assertThat(marathonServiceImpl.isUndeployed(dm)).isEqualTo(expected);
   }
 
   @Test
-  @Parameters({ "1,0,0,0,false",
-      "0,1,0,0,true",
-      "1,1,0,0,false",
-      "0,1,1,0,false",
-      "0,1,1,1,true",
-      "1,1,1,1,false" })
-  public void testIsDeployed(int deployments, int running, int healtChecks,
-      int healty, boolean expected) {
+  @Parameters({
+    "1,0,0,0,false",
+    "0,1,0,0,true",
+    "1,1,0,0,false",
+    "0,1,1,0,false",
+    "0,1,1,1,true",
+    "1,1,1,1,false"
+  })
+  public void testIsDeployed(
+      int deployments, int running, int healtChecks, int healty, boolean expected) {
     Deployment deployment = new Deployment();
     deployment.setId(UUID.randomUUID().toString());
     DeploymentMessage dm = TestUtil.generateDeployDm(deployment);
     VersionedApp app = new VersionedApp();
     app.setId("appId");
 
-    app.setDeployments(IntStream
-        .range(0, deployments)
-        .mapToObj(i -> new mesosphere.marathon.client.model.v2.App.Deployment())
-        .collect(Collectors.toList()));
+    app.setDeployments(
+        IntStream.range(0, deployments)
+            .mapToObj(i -> new mesosphere.marathon.client.model.v2.App.Deployment())
+            .collect(Collectors.toList()));
 
     app.setInstances(1);
 
-    app.setHealthChecks(IntStream
-        .range(0, healtChecks)
-        .mapToObj(i -> new HealthCheck())
-        .collect(Collectors.toList()));
+    app.setHealthChecks(
+        IntStream.range(0, healtChecks)
+            .mapToObj(i -> new HealthCheck())
+            .collect(Collectors.toList()));
 
     app.setTasksRunning(running);
     app.setTasksHealthy(healty);
@@ -350,25 +316,16 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
     group.setId(deployment.getId());
     group.setApps(Lists.newArrayList(app));
 
-    Mockito
-        .when(marathonClient.getGroup(deployment.getId()))
-        .thenReturn(group);
+    Mockito.when(marathonClient.getGroup(deployment.getId())).thenReturn(group);
 
     GetAppResponse appResponse = new GetAppResponse();
     appResponse.setApp(app);
 
-    Mockito
-        .when(marathonClient.getApp("appId"))
-        .thenReturn(appResponse);
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
-    Mockito
-        .when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
+    Mockito.when(marathonClient.getApp("appId")).thenReturn(appResponse);
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
+    Mockito.when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
         .thenReturn(marathonClient);
-    Assertions
-        .assertThat(marathonServiceImpl.isDeployed(dm))
-        .isEqualTo(expected);
+    Assertions.assertThat(marathonServiceImpl.isDeployed(dm)).isEqualTo(expected);
   }
 
   @Test
@@ -389,39 +346,36 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
     group.setId(deployment.getId());
     group.setApps(Lists.newArrayList(app));
 
-    Mockito
-        .when(marathonClient.getGroup(deployment.getId()))
-        .thenReturn(group);
+    Mockito.when(marathonClient.getGroup(deployment.getId())).thenReturn(group);
 
     GetAppResponse appResponse = new GetAppResponse();
     appResponse.setApp(app);
 
-    Mockito
-        .when(marathonClient.getApp("appId"))
-        .thenReturn(appResponse);
+    Mockito.when(marathonClient.getApp("appId")).thenReturn(appResponse);
 
-    Mockito
-        .when(deploymentRepository.findOne(deployment.getId()))
-        .thenReturn(deployment);
+    Mockito.when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
 
-    Mockito
-        .when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
+    Mockito.when(marathonClientFactory.build(deployment.getCloudProviderEndpoint(), "token"))
         .thenReturn(marathonClient);
 
-    AbstractThrowableAssert<?, ? extends Throwable> assertion = assertThatCode(
-        () -> marathonServiceImpl.doProviderTimeout(dm));
+    AbstractThrowableAssert<?, ? extends Throwable> assertion =
+        assertThatCode(() -> marathonServiceImpl.doProviderTimeout(dm));
     if (!hasTaskFailure) {
-      assertion.isInstanceOf(BusinessWorkflowException.class)
+      assertion
+          .isInstanceOf(BusinessWorkflowException.class)
           .hasCauseExactlyInstanceOf(DeploymentException.class)
-          .hasMessage("Error executing request to Marathon service;"
-              + " nested exception is it.reply.orchestrator.exception.service."
-              + "DeploymentException: Deployment timeout");
+          .hasMessage(
+              "Error executing request to Marathon service;"
+                  + " nested exception is it.reply.orchestrator.exception.service."
+                  + "DeploymentException: Deployment timeout");
     } else {
-      assertion.isInstanceOf(BusinessWorkflowException.class)
-      .hasCauseExactlyInstanceOf(DeploymentException.class)
-      .hasMessage("Error executing request to Marathon service;"
-          + " nested exception is it.reply.orchestrator.exception.service."
-          + "DeploymentException: Deployment timeout: Task Failure Message\n");
+      assertion
+          .isInstanceOf(BusinessWorkflowException.class)
+          .hasCauseExactlyInstanceOf(DeploymentException.class)
+          .hasMessage(
+              "Error executing request to Marathon service;"
+                  + " nested exception is it.reply.orchestrator.exception.service."
+                  + "DeploymentException: Deployment timeout: Task Failure Message\n");
     }
   }
 
@@ -429,7 +383,7 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
   public void getDeploymentExtendedInfoInternal() {
     DeploymentMessage dm = new DeploymentMessage();
     assertThat(marathonServiceImpl.getDeploymentExtendedInfoInternal(dm))
-      .isEqualTo(Optional.empty());
+        .isEqualTo(Optional.empty());
   }
 
   @Test
@@ -437,5 +391,4 @@ public class MarathonServiceTest extends ToscaParserAwareTest {
     DeploymentMessage dm = new DeploymentMessage();
     assertThat(marathonServiceImpl.getDeploymentLog(dm)).isEqualTo(Optional.empty());
   }
-
 }

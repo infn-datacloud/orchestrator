@@ -61,7 +61,6 @@ import it.reply.orchestrator.utils.JwtUtils;
 import it.reply.orchestrator.utils.ToscaConstants;
 import it.reply.orchestrator.utils.ToscaUtils;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,35 +83,29 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
 
   public static final String HELM_RELEASE_PREFIX = "paas-";
 
-  @Autowired
-  private ToscaService toscaService;
+  @Autowired private ToscaService toscaService;
 
-  @Autowired
-  private KubernetesClientFactory clientFactory;
+  @Autowired private KubernetesClientFactory clientFactory;
 
-  @Autowired
-  private OrchestratorProperties orchestratorProperties;
+  @Autowired private OrchestratorProperties orchestratorProperties;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
-  @Autowired
-  private IndigoInputsPreProcessorService indigoInputsPreProcessorService;
+  @Autowired private IndigoInputsPreProcessorService indigoInputsPreProcessorService;
 
   private GenericKubernetesApi<V1HelmRelease, V1HelmReleaseList> getHelmClient(
-          CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
+      CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     ApiClient apiClient = clientFactory.build(cloudProviderEndpoint, accessToken);
     return new GenericKubernetesApi<>(
-            V1HelmRelease.class,
-            V1HelmReleaseList.class,
-            "helm.fluxcd.io",
-            "v1",
-            "helmreleases",
-            apiClient);
+        V1HelmRelease.class,
+        V1HelmReleaseList.class,
+        "helm.fluxcd.io",
+        "v1",
+        "helmreleases",
+        apiClient);
   }
 
-  private CoreV1Api getCoreClient(
-      CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
+  private CoreV1Api getCoreClient(CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     ApiClient apiClient = clientFactory.build(cloudProviderEndpoint, accessToken);
     return new CoreV1Api(apiClient);
   }
@@ -129,21 +122,26 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
 
   @Override
   protected Optional<String> getDeploymentExtendedInfoInternal(
-          DeploymentMessage deploymentMessage) {
+      DeploymentMessage deploymentMessage) {
     return Optional.empty();
   }
 
   protected <R extends KubernetesType> KubernetesApiResponse<R> executeWithHelmClientForResult(
-          CloudProviderEndpoint cloudProviderEndpoint,
-          OidcTokenId requestedWithToken,
-          ThrowingFunction<GenericKubernetesApi<V1HelmRelease, V1HelmReleaseList>,
-                  KubernetesApiResponse<R>, ApiException> function)
-          throws ApiException {
-    return oauth2TokenService
-             .executeWithClientForResult(requestedWithToken, token -> function
-                            .apply(this.getHelmClient(cloudProviderEndpoint, token))
-                            .onFailure(this::throwApiException),
-                 ex -> ex instanceof ApiException && ((ApiException) ex).getCode() == 401);
+      CloudProviderEndpoint cloudProviderEndpoint,
+      OidcTokenId requestedWithToken,
+      ThrowingFunction<
+              GenericKubernetesApi<V1HelmRelease, V1HelmReleaseList>,
+              KubernetesApiResponse<R>,
+              ApiException>
+          function)
+      throws ApiException {
+    return oauth2TokenService.executeWithClientForResult(
+        requestedWithToken,
+        token ->
+            function
+                .apply(this.getHelmClient(cloudProviderEndpoint, token))
+                .onFailure(this::throwApiException),
+        ex -> ex instanceof ApiException && ((ApiException) ex).getCode() == 401);
   }
 
   protected <R> R executeWithCoreClientForResult(
@@ -151,10 +149,10 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
       OidcTokenId requestedWithToken,
       ThrowingFunction<CoreV1Api, R, ApiException> function)
       throws ApiException {
-    return oauth2TokenService
-        .executeWithClientForResult(requestedWithToken, token -> function
-                .apply(this.getCoreClient(cloudProviderEndpoint, token)),
-            ex -> ex instanceof ApiException && ((ApiException) ex).getCode() == 401);
+    return oauth2TokenService.executeWithClientForResult(
+        requestedWithToken,
+        token -> function.apply(this.getCoreClient(cloudProviderEndpoint, token)),
+        ex -> ex instanceof ApiException && ((ApiException) ex).getCode() == 401);
   }
 
   private void throwApiException(V1Status errorStatus) throws ApiException {
@@ -166,47 +164,52 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     return helmReleaseFromTosca(helmRelease, deployment, deployment.getTemplate());
   }
 
-  private V1HelmRelease helmReleaseFromTosca(V1HelmRelease helmRelease, Deployment deployment,
-      String template) {
+  private V1HelmRelease helmReleaseFromTosca(
+      V1HelmRelease helmRelease, Deployment deployment, String template) {
     Map<String, Object> inputs = deployment.getParameters();
     ArchiveRoot ar = toscaService.parseAndValidateTemplate(template, inputs);
     indigoInputsPreProcessorService.processGetInput(ar, inputs);
 
-    NodeTemplate chartNode = Optional
-        .ofNullable(ar.getTopology())
-        .map(Topology::getNodeTemplates)
-        .flatMap(nodes -> nodes
-            .values()
-            .stream()
-            .filter(node -> toscaService
-                .isOfToscaType(node, ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART))
-                .findFirst())
-        .orElseThrow(() -> new OrchestratorException("Unable to find Kubernetes TOSCA node"));
+    NodeTemplate chartNode =
+        Optional.ofNullable(ar.getTopology())
+            .map(Topology::getNodeTemplates)
+            .flatMap(
+                nodes ->
+                    nodes.values().stream()
+                        .filter(
+                            node ->
+                                toscaService.isOfToscaType(
+                                    node, ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART))
+                        .findFirst())
+            .orElseThrow(() -> new OrchestratorException("Unable to find Kubernetes TOSCA node"));
 
-    String repository = ToscaUtils.extractScalar(chartNode.getProperties(), "repository")
-        .orElseThrow(() -> new OrchestratorException("Helm Repository not specified"));
-    String chartName = ToscaUtils.extractScalar(chartNode.getProperties(), "name")
-        .orElseThrow(() -> new OrchestratorException("Chart Name not specified"));
-    String version = ToscaUtils.extractScalar(chartNode.getProperties(), "version")
-        .orElseThrow(() -> new OrchestratorException("Chart Version not specified"));
-    String values = ToscaUtils.extractScalar(chartNode.getProperties(), "values")
-        .orElseGet(String::new);
+    String repository =
+        ToscaUtils.extractScalar(chartNode.getProperties(), "repository")
+            .orElseThrow(() -> new OrchestratorException("Helm Repository not specified"));
+    String chartName =
+        ToscaUtils.extractScalar(chartNode.getProperties(), "name")
+            .orElseThrow(() -> new OrchestratorException("Chart Name not specified"));
+    String version =
+        ToscaUtils.extractScalar(chartNode.getProperties(), "version")
+            .orElseThrow(() -> new OrchestratorException("Chart Version not specified"));
+    String values =
+        ToscaUtils.extractScalar(chartNode.getProperties(), "values").orElseGet(String::new);
 
     /* Note: the release name is used to set the label instance that must
        adhere to DNS-1035 naming convention: it must consist of lower case alphanumeric
        characters or '-', start with an alphabetic character, and end with an alphanumeric
        character
     */
-    return helmRelease
-        .spec(new V1HelmReleaseSpec()
-                .releaseName(HELM_RELEASE_PREFIX + deployment.getId())
-                .chart(new V1HelmReleaseSpecChart()
-                        .repository(repository)
-                        .name(chartName)
-                        .version(version)
-                ).wait(true)
-                .values(new Yaml().load(values))
-        );
+    return helmRelease.spec(
+        new V1HelmReleaseSpec()
+            .releaseName(HELM_RELEASE_PREFIX + deployment.getId())
+            .chart(
+                new V1HelmReleaseSpecChart()
+                    .repository(repository)
+                    .name(chartName)
+                    .version(version))
+            .wait(true)
+            .values(new Yaml().load(values)));
   }
 
   @Override
@@ -216,11 +219,12 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     deployment.setTask(Task.DEPLOYER);
     String name = deployment.getId();
     deployment.setEndpoint(name);
-    CloudProviderEndpoint chosenCloudProviderEndpoint = deploymentMessage
-            .getChosenCloudProviderEndpoint();
+    CloudProviderEndpoint chosenCloudProviderEndpoint =
+        deploymentMessage.getChosenCloudProviderEndpoint();
 
-    String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    String namespace =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
 
     String email = "";
     try {
@@ -232,24 +236,24 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
 
     final String userEmail = email;
 
-    Map<String, String> annotations  = new HashMap<String, String>() {{
-        put("PAAS_URL", orchestratorProperties.getUrl().toString());
-        put("PAAS_DEP_USER_EMAIL", userEmail);
-        put("PAAS_DEP_UUID", deployment.getId());
-      }};
+    Map<String, String> annotations =
+        new HashMap<String, String>() {
+          {
+            put("PAAS_URL", orchestratorProperties.getUrl().toString());
+            put("PAAS_DEP_USER_EMAIL", userEmail);
+            put("PAAS_DEP_UUID", deployment.getId());
+          }
+        };
 
-    V1HelmRelease helmRelease = new V1HelmRelease()
-        .apiVersion("helm.fluxcd.io/v1")
-        .kind("HelmRelease")
-        .metadata(new V1ObjectMeta()
-            .name(name)
-            .namespace(namespace)
-         .annotations(annotations)
-        );
+    V1HelmRelease helmRelease =
+        new V1HelmRelease()
+            .apiVersion("helm.fluxcd.io/v1")
+            .kind("HelmRelease")
+            .metadata(new V1ObjectMeta().name(name).namespace(namespace).annotations(annotations));
     helmReleaseFromTosca(helmRelease, deployment);
     try {
-      this.executeWithHelmClientForResult(chosenCloudProviderEndpoint, requestedWithToken,
-          client -> client.create(helmRelease));
+      this.executeWithHelmClientForResult(
+          chosenCloudProviderEndpoint, requestedWithToken, client -> client.create(helmRelease));
     } catch (ApiException e) {
       throw new OrchestratorException("Error creating Helm Release", e);
     }
@@ -258,17 +262,22 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
 
   @Override
   public boolean isDeployed(DeploymentMessage deploymentMessage) {
-    CloudProviderEndpoint chosenCloudProviderEndpoint = deploymentMessage
-            .getChosenCloudProviderEndpoint();
+    CloudProviderEndpoint chosenCloudProviderEndpoint =
+        deploymentMessage.getChosenCloudProviderEndpoint();
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
     Deployment deployment = getDeployment(deploymentMessage);
     String name = deployment.getEndpoint();
-    String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    String namespace =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
     V1HelmRelease helmRelease = null;
     try {
-      helmRelease = this.executeWithHelmClientForResult(chosenCloudProviderEndpoint,
-              requestedWithToken, client -> client.get(namespace, name)).getObject();
+      helmRelease =
+          this.executeWithHelmClientForResult(
+                  chosenCloudProviderEndpoint,
+                  requestedWithToken,
+                  client -> client.get(namespace, name))
+              .getObject();
     } catch (ApiException e) {
       throw new OrchestratorException("Error retrieving helm release status", e);
     }
@@ -276,7 +285,7 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     if (status == null || status.getPhase() == null) {
       return false;
     }
-    PhaseEnum phase =  status.getPhase();
+    PhaseEnum phase = status.getPhase();
     if (phase == null) {
       throw new OrchestratorException("Chart phase is null.");
     }
@@ -297,16 +306,15 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
       case TESTFAILED:
       case CHARTFETCHFAILED:
       case ROLLBACKFAILED:
-        String cause = Optional
-            .ofNullable(status.getConditions())
-            .orElseGet(Collections::emptyList)
-            .stream()
-            .reduce((first, second) -> second)
-            .map(V1HelmReleaseStatusConditions::getMessage)
-            .map(message -> "\n" + message)
-            .orElse("");
-        throw new BusinessWorkflowException(WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
-                "Helm release creation or update failed" + cause);
+        String cause =
+            Optional.ofNullable(status.getConditions()).orElseGet(Collections::emptyList).stream()
+                .reduce((first, second) -> second)
+                .map(V1HelmReleaseStatusConditions::getMessage)
+                .map(message -> "\n" + message)
+                .orElse("");
+        throw new BusinessWorkflowException(
+            WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
+            "Helm release creation or update failed" + cause);
       default:
         throw new OrchestratorException("Unknown Chart phase: " + phase);
     }
@@ -339,13 +347,16 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     deployment.setTask(Task.DEPLOYER);
     String name = deployment.getId();
     deployment.setEndpoint(name);
-    CloudProviderEndpoint chosenCloudProviderEndpoint = deploymentMessage
-            .getChosenCloudProviderEndpoint();
-    String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    CloudProviderEndpoint chosenCloudProviderEndpoint =
+        deploymentMessage.getChosenCloudProviderEndpoint();
+    String namespace =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
 
     try {
-      this.executeWithHelmClientForResult(chosenCloudProviderEndpoint, requestedWithToken,
+      this.executeWithHelmClientForResult(
+          chosenCloudProviderEndpoint,
+          requestedWithToken,
           client -> {
             V1HelmRelease helmRelease = client.get(namespace, name).getObject();
             helmRelease
@@ -372,10 +383,13 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
     String name = deployment.getId();
     CloudProviderEndpoint chosenCloudProviderEndpoint = deployment.getCloudProviderEndpoint();
-    String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    String namespace =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
     try {
-      this.executeWithHelmClientForResult(chosenCloudProviderEndpoint, requestedWithToken,
+      this.executeWithHelmClientForResult(
+          chosenCloudProviderEndpoint,
+          requestedWithToken,
           client -> client.delete(namespace, name));
     } catch (ApiException e) {
       if (404 == e.getCode()) {
@@ -392,11 +406,12 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
     String name = deployment.getId();
     CloudProviderEndpoint chosenCloudProviderEndpoint = deployment.getCloudProviderEndpoint();
-    String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    String namespace =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
     try {
-      this.executeWithHelmClientForResult(chosenCloudProviderEndpoint, requestedWithToken,
-          client -> client.get(namespace, name));
+      this.executeWithHelmClientForResult(
+          chosenCloudProviderEndpoint, requestedWithToken, client -> client.get(namespace, name));
     } catch (ApiException e) {
       if (404 == e.getCode()) {
         return true;
@@ -408,9 +423,10 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
 
   @Override
   public void doProviderTimeout(DeploymentMessage deploymentMessage) {
-    throw new BusinessWorkflowException(WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
-            "Error executing request to Kubernetes service",
-            new DeploymentException("Provider Timeout"));
+    throw new BusinessWorkflowException(
+        WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
+        "Error executing request to Kubernetes service",
+        new DeploymentException("Provider Timeout"));
   }
 
   @Override
@@ -420,24 +436,23 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
     ArchiveRoot ar = toscaService.parseAndValidateTemplate(deployment.getTemplate(), inputs);
     indigoInputsPreProcessorService.processGetInput(ar, inputs);
 
-    Map<String, OutputDefinition> outputs = Optional
-        .ofNullable(ar.getTopology())
-        .map(Topology::getOutputs)
-        .orElseGet(HashMap::new);
+    Map<String, OutputDefinition> outputs =
+        Optional.ofNullable(ar.getTopology()).map(Topology::getOutputs).orElseGet(HashMap::new);
     if (!outputs.isEmpty()) {
-      CloudProviderEndpoint chosenCloudProviderEndpoint = deploymentMessage
-          .getChosenCloudProviderEndpoint();
+      CloudProviderEndpoint chosenCloudProviderEndpoint =
+          deploymentMessage.getChosenCloudProviderEndpoint();
       final OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
 
       String name = HELM_RELEASE_PREFIX + deployment.getId();
-      String namespace = Optional.ofNullable(deployment.getUserGroup())
-                       .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+      String namespace =
+          Optional.ofNullable(deployment.getUserGroup())
+              .orElse(oauth2TokenService.getOrganization(requestedWithToken));
 
       String labelSelector = String.format("app.kubernetes.io/instance=%s", name);
-      Map<String, NodeTemplate> nodes = Optional
-          .ofNullable(ar.getTopology())
-          .map(Topology::getNodeTemplates)
-          .orElseGet(HashMap::new);
+      Map<String, NodeTemplate> nodes =
+          Optional.ofNullable(ar.getTopology())
+              .map(Topology::getNodeTemplates)
+              .orElseGet(HashMap::new);
 
       DirectedMultigraph<NodeTemplate, RelationshipTemplate> graph =
           toscaService.buildNodeGraph(nodes, false);
@@ -445,13 +460,15 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
       TopologicalOrderIterator<NodeTemplate, RelationshipTemplate> orderIterator =
           new TopologicalOrderIterator<>(graph);
 
-      String chartNodeName = CommonUtils
-          .iteratorToStream(orderIterator)
-          .filter(node -> toscaService
-              .isOfToscaType(node, ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART))
-          .findFirst()
-          .orElseThrow(() -> new DeploymentException("Error finalizing deployment"))
-          .getName();
+      String chartNodeName =
+          CommonUtils.iteratorToStream(orderIterator)
+              .filter(
+                  node ->
+                      toscaService.isOfToscaType(
+                          node, ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART))
+              .findFirst()
+              .orElseThrow(() -> new DeploymentException("Error finalizing deployment"))
+              .getName();
 
       RuntimeProperties runtimeProperties = new RuntimeProperties();
       CloudServicesOrderedIterator csIterator = deploymentMessage.getCloudServicesOrderedIterator();
@@ -460,49 +477,71 @@ public class KubernetesServiceImpl extends AbstractDeploymentProviderService {
       }
       KubernetesService kubernetesService = csIterator.currentService(KubernetesService.class);
 
-      runtimeProperties.put(kubernetesService.getWorkerNodesIp(), chartNodeName,
-          "worker_nodes_ips");
+      runtimeProperties.put(
+          kubernetesService.getWorkerNodesIp(), chartNodeName, "worker_nodes_ips");
       try {
-        V1ServiceList services = this.executeWithCoreClientForResult(chosenCloudProviderEndpoint,
-            requestedWithToken, client -> client
-                .listNamespacedService(namespace, null, null, null,
-                    null, labelSelector, null, null, null, null));
-        services.getItems().forEach(service -> {
-          V1ObjectMeta meta = service.getMetadata();
-          String sname = meta != null ? meta.getName() : null;
-          if (sname != null) {
-            String serviceName = sname.split(name + "-")[1];
-            Optional
-                .ofNullable(service.getSpec())
-                .map(V1ServiceSpec::getPorts)
-                .orElseGet(Collections::emptyList)
-                .forEach(portSpec -> {
-                  String portName = portSpec.getName();
-                  Optional
-                      .ofNullable(portSpec.getNodePort())
-                      .ifPresent(target -> runtimeProperties
-                          .put(target, chartNodeName, "service_ports", serviceName,
-                              portName, "target"));
-                  Optional
-                      .ofNullable(portSpec.getPort())
-                      .ifPresent(source -> runtimeProperties
-                          .put(source, chartNodeName, "service_ports", serviceName,
-                              portName, "source"));
-                  Optional
-                      .ofNullable(portSpec.getProtocol())
-                      .map(String::toLowerCase)
-                      .ifPresent(protocol -> runtimeProperties
-                          .put(protocol, chartNodeName, "service_ports", serviceName,
-                              portName, "protocol"));
+        V1ServiceList services =
+            this.executeWithCoreClientForResult(
+                chosenCloudProviderEndpoint,
+                requestedWithToken,
+                client ->
+                    client.listNamespacedService(
+                        namespace, null, null, null, null, labelSelector, null, null, null, null));
+        services
+            .getItems()
+            .forEach(
+                service -> {
+                  V1ObjectMeta meta = service.getMetadata();
+                  String sname = meta != null ? meta.getName() : null;
+                  if (sname != null) {
+                    String serviceName = sname.split(name + "-")[1];
+                    Optional.ofNullable(service.getSpec())
+                        .map(V1ServiceSpec::getPorts)
+                        .orElseGet(Collections::emptyList)
+                        .forEach(
+                            portSpec -> {
+                              String portName = portSpec.getName();
+                              Optional.ofNullable(portSpec.getNodePort())
+                                  .ifPresent(
+                                      target ->
+                                          runtimeProperties.put(
+                                              target,
+                                              chartNodeName,
+                                              "service_ports",
+                                              serviceName,
+                                              portName,
+                                              "target"));
+                              Optional.ofNullable(portSpec.getPort())
+                                  .ifPresent(
+                                      source ->
+                                          runtimeProperties.put(
+                                              source,
+                                              chartNodeName,
+                                              "service_ports",
+                                              serviceName,
+                                              portName,
+                                              "source"));
+                              Optional.ofNullable(portSpec.getProtocol())
+                                  .map(String::toLowerCase)
+                                  .ifPresent(
+                                      protocol ->
+                                          runtimeProperties.put(
+                                              protocol,
+                                              chartNodeName,
+                                              "service_ports",
+                                              serviceName,
+                                              portName,
+                                              "protocol"));
+                            });
+                  }
                 });
-          }
-        });
 
       } catch (ApiException e) {
         throw new OrchestratorException("Error retrieving helm release status", e);
       }
-      deployment.setOutputs(indigoInputsPreProcessorService.processOutputs(ar,
-          deployment.getParameters(), runtimeProperties));
+      deployment.setOutputs(
+          indigoInputsPreProcessorService.processOutputs(
+              ar, deployment.getParameters(), runtimeProperties));
     }
     super.finalizeDeploy(deploymentMessage);
   }

@@ -31,9 +31,7 @@ import org.springframework.stereotype.Component;
 public class DeploymentScheduleResourceAssembler
     extends ResourceAssemblerSupport<DeploymentSchedule, DeploymentScheduleResource> {
 
-  /**
-   * DeploymentScheduleResourceAssembler.
-   */
+  /** DeploymentScheduleResourceAssembler. */
   public DeploymentScheduleResourceAssembler() {
     super(DeploymentScheduleController.class, DeploymentScheduleResource.class);
   }
@@ -45,16 +43,17 @@ public class DeploymentScheduleResourceAssembler
 
   private DeploymentScheduleResource getDeploymentScheduleResource(DeploymentSchedule entity) {
 
-    DeploymentScheduleResource resource = DeploymentScheduleResource.builder()
-        .uuid(entity.getId())
-        .creationTime(entity.getCreatedAt())
-        .updateTime(entity.getUpdatedAt())
-        .status(entity.getStatus())
-        .callback(entity.getCallback())
-        .numberOfReplicas(entity.getNumberOfReplicas())
-        .fileExpression(entity.getFileExpression())
-        .replicationExpression(entity.getReplicationExpression())
-        .build();
+    DeploymentScheduleResource resource =
+        DeploymentScheduleResource.builder()
+            .uuid(entity.getId())
+            .creationTime(entity.getCreatedAt())
+            .updateTime(entity.getUpdatedAt())
+            .status(entity.getStatus())
+            .callback(entity.getCallback())
+            .numberOfReplicas(entity.getNumberOfReplicas())
+            .fileExpression(entity.getFileExpression())
+            .replicationExpression(entity.getReplicationExpression())
+            .build();
 
     Optional.ofNullable(entity.getOwner())
         .map(OidcEntity::getOidcEntityId)
@@ -63,13 +62,13 @@ public class DeploymentScheduleResourceAssembler
     // add hateoas links only if we are inside of a HTTP request otherwise, due to
     // https://github.com/spring-projects/spring-hateoas/issues/408, we'd have an error
     if (CommonUtils.isInHttpRequest()) {
-      resource.add(ControllerLinkBuilder.linkTo(
-          DummyInvocationUtils.methodOn(DeploymentScheduleController.class)
-              .getDeploymentSchedule(entity.getId()))
-          .withSelfRel());
+      resource.add(
+          ControllerLinkBuilder.linkTo(
+                  DummyInvocationUtils.methodOn(DeploymentScheduleController.class)
+                      .getDeploymentSchedule(entity.getId()))
+              .withSelfRel());
     }
 
     return resource;
   }
-
 }

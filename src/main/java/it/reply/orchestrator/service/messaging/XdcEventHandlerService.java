@@ -28,18 +28,18 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class XdcEventHandlerService {
 
-  @Autowired
-  private DeploymentScheduleServiceImpl deploymentScheduleService;
+  @Autowired private DeploymentScheduleServiceImpl deploymentScheduleService;
 
   /**
    * Handle a XDC Event.
+   *
    * @param xdcEvent the event
    */
   public void handleEvent(GenericEvent xdcEvent) {
     if (xdcEvent instanceof DidRegisteredEvent) {
       DidRegisteredEvent didRegisteredEvent = (DidRegisteredEvent) xdcEvent;
-      deploymentScheduleService.createDeploymentScheduleEvents(didRegisteredEvent.getScope(),
-          didRegisteredEvent.getName());
+      deploymentScheduleService.createDeploymentScheduleEvents(
+          didRegisteredEvent.getScope(), didRegisteredEvent.getName());
     }
   }
 }

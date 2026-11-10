@@ -18,7 +18,6 @@
 package it.reply.orchestrator.dal.entity;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
@@ -26,12 +25,10 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @MappedSuperclass

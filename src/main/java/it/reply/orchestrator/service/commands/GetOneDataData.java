@@ -20,7 +20,6 @@ package it.reply.orchestrator.service.commands;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.service.OneDataService;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,21 +27,22 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_ONEDATA_DATA)
 public class GetOneDataData extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private OneDataService oneDataService;
+  @Autowired private OneDataService oneDataService;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
 
-    rankCloudProvidersMessage.getOneDataRequirements()
+    rankCloudProvidersMessage
+        .getOneDataRequirements()
         .values()
-        .forEach(oneDataRequirement -> oneDataService.populateProviderInfo(
-            oneDataRequirement,
-            rankCloudProvidersMessage.getCloudProviders(),
-            rankCloudProvidersMessage.getRequestedWithToken(),
-            rankCloudProvidersMessage.getDeploymentId()));
-
+        .forEach(
+            oneDataRequirement ->
+                oneDataService.populateProviderInfo(
+                    oneDataRequirement,
+                    rankCloudProvidersMessage.getCloudProviders(),
+                    rankCloudProvidersMessage.getRequestedWithToken(),
+                    rankCloudProvidersMessage.getDeploymentId()));
   }
 
   @Override

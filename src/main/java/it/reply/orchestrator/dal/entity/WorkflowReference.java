@@ -35,8 +35,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"processId", "requestId"}, callSuper = true)
-@ToString(of = {"processId", "requestId"}, callSuper = true)
+@EqualsAndHashCode(
+    of = {"processId", "requestId"},
+    callSuper = true)
+@ToString(
+    of = {"processId", "requestId"},
+    callSuper = true)
 public class WorkflowReference extends AbstractResourceEntity {
 
   public enum Action {
@@ -60,12 +64,8 @@ public class WorkflowReference extends AbstractResourceEntity {
   @JoinColumn(name = "deployment_id", nullable = false, updatable = false)
   private Deployment deployment;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "actor_id")
   @Nullable
   private OidcEntity actor;
@@ -73,14 +73,10 @@ public class WorkflowReference extends AbstractResourceEntity {
   /**
    * Generate a WorkflowReference.
    *
-   * @param processId
-   *     the processId
-   * @param requestId
-   *     the requestId
-   * @param actor
-   *     the OidcEntity of actor that start the process
-   * @param action
-   *     the action
+   * @param processId the processId
+   * @param requestId the requestId
+   * @param actor the OidcEntity of actor that start the process
+   * @param action the action
    */
   public WorkflowReference(String processId, String requestId, OidcEntity actor, Action action) {
     this.processId = processId;
@@ -88,5 +84,4 @@ public class WorkflowReference extends AbstractResourceEntity {
     this.actor = actor;
     this.action = action;
   }
-
 }

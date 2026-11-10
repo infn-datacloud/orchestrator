@@ -20,11 +20,9 @@ package it.reply.orchestrator.dal.entity;
 import it.reply.orchestrator.dal.util.SetStringToJsonConverter;
 import it.reply.orchestrator.dto.security.AccessGrant;
 import it.reply.orchestrator.utils.JwtUtils;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Embedded;
@@ -34,11 +32,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -53,10 +49,8 @@ public class OidcRefreshToken extends UuidIdentifiable {
   /**
    * Generate a OidcRefreshToken from a token id and a grant.
    *
-   * @param grant
-   *          the grant
-   * @param id
-   *          the token identifier
+   * @param grant the grant
+   * @param id the token identifier
    * @return the new OidcRefreshToken
    */
   public static OidcRefreshToken createFromAccessGrant(AccessGrant grant, OidcTokenId id) {
@@ -66,8 +60,7 @@ public class OidcRefreshToken extends UuidIdentifiable {
     token.setScopes(grant.getScopes());
     token.setOidcTokenId(id);
 
-    JwtUtils
-        .getExpirationTime(JwtUtils.parseJwt(grant.getRefreshToken()))
+    JwtUtils.getExpirationTime(JwtUtils.parseJwt(grant.getRefreshToken()))
         .ifPresent(expirationDate -> token.setExpirationDate(expirationDate));
 
     return token;
@@ -76,14 +69,12 @@ public class OidcRefreshToken extends UuidIdentifiable {
   /**
    * Updates the refresh token using the information contained in the access grant.
    *
-   * @param grant
-   *          the access grant
+   * @param grant the access grant
    */
   public void updateFromAccessGrant(AccessGrant grant) {
     setValue(grant.getRefreshToken());
     setCreationDate(new Date());
-    JwtUtils
-        .getExpirationTime(JwtUtils.parseJwt(grant.getRefreshToken()))
+    JwtUtils.getExpirationTime(JwtUtils.parseJwt(grant.getRefreshToken()))
         .ifPresent(newExpirationDate -> setExpirationDate(newExpirationDate));
   }
 
@@ -109,9 +100,5 @@ public class OidcRefreshToken extends UuidIdentifiable {
   @NonNull
   private Set<String> scopes = new HashSet<>();
 
-  @NotNull
-  @NonNull
-  @Embedded
-  private OidcTokenId oidcTokenId;
-
+  @NotNull @NonNull @Embedded private OidcTokenId oidcTokenId;
 }

@@ -19,7 +19,6 @@ package it.reply.orchestrator.workflow;
 
 import it.reply.orchestrator.exception.service.WorkflowException;
 import it.reply.orchestrator.utils.WorkflowUtil;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.ServiceTask;
@@ -93,12 +92,16 @@ public class CustomJobRetryCmd extends JobRetryCmd {
       newJobEntity.setRetries(job.getRetries() - 1);
       if (job.getDuedate() == null || JobEntity.JOB_TYPE_MESSAGE.equals(job.getJobType())) {
         // add wait time for failed async job
-        newJobEntity.setDuedate(calculateDueDate(commandContext,
-            processEngineConfig.getAsyncFailedJobWaitTime(), null));
+        newJobEntity.setDuedate(
+            calculateDueDate(
+                commandContext, processEngineConfig.getAsyncFailedJobWaitTime(), null));
       } else {
         // add default wait time for failed job
-        newJobEntity.setDuedate(calculateDueDate(commandContext,
-            processEngineConfig.getDefaultFailedJobWaitTime(), job.getDuedate()));
+        newJobEntity.setDuedate(
+            calculateDueDate(
+                commandContext,
+                processEngineConfig.getDefaultFailedJobWaitTime(),
+                job.getDuedate()));
       }
 
     } else {
@@ -123,12 +126,17 @@ public class CustomJobRetryCmd extends JobRetryCmd {
         newJobEntity.setDuedate(durationHelper.getDateAfter());
 
         if (job.getExceptionMessage() == null) { // is it the first exception
-          LOGGER.debug("Applying JobRetryStrategy '{}' the first time for job {} with {} retries",
-              failedJobRetryTimeCycleValue, job.getId(), durationHelper.getTimes());
+          LOGGER.debug(
+              "Applying JobRetryStrategy '{}' the first time for job {} with {} retries",
+              failedJobRetryTimeCycleValue,
+              job.getId(),
+              durationHelper.getTimes());
 
         } else {
-          LOGGER.debug("Decrementing retries of JobRetryStrategy '{}' for job {}",
-              failedJobRetryTimeCycleValue, job.getId());
+          LOGGER.debug(
+              "Decrementing retries of JobRetryStrategy '{}' for job {}",
+              failedJobRetryTimeCycleValue,
+              job.getId());
         }
 
         newJobEntity.setRetries(jobRetries - 1);
@@ -151,23 +159,26 @@ public class CustomJobRetryCmd extends JobRetryCmd {
     // Dispatch both an update and a retry-decrement event
     FlowableEventDispatcher eventDispatcher = CommandContextUtil.getEventDispatcher();
     if (eventDispatcher.isEnabled()) {
-      eventDispatcher.dispatchEvent(FlowableEventBuilder
-          .createEntityEvent(FlowableEngineEventType.ENTITY_UPDATED, newJobEntity));
-      eventDispatcher.dispatchEvent(FlowableEventBuilder
-          .createEntityEvent(FlowableEngineEventType.JOB_RETRIES_DECREMENTED, newJobEntity));
+      eventDispatcher.dispatchEvent(
+          FlowableEventBuilder.createEntityEvent(
+              FlowableEngineEventType.ENTITY_UPDATED, newJobEntity));
+      eventDispatcher.dispatchEvent(
+          FlowableEventBuilder.createEntityEvent(
+              FlowableEngineEventType.JOB_RETRIES_DECREMENTED, newJobEntity));
     }
 
     return null;
   }
 
-  protected AbstractRuntimeJobEntity handleExaustedRetries(JobEntity job, JobService jobService,
-      @Nullable ExecutionEntity executionEntity) {
+  protected AbstractRuntimeJobEntity handleExaustedRetries(
+      JobEntity job, JobService jobService, @Nullable ExecutionEntity executionEntity) {
     if (exception.getCause() instanceof WorkflowException && executionEntity != null) {
       job.setRetries(0);
       FlowableEventDispatcher eventDispatcher = CommandContextUtil.getEventDispatcher();
       if (eventDispatcher.isEnabled()) {
-        eventDispatcher.dispatchEvent(FlowableEventBuilder
-            .createEntityEvent(FlowableEngineEventType.JOB_RETRIES_DECREMENTED, job));
+        eventDispatcher.dispatchEvent(
+            FlowableEventBuilder.createEntityEvent(
+                FlowableEngineEventType.JOB_RETRIES_DECREMENTED, job));
       }
       jobService.deleteJob(job);
       WorkflowException wfException = (WorkflowException) exception.getCause();
@@ -177,5 +188,4 @@ public class CustomJobRetryCmd extends JobRetryCmd {
       return jobService.moveJobToDeadLetterJob(job);
     }
   }
-
 }

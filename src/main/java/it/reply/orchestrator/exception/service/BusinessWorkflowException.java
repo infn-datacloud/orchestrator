@@ -28,5 +28,4 @@ public class BusinessWorkflowException extends WorkflowException {
   public BusinessWorkflowException(String errorCode, String message, Throwable ex) {
     super(errorCode, message, ex);
   }
-
 }

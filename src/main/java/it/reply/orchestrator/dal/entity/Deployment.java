@@ -51,10 +51,7 @@ import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
-@Table(indexes = {
-    @Index(columnList = "createdAt"),
-    @Index(columnList = "owner_id")
-})
+@Table(indexes = {@Index(columnList = "createdAt"), @Index(columnList = "owner_id")})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -64,10 +61,7 @@ public class Deployment extends AbstractResourceEntity {
   @Column(nullable = false)
   private Status status;
 
-  @Lob
-  @Basic
-  @Nullable
-  private String statusReason;
+  @Lob @Basic @Nullable private String statusReason;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -77,14 +71,11 @@ public class Deployment extends AbstractResourceEntity {
   @Nullable
   private DeploymentProvider deploymentProvider;
 
-  @Nullable
-  private String endpoint;
+  @Nullable private String endpoint;
 
-  @Nullable
-  private String callback;
+  @Nullable private String callback;
 
-  @Nullable
-  private String userGroup;
+  @Nullable private String userGroup;
 
   @Lob
   @Basic
@@ -98,7 +89,10 @@ public class Deployment extends AbstractResourceEntity {
 
   @ElementCollection(fetch = FetchType.EAGER, targetClass = String.class)
   @MapKeyColumn(name = "name")
-  @Column(name = "value", table = "deployment_parameter", nullable = false,
+  @Column(
+      name = "value",
+      table = "deployment_parameter",
+      nullable = false,
       columnDefinition = "TEXT")
   @Convert(attributeName = "value.", converter = ObjectToJsonConverter.class)
   private Map<String, Object> parameters = new HashMap<>();
@@ -112,18 +106,13 @@ public class Deployment extends AbstractResourceEntity {
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "deployment", orphanRemoval = true)
   private Set<Resource> resources = new HashSet<>();
 
-  @Nullable
-  private String cloudProviderName;
+  @Nullable private String cloudProviderName;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "deployment", orphanRemoval = true)
   private Set<WorkflowReference> workflowReferences = new HashSet<>();
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "owner_id")
   @Nullable
   private OidcEntity owner;
@@ -139,7 +128,10 @@ public class Deployment extends AbstractResourceEntity {
     this.workflowReferences.add(workflowReference);
   }
 
-  @OneToOne(mappedBy = "deployment", cascade = CascadeType.ALL, fetch = FetchType.LAZY,
+  @OneToOne(
+      mappedBy = "deployment",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
       optional = true)
   @Nullable
   private DeploymentScheduleEvent deploymentScheduleEvent;

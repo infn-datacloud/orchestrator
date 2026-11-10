@@ -26,5 +26,4 @@ public class VaultServiceNotAvailableException extends VaultException {
   public VaultServiceNotAvailableException() {
     super("Vault service is disabled.");
   }
-
 }

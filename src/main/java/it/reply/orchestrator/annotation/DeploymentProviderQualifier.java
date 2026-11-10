@@ -18,17 +18,15 @@
 package it.reply.orchestrator.annotation;
 
 import it.reply.orchestrator.enums.DeploymentProvider;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 public @interface DeploymentProviderQualifier {
 
   /**
@@ -37,5 +35,4 @@ public @interface DeploymentProviderQualifier {
    * @return the DeploymentProvider
    */
   DeploymentProvider value();
-
 }

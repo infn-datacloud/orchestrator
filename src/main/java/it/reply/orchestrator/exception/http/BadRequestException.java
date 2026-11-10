@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatus;
  * etc)
  *
  * @author m.bassi
- *
  */
 public class BadRequestException extends OrchestratorApiException {
 

@@ -54,13 +54,13 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
   private RestTemplate restTemplate;
 
   /**
-  * Creates a new CloudProviderRankerServiceV2Impl.
-  *
-  * @param cprProperties the CprProperties
-  * @param restTemplateBuilder the RestTemplateBuilder
-  */
-  public CloudProviderRankerServiceV2Impl(CprProperties cprProperties,
-      RestTemplateBuilder restTemplateBuilder) {
+   * Creates a new CloudProviderRankerServiceV2Impl.
+   *
+   * @param cprProperties the CprProperties
+   * @param restTemplateBuilder the RestTemplateBuilder
+   */
+  public CloudProviderRankerServiceV2Impl(
+      CprProperties cprProperties, RestTemplateBuilder restTemplateBuilder) {
     this.cprProperties = cprProperties;
     this.restTemplate = restTemplateBuilder.build();
   }
@@ -77,14 +77,14 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
       for (CloudProvider provider : cloudProviders.values()) {
         for (CloudService service : provider.getServices().values()) {
           if (service.getType() == CloudServiceType.COMPUTE) {
-            result.add(RankedCloudService
-                .builder()
-                .provider(provider.getId())
-                .serviceId(service.getId())
-                .totalScore(1)
-                .rank(count)
-                .ranked(true)
-                .build());
+            result.add(
+                RankedCloudService.builder()
+                    .provider(provider.getId())
+                    .serviceId(service.getId())
+                    .totalScore(1)
+                    .rank(count)
+                    .ranked(true)
+                    .build());
             count++;
           }
         }
@@ -92,17 +92,17 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
       return result;
     }
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
+            .build()
+            .normalize()
+            .toUri();
 
     HttpEntity<String> entity = new HttpEntity<>(cloudProviderRankerRequest.getDeploymentId());
 
     try {
-      List<AiRankedCloudService> airanking = restTemplate.exchange(requestUri, HttpMethod.POST,
-          entity, RESPONSE_TYPE).getBody();
+      List<AiRankedCloudService> airanking =
+          restTemplate.exchange(requestUri, HttpMethod.POST, entity, RESPONSE_TYPE).getBody();
       if (airanking.size() > 0) {
         for (AiRankedCloudService aiservice : airanking) {
           for (CloudProvider provider : cloudProviders.values()) {
@@ -110,15 +110,15 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
               for (CloudService service : provider.getServices().values()) {
                 if (service.getType() == CloudServiceType.COMPUTE
                     && (StringUtils.isEmpty(service.getRegion())
-                    || service.getRegion().equalsIgnoreCase(aiservice.getRegion()))) {
-                  result.add(RankedCloudService
-                      .builder()
-                      .provider(provider.getId())
-                      .serviceId(service.getId())
-                      .totalScore(aiservice.getClassification() + aiservice.getRegression())
-                      .rank(count)
-                      .ranked(true)
-                      .build());
+                        || service.getRegion().equalsIgnoreCase(aiservice.getRegion()))) {
+                  result.add(
+                      RankedCloudService.builder()
+                          .provider(provider.getId())
+                          .serviceId(service.getId())
+                          .totalScore(aiservice.getClassification() + aiservice.getRegression())
+                          .rank(count)
+                          .ranked(true)
+                          .build());
                   count++;
                 }
               }
@@ -135,14 +135,14 @@ public class CloudProviderRankerServiceV2Impl implements CloudProviderRankerServ
           for (CloudProvider provider : cloudProviders.values()) {
             for (CloudService service : provider.getServices().values()) {
               if (service.getType() == CloudServiceType.COMPUTE) {
-                result.add(RankedCloudService
-                    .builder()
-                    .provider(provider.getId())
-                    .serviceId(service.getId())
-                    .totalScore(1)
-                    .rank(count)
-                    .ranked(true)
-                    .build());
+                result.add(
+                    RankedCloudService.builder()
+                        .provider(provider.getId())
+                        .serviceId(service.getId())
+                        .totalScore(1)
+                        .rank(count)
+                        .ranked(true)
+                        .build());
                 count++;
               }
             }

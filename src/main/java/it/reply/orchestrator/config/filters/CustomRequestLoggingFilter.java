@@ -22,10 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-
 import it.reply.orchestrator.utils.JsonUtils;
 import it.reply.orchestrator.utils.MdcUtils;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
@@ -33,20 +31,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -61,11 +56,11 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
 
   public static final String X_REQUEST_ID = "X-Request-ID";
 
-  public static final String ATTRIBUTE_REQUEST_ID = CustomRequestLoggingFilter.class.getName()
-      + ".RequestId";
+  public static final String ATTRIBUTE_REQUEST_ID =
+      CustomRequestLoggingFilter.class.getName() + ".RequestId";
 
-  private static final String ATTRIBUTE_STOP_WATCH = CustomRequestLoggingFilter.class.getName()
-      + ".StopWatch";
+  private static final String ATTRIBUTE_STOP_WATCH =
+      CustomRequestLoggingFilter.class.getName() + ".StopWatch";
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   @Data
@@ -75,8 +70,8 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
 
     private String type = "request";
 
-    public RequestWrapper(HttpServletRequest request, int maxPayloadLength,
-        Set<String> headersToOmit) {
+    public RequestWrapper(
+        HttpServletRequest request, int maxPayloadLength, Set<String> headersToOmit) {
       super(request, maxPayloadLength, headersToOmit);
     }
 
@@ -84,7 +79,6 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     public String getType() {
       return type;
     }
-
   }
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -104,19 +98,18 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Generate a ResponseWrapper.
      *
-     * @param request
-     *          the request
-     * @param response
-     *          the response
-     * @param maxPayloadLength
-     *          the max payload request to parse
-     * @param headersToOmit
-     *          the set of headers to omit
-     * @param responseTime
-     *          the response time
+     * @param request the request
+     * @param response the response
+     * @param maxPayloadLength the max payload request to parse
+     * @param headersToOmit the set of headers to omit
+     * @param responseTime the response time
      */
-    public ResponseWrapper(HttpServletRequest request, HttpServletResponse response,
-        int maxPayloadLength, Set<String> headersToOmit, double responseTime) {
+    public ResponseWrapper(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        int maxPayloadLength,
+        Set<String> headersToOmit,
+        double responseTime) {
       super(request, maxPayloadLength, headersToOmit);
       this.responseStatus = response.getStatus();
       this.responseTime = responseTime;
@@ -126,7 +119,6 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     public String getType() {
       return type;
     }
-
   }
 
   @Data
@@ -153,10 +145,8 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the uri from a base uri and a query string.
      *
-     * @param uri
-     *          the base uri without query param
-     * @param queryString
-     *          the string containing the query param
+     * @param uri the base uri without query param
+     * @param queryString the string containing the query param
      */
     public void setUriFromRequest(String uri, String queryString) {
       StringBuilder sb = new StringBuilder(uri);
@@ -168,8 +158,7 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the client ip from a {@link HttpServletRequest}.
      *
-     * @param request
-     *          the request
+     * @param request the request
      */
     public void setClientIpFromRequest(HttpServletRequest request) {
       safeTrimmedString(request.getRemoteAddr()).ifPresent(this::setClientIp);
@@ -178,8 +167,7 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the session from a {@link HttpServletRequest}.
      *
-     * @param request
-     *          the request
+     * @param request the request
      */
     public void setSessionFromRequest(HttpServletRequest request) {
       Optional.ofNullable(request.getSession(false))
@@ -190,8 +178,7 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the user from a {@link HttpServletRequest}.
      *
-     * @param request
-     *          the request
+     * @param request the request
      */
     public void setUserFromRequest(HttpServletRequest request) {
       safeTrimmedString(request.getRemoteUser()).ifPresent(this::setUser);
@@ -200,19 +187,17 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the headers from a {@link HttpServletRequest}.
      *
-     * @param request
-     *          the request
-     * @param headersToOmit
-     *          the set of headers to omit
+     * @param request the request
+     * @param headersToOmit the set of headers to omit
      */
-    public void setHeadersFromRequest(HttpServletRequest request,
-        @NonNull Set<String> headersToOmit) {
-      HttpHeaders httpHeaders = new ServletServerHttpRequest(request)
-          .getHeaders();
+    public void setHeadersFromRequest(
+        HttpServletRequest request, @NonNull Set<String> headersToOmit) {
+      HttpHeaders httpHeaders = new ServletServerHttpRequest(request).getHeaders();
       if (!headersToOmit.isEmpty()) {
-        httpHeaders.replaceAll((key, value) -> {
-          return headersToOmit.contains(key) ? Lists.newArrayList("<omitted>") : value;
-        });
+        httpHeaders.replaceAll(
+            (key, value) -> {
+              return headersToOmit.contains(key) ? Lists.newArrayList("<omitted>") : value;
+            });
       }
       setHeaders(httpHeaders.toSingleValueMap());
     }
@@ -220,44 +205,40 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     /**
      * Set the payload from a {@link HttpServletRequest}.
      *
-     * @param request
-     *          the request
-     * @param maxPayloadLength
-     *          the max payload length to parse
+     * @param request the request
+     * @param maxPayloadLength the max payload length to parse
      */
     public void setPayloadFromRequest(HttpServletRequest request, int maxPayloadLength) {
       if (isIncludePayload(maxPayloadLength)) {
-        Optional<ContentCachingRequestWrapper> optionalWrapper = Optional
-            .ofNullable(WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class));
-        optionalWrapper.ifPresent(wrapper -> {
-          byte[] buf = wrapper.getContentAsByteArray();
-          if (buf.length > 0) {
-            int length = Math.min(buf.length, maxPayloadLength);
-            String extractedPayload;
-            try {
-              extractedPayload = new String(buf, 0, length, wrapper.getCharacterEncoding());
-            } catch (UnsupportedEncodingException ex) {
-              extractedPayload = "[unknown]";
-            }
-            setPayload(extractedPayload);
-          }
-        });
-
+        Optional<ContentCachingRequestWrapper> optionalWrapper =
+            Optional.ofNullable(
+                WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class));
+        optionalWrapper.ifPresent(
+            wrapper -> {
+              byte[] buf = wrapper.getContentAsByteArray();
+              if (buf.length > 0) {
+                int length = Math.min(buf.length, maxPayloadLength);
+                String extractedPayload;
+                try {
+                  extractedPayload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+                } catch (UnsupportedEncodingException ex) {
+                  extractedPayload = "[unknown]";
+                }
+                setPayload(extractedPayload);
+              }
+            });
       }
     }
 
     /**
      * Generate an AbstractWrapper.
      *
-     * @param request
-     *          the request
-     * @param maxPayloadLength
-     *          the max payload request to parse
-     * @param headersToOmit
-     *          the Set of headers to omit
+     * @param request the request
+     * @param maxPayloadLength the max payload request to parse
+     * @param headersToOmit the Set of headers to omit
      */
-    public AbstractWrapper(HttpServletRequest request, int maxPayloadLength,
-        Set<String> headersToOmit) {
+    public AbstractWrapper(
+        HttpServletRequest request, int maxPayloadLength, Set<String> headersToOmit) {
       setHttpMethod(request.getMethod());
 
       setUriFromRequest(request.getRequestURI(), request.getQueryString());
@@ -269,14 +250,9 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
     }
   }
 
-  @Getter
-  @Setter
-  private int maxPayloadLength = -1;
+  @Getter @Setter private int maxPayloadLength = -1;
 
-  @Getter
-  @Setter
-  @NonNull
-  private Set<String> headersToOmit = new HashSet<>();
+  @Getter @Setter @NonNull private Set<String> headersToOmit = new HashSet<>();
 
   public boolean isIncludePayload() {
     return isIncludePayload(getMaxPayloadLength());
@@ -287,8 +263,9 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
     StopWatch stopWatch = createStopWatchIfNecessary(request);
     String requestId = createRequestIdIfNecessary(request);
@@ -331,28 +308,28 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
   }
 
   private StopWatch createStopWatchIfNecessary(HttpServletRequest request) {
-    return Optional
-        .ofNullable(request.getAttribute(ATTRIBUTE_STOP_WATCH))
+    return Optional.ofNullable(request.getAttribute(ATTRIBUTE_STOP_WATCH))
         .filter(StopWatch.class::isInstance)
         .map(StopWatch.class::cast)
-        .orElseGet(() -> {
-          StopWatch stopWatch = new StopWatch();
-          stopWatch.start();
-          request.setAttribute(ATTRIBUTE_STOP_WATCH, stopWatch);
-          return stopWatch;
-        });
+        .orElseGet(
+            () -> {
+              StopWatch stopWatch = new StopWatch();
+              stopWatch.start();
+              request.setAttribute(ATTRIBUTE_STOP_WATCH, stopWatch);
+              return stopWatch;
+            });
   }
 
   private String createRequestIdIfNecessary(HttpServletRequest request) {
-    return Optional
-        .ofNullable(request.getAttribute(ATTRIBUTE_REQUEST_ID))
+    return Optional.ofNullable(request.getAttribute(ATTRIBUTE_REQUEST_ID))
         .filter(String.class::isInstance)
         .map(String.class::cast)
-        .orElseGet(() -> {
-          String requestId = "req-" + UUID.randomUUID().toString();
-          request.setAttribute(ATTRIBUTE_REQUEST_ID, requestId);
-          return requestId;
-        });
+        .orElseGet(
+            () -> {
+              String requestId = "req-" + UUID.randomUUID().toString();
+              request.setAttribute(ATTRIBUTE_REQUEST_ID, requestId);
+              return requestId;
+            });
   }
 
   /**
@@ -377,12 +354,12 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
    * Writes a log message before the request is processed.
    *
    * @param request The HttpServletRequest object
-   *
    */
   protected void beforeRequest(HttpServletRequest request) {
     try {
-      LOG.debug(JsonUtils
-          .serialize(new RequestWrapper(request, getMaxPayloadLength(), getHeadersToOmit())));
+      LOG.debug(
+          JsonUtils.serialize(
+              new RequestWrapper(request, getMaxPayloadLength(), getHeadersToOmit())));
     } catch (JsonProcessingException ex) {
       LOG.error("Error logging request {}", request, ex);
     }
@@ -395,15 +372,15 @@ public class CustomRequestLoggingFilter extends OncePerRequestFilter {
    * @param response The HttpServletResponse object
    * @param responseTime The response time
    */
-  protected void afterRequest(HttpServletRequest request, HttpServletResponse response,
-      double responseTime) {
+  protected void afterRequest(
+      HttpServletRequest request, HttpServletResponse response, double responseTime) {
     try {
-      LOG.debug(JsonUtils.serialize(
-          new ResponseWrapper(request, response, getMaxPayloadLength(), getHeadersToOmit(),
-              responseTime)));
+      LOG.debug(
+          JsonUtils.serialize(
+              new ResponseWrapper(
+                  request, response, getMaxPayloadLength(), getHeadersToOmit(), responseTime)));
     } catch (JsonProcessingException ex) {
       LOG.error("Error logging response {} for request {}", response, request, ex);
     }
   }
-
 }

@@ -41,61 +41,78 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractCmdbServiceImpl implements CmdbService {
 
   @Override
-  public CloudProvider fillCloudProviderInfo(String providerId, Set<String> servicesWithSla,
-      String organisation, RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public CloudProvider fillCloudProviderInfo(
+      String providerId,
+      Set<String> servicesWithSla,
+      String organisation,
+      RankCloudProvidersMessage rankCloudProvidersMessage) {
     // Get provider's data
     CloudProvider provider = getProviderById(providerId);
-    Map<String, CloudService> services = getServicesByProvider(providerId)
-        .stream()
-        .filter(cs -> servicesWithSla.contains(cs.getId())
-            || cs.getType().equals(CloudServiceType.STORAGE))
-        .map(cloudService -> {
-          if (cloudService instanceof ComputeService) {
-            String prId = cloudService.getProviderId();
-            String serviceId = cloudService.getId();
-            ComputeService computeService = (ComputeService) cloudService;
-            List<Tenant> serviceTenants = getTenantsByService(serviceId);
-            List<Tenant> organisationTenants = getTenantsByOrganisation(organisation);
-            List<Tenant> tenantList = serviceTenants.stream()
-                .distinct()
-                .filter(organisationTenants::contains)
-                .collect(Collectors.toList());
-            List<Image> imageList = new ArrayList<>();
-            List<Flavor> flavorList = new ArrayList<>();
-            if (!tenantList.isEmpty()) {
-              //only one element must be here
-              Tenant tenant = tenantList.get(0);
-              imageList.addAll(getImagesByTenant(tenant.getId()));
-              flavorList.addAll(getFlavorsByTenant(tenant.getId()));
-              computeService.setPublicNetworkName(tenant.getPublicNetworkName());
-              computeService.setPrivateNetworkName(tenant.getPrivateNetworkName());
-              computeService.setPrivateNetworkCidr(tenant.getPrivateNetworkCidr());
-              computeService.setPrivateNetworkProxyHost(tenant.getPrivateNetworkProxyHost());
-              computeService.setPrivateNetworkProxyUser(tenant.getPrivateNetworkProxyUser());
-              computeService.setTenant(tenant.getTenantName());
-            }
-            LOG.info("Image list for service <{}> of provider <{}>: <{}>",
-                Arrays.toString(imageList.toArray()), serviceId, prId);
-            computeService.setImages(imageList);
-            LOG.info("Flavor list for service <{}> of provider <{}>: <{}>",
-                Arrays.toString(flavorList.toArray()), serviceId, prId);
-            computeService.setFlavors(flavorList);
-          }
-          return cloudService;
-        })
-        .collect(Collectors.toMap(CloudService::getId, Function.identity()));
+    Map<String, CloudService> services =
+        getServicesByProvider(providerId).stream()
+            .filter(
+                cs ->
+                    servicesWithSla.contains(cs.getId())
+                        || cs.getType().equals(CloudServiceType.STORAGE))
+            .map(
+                cloudService -> {
+                  if (cloudService instanceof ComputeService) {
+                    String prId = cloudService.getProviderId();
+                    String serviceId = cloudService.getId();
+                    ComputeService computeService = (ComputeService) cloudService;
+                    List<Tenant> serviceTenants = getTenantsByService(serviceId);
+                    List<Tenant> organisationTenants = getTenantsByOrganisation(organisation);
+                    List<Tenant> tenantList =
+                        serviceTenants.stream()
+                            .distinct()
+                            .filter(organisationTenants::contains)
+                            .collect(Collectors.toList());
+                    List<Image> imageList = new ArrayList<>();
+                    List<Flavor> flavorList = new ArrayList<>();
+                    if (!tenantList.isEmpty()) {
+                      // only one element must be here
+                      Tenant tenant = tenantList.get(0);
+                      imageList.addAll(getImagesByTenant(tenant.getId()));
+                      flavorList.addAll(getFlavorsByTenant(tenant.getId()));
+                      computeService.setPublicNetworkName(tenant.getPublicNetworkName());
+                      computeService.setPrivateNetworkName(tenant.getPrivateNetworkName());
+                      computeService.setPrivateNetworkCidr(tenant.getPrivateNetworkCidr());
+                      computeService.setPrivateNetworkProxyHost(
+                          tenant.getPrivateNetworkProxyHost());
+                      computeService.setPrivateNetworkProxyUser(
+                          tenant.getPrivateNetworkProxyUser());
+                      computeService.setTenant(tenant.getTenantName());
+                    }
+                    LOG.info(
+                        "Image list for service <{}> of provider <{}>: <{}>",
+                        Arrays.toString(imageList.toArray()),
+                        serviceId,
+                        prId);
+                    computeService.setImages(imageList);
+                    LOG.info(
+                        "Flavor list for service <{}> of provider <{}>: <{}>",
+                        Arrays.toString(flavorList.toArray()),
+                        serviceId,
+                        prId);
+                    computeService.setFlavors(flavorList);
+                  }
+                  return cloudService;
+                })
+            .collect(Collectors.toMap(CloudService::getId, Function.identity()));
 
     provider.setServices(services);
     return provider;
   }
 
   @Override
-  public CloudProvider getUpdatedCloudProviderInfo(Deployment deployment, String organisation,
+  public CloudProvider getUpdatedCloudProviderInfo(
+      Deployment deployment,
+      String organisation,
       RankCloudProvidersMessage rankCloudProvidersMessage) {
     String cloudProviderId = deployment.getCloudProviderName();
     CloudProviderEndpoint cloudProviderEndpoint = deployment.getCloudProviderEndpoint();
     Set<String> servicesWithSla = Sets.newHashSet(cloudProviderEndpoint.getCpComputeServiceId());
-    return fillCloudProviderInfo(cloudProviderId, servicesWithSla, organisation,
-        rankCloudProvidersMessage);
+    return fillCloudProviderInfo(
+        cloudProviderId, servicesWithSla, organisation, rankCloudProvidersMessage);
   }
 }

@@ -26,20 +26,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class BaseRankCloudProvidersCommand
     extends BaseWorkflowCommand<RankCloudProvidersMessage> {
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Override
   protected RankCloudProvidersMessage getMessage(DelegateExecution execution) {
-    return getRequiredParameter(execution, WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
+    return getRequiredParameter(
+        execution,
+        WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
         RankCloudProvidersMessage.class);
   }
 
   @Override
   protected void setMessage(RankCloudProvidersMessage message, DelegateExecution execution) {
-    execution
-        .setVariable(WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
-            objectMapper.valueToTree(message),
-            false);
+    execution.setVariable(
+        WorkflowConstants.Param.RANK_CLOUD_PROVIDERS_MESSAGE,
+        objectMapper.valueToTree(message),
+        false);
   }
 }

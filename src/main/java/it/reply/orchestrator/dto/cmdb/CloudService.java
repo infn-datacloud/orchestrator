@@ -38,8 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
     use = JsonTypeInfo.Id.NAME,
     property = "service_type",
     visible = true,
-    include = As.EXISTING_PROPERTY
-)
+    include = As.EXISTING_PROPERTY)
 @JsonTypeIdResolver(CloudServiceResolver.class)
 public class CloudService implements CmdbIdentifiable {
 
@@ -114,15 +113,11 @@ public class CloudService implements CmdbIdentifiable {
     @JsonProperty("issuer")
     private String issuer;
 
-    /**
-     * Default constructor.
-     */
+    /** Default constructor. */
     public SupportedIdp() {
       this.name = null;
       this.issuer = null;
-
     }
-
   }
 
   @Data
@@ -136,15 +131,11 @@ public class CloudService implements CmdbIdentifiable {
     @JsonProperty("name")
     private String name;
 
-    /**
-     * Default constructor.
-     */
+    /** Default constructor. */
     public VolumeType() {
       this.qos = null;
       this.name = null;
-
     }
-
   }
 
   @Builder.Default
@@ -321,7 +312,8 @@ public class CloudService implements CmdbIdentifiable {
 
   @JsonIgnore
   public boolean isCredentialsRequired() {
-    return isAwsComputeProviderService() || isAzureComputeProviderService()
+    return isAwsComputeProviderService()
+        || isAzureComputeProviderService()
         || isOtcComputeProviderService();
   }
 }

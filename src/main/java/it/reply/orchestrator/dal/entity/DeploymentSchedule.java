@@ -45,9 +45,7 @@ import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
-@Table(indexes = {
-    @Index(columnList = "fileExpression, status")
-})
+@Table(indexes = {@Index(columnList = "fileExpression, status")})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -57,8 +55,7 @@ public class DeploymentSchedule extends AbstractResourceEntity {
   @Column(nullable = false)
   private DeploymentScheduleStatus status;
 
-  @Nullable
-  private String callback;
+  @Nullable private String callback;
 
   @Column(nullable = false)
   private String replicationExpression;
@@ -76,7 +73,10 @@ public class DeploymentSchedule extends AbstractResourceEntity {
 
   @ElementCollection(fetch = FetchType.EAGER, targetClass = String.class)
   @MapKeyColumn(name = "name")
-  @Column(name = "value", table = "deployment_schedule_parameter", nullable = false,
+  @Column(
+      name = "value",
+      table = "deployment_schedule_parameter",
+      nullable = false,
       columnDefinition = "TEXT")
   @Convert(attributeName = "value.", converter = ObjectToJsonConverter.class)
   private Map<String, Object> parameters = new HashMap<>();
@@ -84,24 +84,15 @@ public class DeploymentSchedule extends AbstractResourceEntity {
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "deploymentSchedule", orphanRemoval = true)
   private Set<DeploymentScheduleEvent> scheduleEvents = new HashSet<>();
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "owner_id")
   @Nullable
   private OidcEntity owner;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "requested_with_token_id")
   @Nullable
   private OidcRefreshToken requestedWithToken;
-
 }

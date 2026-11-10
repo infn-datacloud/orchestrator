@@ -31,8 +31,5 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class RucioProperties {
 
-  @NotNull
-  @NonNull
-  private URI url;
-
+  @NotNull @NonNull private URI url;
 }

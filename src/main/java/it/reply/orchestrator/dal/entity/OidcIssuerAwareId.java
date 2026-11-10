@@ -18,15 +18,12 @@
 package it.reply.orchestrator.dal.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -41,5 +38,4 @@ public abstract class OidcIssuerAwareId implements Serializable {
   @NotNull
   @Column(nullable = false, updatable = false)
   private String issuer;
-
 }

@@ -25,13 +25,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     property = "event_type",
     defaultImpl = GenericEvent.class,
     visible = true,
-    include = JsonTypeInfo.As.EXISTING_PROPERTY
-)
+    include = JsonTypeInfo.As.EXISTING_PROPERTY)
 @JsonSubTypes({
-    @JsonSubTypes.Type(
-        value = DidRegisteredEvent.class,
-        name = DidRegisteredEvent.EVENT_TYPE
-    )
+  @JsonSubTypes.Type(value = DidRegisteredEvent.class, name = DidRegisteredEvent.EVENT_TYPE)
 })
-public abstract class GenericEvent {
-}
+public abstract class GenericEvent {}

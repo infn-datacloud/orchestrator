@@ -18,14 +18,12 @@
 package it.reply.orchestrator.exception.service;
 
 import it.reply.orchestrator.exception.http.OrchestratorApiException;
-
 import org.springframework.http.HttpStatus;
 
 /**
  * Exception thrown when error occurred during the tosca parsing.
  *
  * @author m.bassi
- *
  */
 public class ToscaException extends OrchestratorApiException {
 
@@ -38,5 +36,4 @@ public class ToscaException extends OrchestratorApiException {
   public ToscaException(String message, Throwable cause) {
     super(HttpStatus.BAD_REQUEST, message, cause);
   }
-
 }

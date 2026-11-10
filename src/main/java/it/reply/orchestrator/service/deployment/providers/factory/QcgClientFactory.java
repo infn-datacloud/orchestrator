@@ -21,18 +21,13 @@ import feign.Feign;
 import feign.Logger.Level;
 import feign.RequestInterceptor;
 import feign.slf4j.Slf4jLogger;
-
 import it.infn.ba.deep.qcg.client.Qcg;
 import it.infn.ba.deep.qcg.client.utils.QcgDecoder;
 import it.infn.ba.deep.qcg.client.utils.QcgEncoder;
 import it.infn.ba.deep.qcg.client.utils.QcgException;
-
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
-
 import java.util.Objects;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +37,7 @@ public class QcgClientFactory {
 
   /**
    * Build a Qcg client object.
+   *
    * @param qcgEndpoint the input qcg service endpoint.
    * @param authInterceptor the input request interceptor.
    * @return the Qcg client object.
@@ -49,29 +45,35 @@ public class QcgClientFactory {
   public Qcg build(String qcgEndpoint, RequestInterceptor authInterceptor) {
     LOG.info("Generating Qcg client with endpoint {}", qcgEndpoint);
 
-    return Feign.builder().encoder(new QcgEncoder()).decoder(new QcgDecoder())
+    return Feign.builder()
+        .encoder(new QcgEncoder())
+        .decoder(new QcgDecoder())
         .logger(new Slf4jLogger(Qcg.class))
         .logLevel(Level.FULL)
-        .errorDecoder((methodKey, response) -> new QcgException(response.status(),
-            response.reason()))
-        .requestInterceptor(authInterceptor).requestInterceptor(template -> {
-          template.header(HttpHeaders.ACCEPT, "application/json");
-          template.header(HttpHeaders.CONTENT_TYPE, "application/json");
-        }).target(Qcg.class, qcgEndpoint);
+        .errorDecoder(
+            (methodKey, response) -> new QcgException(response.status(), response.reason()))
+        .requestInterceptor(authInterceptor)
+        .requestInterceptor(
+            template -> {
+              template.header(HttpHeaders.ACCEPT, "application/json");
+              template.header(HttpHeaders.CONTENT_TYPE, "application/json");
+            })
+        .target(Qcg.class, qcgEndpoint);
   }
 
   /**
    * Build a Qcg client object.
+   *
    * @param cloudProviderEndpoint the service endpoint.
    * @param accessToken the input accesstoken.
    * @return the Qcg client object.
    */
   public Qcg build(CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     Objects.requireNonNull(accessToken, "Access Token must not be null");
-    RequestInterceptor requestInterceptor = requestTemplate -> {
-      requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-    };
+    RequestInterceptor requestInterceptor =
+        requestTemplate -> {
+          requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        };
     return build(cloudProviderEndpoint.getCpEndpoint(), requestInterceptor);
   }
-
 }

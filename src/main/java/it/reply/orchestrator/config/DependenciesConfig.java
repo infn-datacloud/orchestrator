@@ -33,29 +33,27 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties({
-    SlamProperties.class,
-    CmdbProperties.class,
-    CprProperties.class
-})
+@EnableConfigurationProperties({SlamProperties.class, CmdbProperties.class, CprProperties.class})
 public class DependenciesConfig {
 
-  @Autowired
-  private ApplicationContext applicationContext;
+  @Autowired private ApplicationContext applicationContext;
 
   private <R> R findVersion(Class<R> clazz, String version) {
-    return applicationContext
-        .getBeansOfType(clazz)
-        .values()
-        .stream()
-        .filter(bean -> Arrays
-            .stream(bean.getClass().getAnnotations())
-            .filter(ServiceVersion.class::isInstance)
-            .map(ServiceVersion.class::cast)
-            .anyMatch(annotation -> version.equals(annotation.value()))
-        ).findFirst()
-        .orElseThrow(() -> new BeanCreationException("Unable to find bean of class "
-            + clazz.getName() + " with service version " + version));
+    return applicationContext.getBeansOfType(clazz).values().stream()
+        .filter(
+            bean ->
+                Arrays.stream(bean.getClass().getAnnotations())
+                    .filter(ServiceVersion.class::isInstance)
+                    .map(ServiceVersion.class::cast)
+                    .anyMatch(annotation -> version.equals(annotation.value())))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new BeanCreationException(
+                    "Unable to find bean of class "
+                        + clazz.getName()
+                        + " with service version "
+                        + version));
   }
 
   @Bean
@@ -72,5 +70,4 @@ public class DependenciesConfig {
   public CloudProviderRankerService cprService(CprProperties cprProperties) {
     return this.findVersion(CloudProviderRankerService.class, cprProperties.getServiceVersion());
   }
-
 }

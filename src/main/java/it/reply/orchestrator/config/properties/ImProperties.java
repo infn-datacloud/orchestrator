@@ -18,17 +18,13 @@
 package it.reply.orchestrator.config.properties;
 
 import com.google.common.base.Preconditions;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,16 +37,11 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class ImProperties implements InitializingBean {
 
-  @NotNull
-  @NonNull
-  private URI url;
+  @NotNull @NonNull private URI url;
 
-  @Nullable
-  private String imAuthHeader;
+  @Nullable private String imAuthHeader;
 
-  @NotNull
-  @NonNull
-  private Map<String, String> iaasAuthHeaders = new HashMap<>();
+  @NotNull @NonNull private Map<String, String> iaasAuthHeaders = new HashMap<>();
 
   public Optional<String> getIaasHeader(String computeServiceId) {
     Preconditions.checkNotNull(computeServiceId);
@@ -64,11 +55,10 @@ public class ImProperties implements InitializingBean {
   @Override
   public void afterPropertiesSet() throws Exception {
     Preconditions.checkNotNull(url);
-    iaasAuthHeaders.forEach((key, value) -> {
-      Preconditions.checkNotNull(key);
-      Preconditions.checkNotNull(value);
-    });
-
+    iaasAuthHeaders.forEach(
+        (key, value) -> {
+          Preconditions.checkNotNull(key);
+          Preconditions.checkNotNull(value);
+        });
   }
-
 }

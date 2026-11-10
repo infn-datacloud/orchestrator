@@ -52,9 +52,7 @@ public class CloudProviderRankerRequest {
   @Builder.Default
   private String deploymentId = "";
 
-  @JsonIgnore
-  @Builder.Default
-  private Map<String, CloudProvider> cloudProviders = new HashMap<>();
+  @JsonIgnore @Builder.Default private Map<String, CloudProvider> cloudProviders = new HashMap<>();
 
   @Deprecated
   protected CloudProviderRankerRequest() {

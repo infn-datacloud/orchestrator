@@ -38,5 +38,4 @@ public class BlockStorageQuota extends Quota {
 
   @JsonProperty("volumes")
   private Integer volumes;
-
 }

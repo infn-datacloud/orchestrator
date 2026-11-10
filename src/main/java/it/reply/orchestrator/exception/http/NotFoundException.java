@@ -23,7 +23,6 @@ import org.springframework.http.HttpStatus;
  * Exception thrown when a resource doesn't exist.
  *
  * @author m.bassi
- *
  */
 public class NotFoundException extends OrchestratorApiException {
 
@@ -32,5 +31,4 @@ public class NotFoundException extends OrchestratorApiException {
   public NotFoundException(String message) {
     super(HttpStatus.NOT_FOUND, message);
   }
-
 }

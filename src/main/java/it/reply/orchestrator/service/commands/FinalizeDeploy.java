@@ -52,5 +52,4 @@ public class FinalizeDeploy extends BaseDeployCommand {
   protected String getErrorMessagePrefix() {
     return "Error finalizing deployment";
   }
-
 }

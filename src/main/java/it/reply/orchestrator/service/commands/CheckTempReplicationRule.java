@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.CHECK_TEMP_REPLICATION_RULE)
 public class CheckTempReplicationRule extends BaseDeployCommand {
 
-  @Autowired
-  private RucioService rucioService;
+  @Autowired private RucioService rucioService;
 
   @Override
   protected void execute(DelegateExecution execution, DeploymentMessage message) {
@@ -44,7 +43,8 @@ public class CheckTempReplicationRule extends BaseDeployCommand {
         message.setTempReplicationRuleCompleted(true);
         break;
       case STUCK:
-        throw new BusinessWorkflowException(WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
+        throw new BusinessWorkflowException(
+            WorkflowConstants.ErrorCode.CLOUD_PROVIDER_ERROR,
             "Error while checking temp replication rule",
             new DeploymentException("Temp Replication rule is stuck: " + rule.getStatusReason()));
       default:

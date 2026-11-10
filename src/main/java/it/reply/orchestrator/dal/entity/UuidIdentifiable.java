@@ -42,5 +42,4 @@ public abstract class UuidIdentifiable implements Identifiable<String> {
   @GeneratedValue(generator = "sequential-uuid")
   @Column(unique = true, nullable = false, updatable = false, length = 36)
   private String id;
-
 }

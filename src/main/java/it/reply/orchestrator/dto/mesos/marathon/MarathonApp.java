@@ -19,14 +19,11 @@ package it.reply.orchestrator.dto.mesos.marathon;
 
 import it.reply.orchestrator.dto.mesos.MesosTask;
 import it.reply.orchestrator.utils.ToscaConstants;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -36,8 +33,7 @@ public class MarathonApp extends MesosTask<MarathonApp> {
 
   private Integer instances;
 
-  @NonNull
-  private Map<String, String> secrets = new HashMap<>();
+  @NonNull private Map<String, String> secrets = new HashMap<>();
 
   private boolean enableHttps = false;
 
@@ -45,5 +41,4 @@ public class MarathonApp extends MesosTask<MarathonApp> {
   public final String getToscaNodeName() {
     return ToscaConstants.Nodes.Types.MARATHON;
   }
-
 }

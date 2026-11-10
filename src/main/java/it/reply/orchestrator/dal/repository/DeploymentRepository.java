@@ -34,95 +34,126 @@ import org.springframework.transaction.annotation.Transactional;
 public interface DeploymentRepository extends JpaRepository<Deployment, String> {
 
   public static final String IN_SAME_ORGANIZATION =
-      "(d.owner is null "
-          + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
+      "(d.owner is null " + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId}")
+  @Query("select d " + "from #{#entityName} d " + "where d.owner.oidcEntityId = ?#{#ownerId}")
   public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId, Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + " and d.status not in ?#{#excludedStatus}")
-  public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId,
-      @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
-
-  @Query("select d "
-        + "from #{#entityName} d "
-        + "where d.owner.oidcEntityId = ?#{#ownerId} "
-        + "and d.userGroup = ?#{#userGroup}")
-  public Page<Deployment> findAllByOwner(@Param("ownerId") OidcEntityId ownerId,
-      @Param("userGroup") String userGroup, Pageable pageable);
-
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + "and " + IN_SAME_ORGANIZATION)
-  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId, Pageable pageable);
-
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + "and " + IN_SAME_ORGANIZATION
-      + " and d.status not in ?#{#excludedStatus}")
-  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId, @Param("excludedStatus") Status[] excludedStatus,
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(
+      @Param("ownerId") OidcEntityId ownerId,
+      @Param("excludedStatus") Status[] excludedStatus,
       Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + "and " + IN_SAME_ORGANIZATION
-      + " and d.userGroup = ?#{#userGroup}")
-  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId, @Param("userGroup") String userGroup,
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and d.userGroup = ?#{#userGroup}")
+  public Page<Deployment> findAllByOwner(
+      @Param("ownerId") OidcEntityId ownerId,
+      @Param("userGroup") String userGroup,
       Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + "and " + IN_SAME_ORGANIZATION
-      + " and d.userGroup = ?#{#userGroup}"
-      + " and d.status not in ?#{#excludedStatus}")
-  public Page<Deployment> findAllByOwner(@Param("requester") OidcEntity requester,
-      @Param("ownerId") OidcEntityId ownerId, @Param("userGroup") String userGroup,
-      @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and "
+          + IN_SAME_ORGANIZATION)
+  public Page<Deployment> findAllByOwner(
+      @Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId,
+      Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.id = ?#{#id} "
-      + "and " + IN_SAME_ORGANIZATION)
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and "
+          + IN_SAME_ORGANIZATION
+          + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(
+      @Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId,
+      @Param("excludedStatus") Status[] excludedStatus,
+      Pageable pageable);
+
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and "
+          + IN_SAME_ORGANIZATION
+          + " and d.userGroup = ?#{#userGroup}")
+  public Page<Deployment> findAllByOwner(
+      @Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId,
+      @Param("userGroup") String userGroup,
+      Pageable pageable);
+
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and "
+          + IN_SAME_ORGANIZATION
+          + " and d.userGroup = ?#{#userGroup}"
+          + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAllByOwner(
+      @Param("requester") OidcEntity requester,
+      @Param("ownerId") OidcEntityId ownerId,
+      @Param("userGroup") String userGroup,
+      @Param("excludedStatus") Status[] excludedStatus,
+      Pageable pageable);
+
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.id = ?#{#id} "
+          + "and "
+          + IN_SAME_ORGANIZATION)
   public Deployment findOne(@Param("requester") OidcEntity requester, @Param("id") String id);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where " + IN_SAME_ORGANIZATION)
+  @Query("select d " + "from #{#entityName} d " + "where " + IN_SAME_ORGANIZATION)
   public Page<Deployment> findAll(@Param("requester") OidcEntity requester, Pageable pageable);
 
-  @Query("select d "
-       + "from #{#entityName} d "
-       + "where " + IN_SAME_ORGANIZATION
-       + " and d.status not in ?#{#excludedStatus}")
-  public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
-       @Param("excludedStatus") Status[] excludedStatus, Pageable pageable);
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where "
+          + IN_SAME_ORGANIZATION
+          + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAll(
+      @Param("requester") OidcEntity requester,
+      @Param("excludedStatus") Status[] excludedStatus,
+      Pageable pageable);
 
-  @Query("select d "
-       + "from #{#entityName} d "
-       + "where " + IN_SAME_ORGANIZATION
-       + " and d.userGroup = ?#{#userGroup}")
-   public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
-       @Param("userGroup") String userGroup, Pageable pageable);
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where "
+          + IN_SAME_ORGANIZATION
+          + " and d.userGroup = ?#{#userGroup}")
+  public Page<Deployment> findAll(
+      @Param("requester") OidcEntity requester,
+      @Param("userGroup") String userGroup,
+      Pageable pageable);
 
-  @Query("select d "
-       + "from #{#entityName} d "
-       + "where " + IN_SAME_ORGANIZATION
-       + " and d.userGroup = ?#{#userGroup}"
-       + " and d.status not in ?#{#excludedStatus}")
-  public Page<Deployment> findAll(@Param("requester") OidcEntity requester,
-        @Param("userGroup") String userGroup, @Param("excludedStatus") Status[] excludedStatus,
-        Pageable pageable);
-
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where "
+          + IN_SAME_ORGANIZATION
+          + " and d.userGroup = ?#{#userGroup}"
+          + " and d.status not in ?#{#excludedStatus}")
+  public Page<Deployment> findAll(
+      @Param("requester") OidcEntity requester,
+      @Param("userGroup") String userGroup,
+      @Param("excludedStatus") Status[] excludedStatus,
+      Pageable pageable);
 }

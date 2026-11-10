@@ -20,7 +20,6 @@ package it.reply.orchestrator.service.commands;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.service.DynafedServiceImpl;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,19 +27,21 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_DYNAFED_DATA)
 public class GetDynafedData extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private DynafedServiceImpl dynafedService;
+  @Autowired private DynafedServiceImpl dynafedService;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
 
-    rankCloudProvidersMessage.getDynafedRequirements()
+    rankCloudProvidersMessage
+        .getDynafedRequirements()
         .values()
-        .forEach(dynafedRequirement -> dynafedService.populateDyanfedData(
-            dynafedRequirement,
-            rankCloudProvidersMessage.getCloudProviders(),
-            rankCloudProvidersMessage.getRequestedWithToken()));
+        .forEach(
+            dynafedRequirement ->
+                dynafedService.populateDyanfedData(
+                    dynafedRequirement,
+                    rankCloudProvidersMessage.getCloudProviders(),
+                    rankCloudProvidersMessage.getRequestedWithToken()));
   }
 
   @Override

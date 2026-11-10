@@ -19,12 +19,11 @@ package it.reply.orchestrator.exception;
 
 import org.springframework.vault.VaultException;
 
-public class VaultSecretNotFoundException  extends VaultException {
+public class VaultSecretNotFoundException extends VaultException {
 
   private static final long serialVersionUID = 1L;
 
   public VaultSecretNotFoundException() {
     super("Vault secret not found.");
   }
-
 }
