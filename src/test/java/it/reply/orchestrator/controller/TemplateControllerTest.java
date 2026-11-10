@@ -17,12 +17,19 @@
 
 package it.reply.orchestrator.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import it.reply.orchestrator.exception.http.NotFoundException;
 import it.reply.orchestrator.service.TemplateService;
 import it.reply.orchestrator.util.TestUtil;
-
 import java.util.UUID;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,15 +46,6 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(controllers = TemplateController.class, secure = false)
 @AutoConfigureRestDocs("target/generated-snippets")
 public class TemplateControllerTest {
@@ -55,17 +53,13 @@ public class TemplateControllerTest {
   private static final MediaType TEXT_PLAIN_UTF8 =
       MediaType.parseMediaType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8");
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private TemplateService templateService;
+  @MockBean private TemplateService templateService;
 
   private final String templatePath = "./src/test/resources/tosca/galaxy_tosca.yaml";
 
@@ -76,14 +70,15 @@ public class TemplateControllerTest {
 
     String expectedtemplate = TestUtil.getFileContentAsString(templatePath);
 
-    when(templateService.getDeploymentTemplate(deploymentUuid))
-        .thenReturn(expectedtemplate);
+    when(templateService.getDeploymentTemplate(deploymentUuid)).thenReturn(expectedtemplate);
 
     MvcResult result =
         mockMvc
-            .perform(get("/deployments/" + deploymentUuid + "/template")
-                .header(HttpHeaders.AUTHORIZATION,
-                    OAuth2AccessToken.BEARER_TYPE + " <access token>"))
+            .perform(
+                get("/deployments/" + deploymentUuid + "/template")
+                    .header(
+                        HttpHeaders.AUTHORIZATION,
+                        OAuth2AccessToken.BEARER_TYPE + " <access token>"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(TEXT_PLAIN_UTF8))
             .andDo(document("get-template"))
@@ -91,7 +86,6 @@ public class TemplateControllerTest {
 
     String returnedTemplate = result.getResponse().getContentAsString();
     assertThat(returnedTemplate).isEqualTo(expectedtemplate);
-
   }
 
   @Test
@@ -102,8 +96,7 @@ public class TemplateControllerTest {
     Exception expectedException =
         new NotFoundException("The deployment <" + deploymentUuid + "> doesn't exist");
 
-    when(templateService.getDeploymentTemplate(deploymentUuid))
-        .thenThrow(expectedException);
+    when(templateService.getDeploymentTemplate(deploymentUuid)).thenThrow(expectedException);
 
     mockMvc
         .perform(get("/deployments/" + deploymentUuid + "/template"))
@@ -111,7 +104,6 @@ public class TemplateControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
         .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
         .andExpect(jsonPath("$.title", is(HttpStatus.NOT_FOUND.getReasonPhrase())))
-        .andExpect(
-            jsonPath("$.message", is(expectedException.getMessage())));
+        .andExpect(jsonPath("$.message", is(expectedException.getMessage())));
   }
 }

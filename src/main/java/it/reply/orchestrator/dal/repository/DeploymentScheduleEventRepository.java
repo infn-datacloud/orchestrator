@@ -34,38 +34,36 @@ public interface DeploymentScheduleEventRepository
     extends JpaRepository<DeploymentScheduleEvent, String> {
 
   String IN_SAME_ORGANIZATION =
-      "(d.owner is null "
-          + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
+      "(d.owner is null " + "or d.owner.oidcEntityId.issuer = ?#{#requester.oidcEntityId.issuer})";
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId}") Page<DeploymentScheduleEvent> findAllByOwner(
-      @Param("ownerId") OidcEntityId ownerId,
-      Pageable pageable);
+  @Query("select d " + "from #{#entityName} d " + "where d.owner.oidcEntityId = ?#{#ownerId}")
+  Page<DeploymentScheduleEvent> findAllByOwner(
+      @Param("ownerId") OidcEntityId ownerId, Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.owner.oidcEntityId = ?#{#ownerId} "
-      + "and " + IN_SAME_ORGANIZATION) Page<DeploymentScheduleEvent> findAllByOwner(
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.owner.oidcEntityId = ?#{#ownerId} "
+          + "and "
+          + IN_SAME_ORGANIZATION)
+  Page<DeploymentScheduleEvent> findAllByOwner(
       @Param("requester") OidcEntity requester,
       @Param("ownerId") OidcEntityId ownerId,
       Pageable pageable);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where d.id = ?#{#id} "
-      + "and " + IN_SAME_ORGANIZATION) DeploymentScheduleEvent findOne(
-      @Param("requester") OidcEntity requester,
-      @Param("id") String id);
+  @Query(
+      "select d "
+          + "from #{#entityName} d "
+          + "where d.id = ?#{#id} "
+          + "and "
+          + IN_SAME_ORGANIZATION)
+  DeploymentScheduleEvent findOne(@Param("requester") OidcEntity requester, @Param("id") String id);
 
-  @Query("select d "
-      + "from #{#entityName} d "
-      + "where " + IN_SAME_ORGANIZATION) Page<DeploymentScheduleEvent> findAll(
-      @Param("requester") OidcEntity requester,
-      Pageable pageable);
+  @Query("select d " + "from #{#entityName} d " + "where " + IN_SAME_ORGANIZATION)
+  Page<DeploymentScheduleEvent> findAll(
+      @Param("requester") OidcEntity requester, Pageable pageable);
 
   DeploymentScheduleEvent findByDeploymentId(String deploymentId);
 
-  Page<DeploymentScheduleEvent> findByDeploymentSchedule_Id(String scheduleId,
-      Pageable pageable);
+  Page<DeploymentScheduleEvent> findByDeploymentSchedule_Id(String scheduleId, Pageable pageable);
 }

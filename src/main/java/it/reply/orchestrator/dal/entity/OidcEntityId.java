@@ -18,18 +18,14 @@
 package it.reply.orchestrator.dal.entity;
 
 import com.nimbusds.jwt.JWT;
-
 import it.reply.orchestrator.utils.JwtUtils;
-
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -50,7 +46,6 @@ public class OidcEntityId extends OidcIssuerAwareId {
    * Generate a OidcEntityId from an access token.
    *
    * @param accessToken The access token
-   *
    * @return the OidcEntityId
    */
   public static OidcEntityId fromAccesToken(String accessToken) {
@@ -60,5 +55,4 @@ public class OidcEntityId extends OidcIssuerAwareId {
     id.setSubject(JwtUtils.getSubject(jwt));
     return id;
   }
-
 }

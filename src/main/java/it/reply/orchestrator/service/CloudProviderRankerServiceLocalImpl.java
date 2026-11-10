@@ -43,15 +43,17 @@ public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerS
   private final ResourceLoader resourceLoader;
 
   /**
-  * Creates a new CloudProviderRankerServiceLocalImpl.
-  *
-  * @param cprProperties the CprProperties
-  * @param restTemplateBuilder the RestTemplateBuilder
-  * @param objectMapper the objectMapper
-  * @param resourceLoader the ResourceLoader
-  */
-  public CloudProviderRankerServiceLocalImpl(CprProperties cprProperties,
-      RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
+   * Creates a new CloudProviderRankerServiceLocalImpl.
+   *
+   * @param cprProperties the CprProperties
+   * @param restTemplateBuilder the RestTemplateBuilder
+   * @param objectMapper the objectMapper
+   * @param resourceLoader the ResourceLoader
+   */
+  public CloudProviderRankerServiceLocalImpl(
+      CprProperties cprProperties,
+      RestTemplateBuilder restTemplateBuilder,
+      ObjectMapper objectMapper,
       ResourceLoader resourceLoader) {
     this.cprProperties = cprProperties;
     this.objectMapper = objectMapper;
@@ -67,15 +69,13 @@ public class CloudProviderRankerServiceLocalImpl implements CloudProviderRankerS
 
   private List<RankedCloudService> loadData() {
     String location = cprProperties.getUrl().toString();
-    Resource serializedPreferences = resourceLoader
-          .getResource(location);
+    Resource serializedPreferences = resourceLoader.getResource(location);
     try (InputStream is = serializedPreferences.getInputStream()) {
-      TypeReference<List<RankedCloudService>> typeRef
-          = new TypeReference<List<RankedCloudService>>() {};
+      TypeReference<List<RankedCloudService>> typeRef =
+          new TypeReference<List<RankedCloudService>>() {};
       return objectMapper.readValue(is, typeRef);
     } catch (IOException e) {
       throw new OrchestratorException("Error loading local CPR preferences from " + location, e);
     }
   }
-
 }

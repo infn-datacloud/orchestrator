@@ -21,7 +21,6 @@ import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.dto.workflow.CloudServiceWf;
 import it.reply.orchestrator.dto.workflow.CloudServicesOrderedIterator;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
@@ -39,12 +38,11 @@ public class CleanFailedDeployment extends BaseDeployCommand {
     if (csIterartor != null) {
       CloudServiceWf cloudServiceWf = csIterartor.current();
       if (cloudServiceWf.getLastErrorCause() == null) {
-        Exception exception = getRequiredParameter(execution, WorkflowConstants.Param.EXCEPTION,
-            Exception.class);
+        Exception exception =
+            getRequiredParameter(execution, WorkflowConstants.Param.EXCEPTION, Exception.class);
         cloudServiceWf.setLastErrorCause(exception.getMessage());
       }
     }
     getDeploymentProviderService(deploymentMessage).cleanFailedDeploy(deploymentMessage);
   }
-
 }

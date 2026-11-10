@@ -29,19 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface  WorkflowReferenceRepository
-    extends JpaRepository<WorkflowReference, String> {
+public interface WorkflowReferenceRepository extends JpaRepository<WorkflowReference, String> {
 
-  @Query("select w "
-      + "from #{#entityName} w "
-      + "where w.processId = ?#{#processId}")
+  @Query("select w " + "from #{#entityName} w " + "where w.processId = ?#{#processId}")
   public Deployment findOneByProcessId(@Param("processId") String processId);
 
-  @Query("select w "
-      + "from #{#entityName} w "
-      + "where w.deployment.id = ?#{#deploymentId}")
-  public Page<WorkflowReference> findAllByDeploymentId(@Param("deploymentId") String deploymentId,
-        Pageable pageable);
+  @Query("select w " + "from #{#entityName} w " + "where w.deployment.id = ?#{#deploymentId}")
+  public Page<WorkflowReference> findAllByDeploymentId(
+      @Param("deploymentId") String deploymentId, Pageable pageable);
 }
-
-

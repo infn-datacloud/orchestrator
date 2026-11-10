@@ -21,25 +21,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.common.collect.Lists;
-
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
-
 import org.junit.Before;
 import org.junit.Test;
 
 public class WorkflowListIteratorTest {
 
-  private static final WorkflowListIterator<String> EMPTY_LIST = new WorkflowListIterator<String>(
-      new ArrayList<>()) {
-  };
+  private static final WorkflowListIterator<String> EMPTY_LIST =
+      new WorkflowListIterator<String>(new ArrayList<>()) {};
 
-  private static final WorkflowListIterator<String> ONE_ELEMENT = new WorkflowListIterator<String>(
-      Lists.newArrayList("one")) {
-  };
-  private static final WorkflowListIterator<String> TWO_ELEMENTS = new WorkflowListIterator<String>(
-      Lists.newArrayList("one", "two")) {
-  };
+  private static final WorkflowListIterator<String> ONE_ELEMENT =
+      new WorkflowListIterator<String>(Lists.newArrayList("one")) {};
+  private static final WorkflowListIterator<String> TWO_ELEMENTS =
+      new WorkflowListIterator<String>(Lists.newArrayList("one", "two")) {};
 
   @Before
   public void init() {
@@ -161,7 +156,8 @@ public class WorkflowListIteratorTest {
   public void testRemove() {
     WorkflowListIterator<String> it = TWO_ELEMENTS;
     it.next();
-    assertThatCode(it::remove).isInstanceOf(UnsupportedOperationException.class)
+    assertThatCode(it::remove)
+        .isInstanceOf(UnsupportedOperationException.class)
         .hasMessage("remove() method is not supported");
   }
 
@@ -169,7 +165,8 @@ public class WorkflowListIteratorTest {
   public void testSet() {
     WorkflowListIterator<String> it = TWO_ELEMENTS;
     it.next();
-    assertThatCode(() -> it.set("three")).isInstanceOf(UnsupportedOperationException.class)
+    assertThatCode(() -> it.set("three"))
+        .isInstanceOf(UnsupportedOperationException.class)
         .hasMessage("set() method is not supported");
   }
 
@@ -177,7 +174,8 @@ public class WorkflowListIteratorTest {
   public void testAdd() {
     WorkflowListIterator<String> it = TWO_ELEMENTS;
     it.next();
-    assertThatCode(() -> it.add("three")).isInstanceOf(UnsupportedOperationException.class)
+    assertThatCode(() -> it.add("three"))
+        .isInstanceOf(UnsupportedOperationException.class)
         .hasMessage("add() method is not supported");
   }
 }

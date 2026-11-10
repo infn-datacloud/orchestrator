@@ -29,7 +29,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -44,21 +43,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerService {
 
   private static final ParameterizedTypeReference<List<RankedCloudService>> RESPONSE_TYPE =
-      new ParameterizedTypeReference<List<RankedCloudService>>() {
-      };
+      new ParameterizedTypeReference<List<RankedCloudService>>() {};
 
   private CprProperties cprProperties;
 
   private RestTemplate restTemplate;
 
   /**
-  * Creates a new CloudProviderRankerServiceV1Impl.
-  *
-  * @param cprProperties the CprProperties
-  * @param restTemplateBuilder the RestTemplateBuilder
-  */
-  public CloudProviderRankerServiceV1Impl(CprProperties cprProperties,
-      RestTemplateBuilder restTemplateBuilder) {
+   * Creates a new CloudProviderRankerServiceV1Impl.
+   *
+   * @param cprProperties the CprProperties
+   * @param restTemplateBuilder the RestTemplateBuilder
+   */
+  public CloudProviderRankerServiceV1Impl(
+      CprProperties cprProperties, RestTemplateBuilder restTemplateBuilder) {
     this.cprProperties = cprProperties;
     this.restTemplate = restTemplateBuilder.build();
   }
@@ -68,21 +66,21 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
       CloudProviderRankerRequest cloudProviderRankerRequest) {
 
     Map<String, CloudProvider> cloudProviders = cloudProviderRankerRequest.getCloudProviders();
-  
+
     if (cloudProviders.size() < 2) {
       List<RankedCloudService> result = new ArrayList<RankedCloudService>();
       int count = 1;
       for (CloudProvider provider : cloudProviders.values()) {
         for (CloudService service : provider.getServices().values()) {
           if (service.getType() == CloudServiceType.COMPUTE) {
-            result.add(RankedCloudService
-                .builder()
-                .provider(provider.getId())
-                .serviceId(service.getId())
-                .totalScore(1)
-                .rank(count)
-                .ranked(true)
-                .build());
+            result.add(
+                RankedCloudService.builder()
+                    .provider(provider.getId())
+                    .serviceId(service.getId())
+                    .totalScore(1)
+                    .rank(count)
+                    .ranked(true)
+                    .build());
             count++;
           }
         }
@@ -90,11 +88,11 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
       return result;
     }
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(cprProperties.getUrl() + cprProperties.getRankPath())
+            .build()
+            .normalize()
+            .toUri();
 
     HttpEntity<CloudProviderRankerRequest> entity = new HttpEntity<>(cloudProviderRankerRequest);
 
@@ -108,14 +106,14 @@ public class CloudProviderRankerServiceV1Impl implements CloudProviderRankerServ
           for (CloudProvider provider : cloudProviders.values()) {
             for (CloudService service : provider.getServices().values()) {
               if (service.getType() == CloudServiceType.COMPUTE) {
-                result.add(RankedCloudService
-                    .builder()
-                    .provider(provider.getId())
-                    .serviceId(service.getId())
-                    .totalScore(1)
-                    .rank(count)
-                    .ranked(true)
-                    .build());
+                result.add(
+                    RankedCloudService.builder()
+                        .provider(provider.getId())
+                        .serviceId(service.getId())
+                        .totalScore(1)
+                        .rank(count)
+                        .ranked(true)
+                        .build());
                 count++;
               }
             }

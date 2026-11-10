@@ -18,7 +18,6 @@
 package it.reply.orchestrator.config.properties;
 
 import com.google.common.collect.ImmutableSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,16 +26,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.InitializingBean;
@@ -66,26 +62,21 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
 
   private boolean cacheTokens = true;
 
-  @NotNull
-  @NonNull
-  @Valid
-  @NestedConfigurationProperty
+  @NotNull @NonNull @Valid @NestedConfigurationProperty
   private Map<String, IamProperties> iamProperties = new HashMap<>();
 
-  /**
-   * Throw an {@link IllegalStateException} if the security is disabled.
-   */
+  /** Throw an {@link IllegalStateException} if the security is disabled. */
   public void throwIfSecurityDisabled() {
-    runIfSecurityDisabled(() -> {
-      throw new IllegalStateException("Security is not enabled");
-    });
+    runIfSecurityDisabled(
+        () -> {
+          throw new IllegalStateException("Security is not enabled");
+        });
   }
 
   /**
    * Run the function if the security is disabled.
    *
-   * @param function
-   *          the function to run
+   * @param function the function to run
    */
   public void runIfSecurityDisabled(Runnable function) {
     if (!enabled) {
@@ -108,15 +99,20 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
         String issuer = iamConfigurationEntry.getKey();
         IamProperties iamConfiguration = iamConfigurationEntry.getValue();
         ScopedOidcClientProperties orchestratorConfiguration = iamConfiguration.getOrchestrator();
-        Assert.notNull(orchestratorConfiguration,
+        Assert.notNull(
+            orchestratorConfiguration,
             "Orchestrator OAuth2 client for issuer " + issuer + " must be provided");
-        Assert.hasText(orchestratorConfiguration.getClientId(),
+        Assert.hasText(
+            orchestratorConfiguration.getClientId(),
             "Orchestrator OAuth2 clientId for issuer " + issuer + " must be provided");
-        Assert.hasText(orchestratorConfiguration.getClientSecret(),
+        Assert.hasText(
+            orchestratorConfiguration.getClientSecret(),
             "Orchestrator OAuth2 clientSecret for issuer " + issuer + " must be provided");
         if (orchestratorConfiguration.getScopes().isEmpty()) {
-          LOG.warn("No Orchestrator OAuth2 scopes provided for issuer {}. Using default: {}",
-                  issuer, REQUIRED_SCOPES);
+          LOG.warn(
+              "No Orchestrator OAuth2 scopes provided for issuer {}. Using default: {}",
+              issuer,
+              REQUIRED_SCOPES);
           orchestratorConfiguration.setScopes(new ArrayList<String>(REQUIRED_SCOPES));
           iamConfiguration.setOrchestrator(orchestratorConfiguration);
           iamConfigurationEntry.setValue(iamConfiguration);
@@ -124,21 +120,22 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
 
         Optional<OidcClientProperties> cluesConfiguration = iamConfiguration.getClues();
         if (cluesConfiguration.isPresent()) {
-          Assert.hasText(cluesConfiguration.get().getClientId(),
+          Assert.hasText(
+              cluesConfiguration.get().getClientId(),
               "CLUES OAuth2 clientId for issuer " + issuer + " must be provided");
-          Assert.hasText(cluesConfiguration.get().getClientSecret(),
+          Assert.hasText(
+              cluesConfiguration.get().getClientSecret(),
               "CLUES OAuth2 clientSecret for issuer " + issuer + " must be provided");
         } else {
           LOG.warn("No CLUES OAuth2 configuration provided for issuer {}", issuer);
         }
 
         String audience = iamConfiguration.getAudience();
-        Assert.hasText(audience,
-            "Audience token for issuer " + issuer + " must be provided");
+        Assert.hasText(audience, "Audience token for issuer " + issuer + " must be provided");
 
         String admingroup = iamConfiguration.getAdmingroup();
-        Assert.hasText(admingroup,
-            "Administrator group for issuer " + issuer + " must be specified");
+        Assert.hasText(
+            admingroup, "Administrator group for issuer " + issuer + " must be specified");
       }
       if (iamProperties.keySet().isEmpty()) {
         LOG.warn("Empty OIDC configuration list provided");
@@ -148,7 +145,6 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
     } else {
       LOG.info("OIDC support is disabled");
     }
-
   }
 
   @Data
@@ -156,23 +152,14 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
   @NoArgsConstructor
   public static class IamProperties {
 
-    @NotNull
-    @NonNull
-    @Valid
-    @NestedConfigurationProperty
+    @NotNull @NonNull @Valid @NestedConfigurationProperty
     private ScopedOidcClientProperties orchestrator;
 
-    @Nullable
-    @Valid
-    @NestedConfigurationProperty
-    private OidcClientProperties clues;
+    @Nullable @Valid @NestedConfigurationProperty private OidcClientProperties clues;
 
-    @NotNull
-    @NonNull
-    private String audience;
+    @NotNull @NonNull private String audience;
 
-    @Nullable
-    private String admingroup;
+    @Nullable private String admingroup;
 
     public Optional<OidcClientProperties> getClues() {
       return Optional.ofNullable(clues);
@@ -185,14 +172,9 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
   @NoArgsConstructor
   public static class OidcClientProperties {
 
-    @NotNull
-    @NonNull
-    private String clientId;
+    @NotNull @NonNull private String clientId;
 
-    @NotNull
-    @NonNull
-    private String clientSecret;
-
+    @NotNull @NonNull private String clientSecret;
   }
 
   @Data
@@ -206,6 +188,7 @@ public class OidcProperties implements SecurityPrerequisite, InitializingBean {
 
     /**
      * Return the scopes.
+     *
      * @return scopes the scopes
      */
     public List<String> getScopes() {

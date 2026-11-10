@@ -19,16 +19,12 @@ package it.reply.orchestrator.service.security;
 
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.SignedJWT;
-
 import it.reply.orchestrator.dto.security.IndigoOAuth2Authentication;
 import it.reply.orchestrator.utils.JwtUtils;
-
 import java.text.ParseException;
 import java.util.Optional;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.oauth2.introspectingfilter.IntrospectingTokenService;
@@ -78,8 +74,8 @@ public class UserInfoIntrospectingTokenService extends IntrospectingTokenService
       return null;
     } finally {
       stopWatch.stop();
-      LOG.debug("Validation of received access token performed in {}ms",
-          stopWatch.getTotalTimeMillis());
+      LOG.debug(
+          "Validation of received access token performed in {}ms", stopWatch.getTotalTimeMillis());
     }
   }
 
@@ -89,12 +85,14 @@ public class UserInfoIntrospectingTokenService extends IntrospectingTokenService
     }
 
     String issuer = JwtUtils.getIssuer(jwtToken);
-    ServerConfiguration serverConfiguration = oauth2ConfigurationsService
-        .getServerConfiguration(issuer);
-    JWTSigningAndValidationService validationService = Optional
-        .ofNullable(validationServices.getValidator(serverConfiguration.getJwksUri()))
-        .orElseThrow(() -> new AuthorizationServiceException(String
-            .format("Couldn't retrive validator for issuer %s", issuer)));
+    ServerConfiguration serverConfiguration =
+        oauth2ConfigurationsService.getServerConfiguration(issuer);
+    JWTSigningAndValidationService validationService =
+        Optional.ofNullable(validationServices.getValidator(serverConfiguration.getJwksUri()))
+            .orElseThrow(
+                () ->
+                    new AuthorizationServiceException(
+                        String.format("Couldn't retrive validator for issuer %s", issuer)));
 
     if (!validationService.validateSignature(jwtToken)) {
       throw new InvalidTokenException("access token has an invalid signature");
@@ -104,15 +102,13 @@ public class UserInfoIntrospectingTokenService extends IntrospectingTokenService
   private UserInfo getUserInfo(JWT jwtToken) {
     String subject = JwtUtils.getSubject(jwtToken);
     String issuer = JwtUtils.getIssuer(jwtToken);
-    ServerConfiguration serverConfiguration = oauth2ConfigurationsService
-        .getServerConfiguration(issuer);
+    ServerConfiguration serverConfiguration =
+        oauth2ConfigurationsService.getServerConfiguration(issuer);
     PendingOIDCAuthenticationToken infoKey =
-        new PendingOIDCAuthenticationToken(subject, issuer,
-            serverConfiguration, null, jwtToken.getParsedString(), null);
+        new PendingOIDCAuthenticationToken(
+            subject, issuer, serverConfiguration, null, jwtToken.getParsedString(), null);
 
-    return Optional
-        .ofNullable(userInfoFetcher.loadUserInfo(infoKey))
+    return Optional.ofNullable(userInfoFetcher.loadUserInfo(infoKey))
         .orElseThrow(() -> new AuthorizationServiceException("Error retrieving user info"));
   }
-
 }

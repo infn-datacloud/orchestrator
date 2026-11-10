@@ -22,10 +22,8 @@ import static org.mockito.Mockito.when;
 
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,18 +40,16 @@ public class UpdateTest extends BaseDeployCommandTest<Update> {
   public void testUpdate(boolean complete) throws Exception {
     DeploymentMessage dm = new DeploymentMessage();
     String updateTemplate = "template";
-    ExecutionEntity execution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.TOSCA_TEMPLATE, updateTemplate)
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
-        .build();
+    ExecutionEntity execution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.TOSCA_TEMPLATE, updateTemplate)
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
+            .build();
 
-    when(deploymentProviderService.doUpdate(dm, updateTemplate))
-        .thenReturn(complete);
+    when(deploymentProviderService.doUpdate(dm, updateTemplate)).thenReturn(complete);
 
     command.execute(execution);
 
-    assertThat(dm.isCreateComplete())
-        .isEqualTo(complete);
+    assertThat(dm.isCreateComplete()).isEqualTo(complete);
   }
-
 }

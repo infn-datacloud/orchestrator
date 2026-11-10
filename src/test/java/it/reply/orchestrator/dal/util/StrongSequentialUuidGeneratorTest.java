@@ -28,15 +28,13 @@ public class StrongSequentialUuidGeneratorTest {
 
   @Test
   public void testSequentialization() {
-    assertThat(
-        StrongSequentialUuidGenerator.toSequentialUuid(NON_SEQUENTIAL_UUID))
+    assertThat(StrongSequentialUuidGenerator.toSequentialUuid(NON_SEQUENTIAL_UUID))
         .isEqualTo(SEQUENTIAL_UUID);
   }
 
   @Test
   public void testDeSequentialization() {
-    assertThat(
-        StrongSequentialUuidGenerator.fromSequentialUuid(SEQUENTIAL_UUID))
+    assertThat(StrongSequentialUuidGenerator.fromSequentialUuid(SEQUENTIAL_UUID))
         .isEqualTo(NON_SEQUENTIAL_UUID);
   }
 }

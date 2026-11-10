@@ -18,11 +18,9 @@
 package it.reply.orchestrator.dto.deployment;
 
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -35,14 +33,11 @@ public class ActionMessage extends BaseWorkflowMessage {
 
   private String action;
 
-  @NonNull
-  @NotNull
-  private String resourceId;
+  @NonNull @NotNull private String resourceId;
 
   public ActionMessage(String resourceId) {
     this.resourceId = resourceId;
   }
 
-  public ActionMessage() {
-  }
+  public ActionMessage() {}
 }

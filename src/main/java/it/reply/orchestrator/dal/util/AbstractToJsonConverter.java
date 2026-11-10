@@ -20,13 +20,9 @@ package it.reply.orchestrator.dal.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Preconditions;
-
 import it.reply.orchestrator.utils.JsonUtils;
-
 import javax.persistence.AttributeConverter;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Slf4j
@@ -48,12 +44,20 @@ public abstract class AbstractToJsonConverter<@Nullable T>
       try {
         convertedValue = JsonUtils.serialize(optionalAttribute);
       } catch (JsonProcessingException ex) {
-        throw new IllegalArgumentException("Error serializing attribute <" + optionalAttribute
-            + "> of type " + typeReference + " to JSON DB value", ex);
+        throw new IllegalArgumentException(
+            "Error serializing attribute <"
+                + optionalAttribute
+                + "> of type "
+                + typeReference
+                + " to JSON DB value",
+            ex);
       }
     }
-    LOG.trace("Converted attribute {} of type {} to JSON DB value <{}>", optionalAttribute,
-        typeReference, convertedValue);
+    LOG.trace(
+        "Converted attribute {} of type {} to JSON DB value <{}>",
+        optionalAttribute,
+        typeReference,
+        convertedValue);
     return convertedValue;
   }
 
@@ -66,13 +70,19 @@ public abstract class AbstractToJsonConverter<@Nullable T>
       try {
         convertedValue = JsonUtils.deserialize(optionalDbData, typeReference);
       } catch (JsonProcessingException ex) {
-        throw new IllegalArgumentException("Error de-serializing DB data with value <"
-            + optionalDbData + "> to object of type " + typeReference, ex);
+        throw new IllegalArgumentException(
+            "Error de-serializing DB data with value <"
+                + optionalDbData
+                + "> to object of type "
+                + typeReference,
+            ex);
       }
     }
-    LOG.trace("Converted JSON DB value <{}> to attribute {} of type {}", optionalDbData,
-        convertedValue, typeReference);
+    LOG.trace(
+        "Converted JSON DB value <{}> to attribute {} of type {}",
+        optionalDbData,
+        convertedValue,
+        typeReference);
     return convertedValue;
   }
-
 }

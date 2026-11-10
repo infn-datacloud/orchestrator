@@ -31,19 +31,11 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class CprProperties {
 
-  @NotNull
-  @NonNull
-  private URI url;
+  @NotNull @NonNull private URI url;
 
-  @NotNull
-  @NonNull
-  private String rankPath = "/rank";
+  @NotNull @NonNull private String rankPath = "/rank";
 
-  @NotNull
-  @NonNull
-  private String serviceVersion = "v1";
+  @NotNull @NonNull private String serviceVersion = "v1";
 
-  @NotNull
-  @NonNull
-  private boolean internalFallback = false;
+  @NotNull @NonNull private boolean internalFallback = false;
 }

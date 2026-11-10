@@ -61,8 +61,8 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
    * @param objectMapper the objectMapper
    * @param resourceLoader the ResourceLoader
    */
-  public CmdbServiceLocalImpl(CmdbProperties cmdbProperties, ObjectMapper objectMapper,
-      ResourceLoader resourceLoader)  {
+  public CmdbServiceLocalImpl(
+      CmdbProperties cmdbProperties, ObjectMapper objectMapper, ResourceLoader resourceLoader) {
     this.cmdbProperties = cmdbProperties;
     this.objectMapper = objectMapper;
     this.resourceLoader = resourceLoader;
@@ -70,8 +70,7 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   private LocalCmdbInfoHolder loadData() {
     String location = cmdbProperties.getUrl().toString();
-    Resource serializedValues = resourceLoader
-        .getResource(location);
+    Resource serializedValues = resourceLoader.getResource(location);
     try (InputStream is = serializedValues.getInputStream()) {
       return objectMapper.readValue(is, LocalCmdbInfoHolder.class);
     } catch (IOException e) {
@@ -81,9 +80,7 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public CloudProvider getProviderById(String id) {
-    return loadData()
-        .getProviders()
-        .stream()
+    return loadData().getProviders().stream()
         .filter(cloudProvider -> id.equals(cloudProvider.getId()))
         .findFirst()
         .orElseThrow(() -> new DeploymentException("Cloud provider not found: " + id));
@@ -96,9 +93,7 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public CloudService getServiceById(String id) {
-    return loadData()
-        .getProviders()
-        .stream()
+    return loadData().getProviders().stream()
         .flatMap(cloudProvider -> cloudProvider.getServices().values().stream())
         .filter(cloudService -> id.equals(cloudService.getId()))
         .findFirst()
@@ -107,19 +102,14 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public List<Image> getImagesByTenant(String tenantId) {
-    return Optional.ofNullable(loadData()
-        .getTenants()
-        .get(tenantId))
+    return Optional.ofNullable(loadData().getTenants().get(tenantId))
         .map(LocalCmdbTenantHolder::getImages)
         .orElseGet(Collections::emptyList);
   }
 
   @Override
   public Image getImageById(String imageId) {
-    return loadData()
-        .getTenants()
-        .values()
-        .stream()
+    return loadData().getTenants().values().stream()
         .flatMap(tenant -> tenant.getImages().stream())
         .filter(image -> imageId.equals(image.getId()))
         .findFirst()
@@ -128,19 +118,14 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public List<Flavor> getFlavorsByTenant(String tenantId) {
-    return Optional.ofNullable(loadData()
-        .getTenants()
-        .get(tenantId))
+    return Optional.ofNullable(loadData().getTenants().get(tenantId))
         .map(LocalCmdbTenantHolder::getFlavors)
         .orElseGet(Collections::emptyList);
   }
 
   @Override
   public List<Tenant> getTenantsByService(String serviceId) {
-    return loadData()
-        .getTenants()
-        .values()
-        .stream()
+    return loadData().getTenants().values().stream()
         .map(LocalCmdbTenantHolder::getTenant)
         .filter(tenant -> serviceId.equals(tenant.getService()))
         .collect(Collectors.toList());
@@ -148,10 +133,7 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public List<Tenant> getTenantsByOrganisation(String organisationId) {
-    return loadData()
-        .getTenants()
-        .values()
-        .stream()
+    return loadData().getTenants().values().stream()
         .map(LocalCmdbTenantHolder::getTenant)
         .filter(tenant -> organisationId.equals(tenant.getIamOrganisation()))
         .collect(Collectors.toList());
@@ -159,19 +141,14 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
 
   @Override
   public Tenant getTenantById(String tenantId) {
-    return Optional.ofNullable(loadData()
-        .getTenants()
-        .get(tenantId))
+    return Optional.ofNullable(loadData().getTenants().get(tenantId))
         .map(LocalCmdbTenantHolder::getTenant)
         .orElseThrow(() -> new DeploymentException("Tenant not found: " + tenantId));
   }
 
   @Override
   public Flavor getFlavorById(String flavorId) {
-    return loadData()
-        .getTenants()
-        .values()
-        .stream()
+    return loadData().getTenants().values().stream()
         .flatMap(tenant -> tenant.getFlavors().stream())
         .filter(flavor -> flavorId.equals(flavor.getFlavorId()))
         .findFirst()
@@ -182,10 +159,8 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
   @Builder
   @AllArgsConstructor(access = AccessLevel.PROTECTED)
   public static class LocalCmdbInfoHolder {
-    @Builder.Default
-    private List<CloudProvider> providers = new ArrayList<>();
-    @Builder.Default
-    private Map<String, LocalCmdbTenantHolder> tenants = new HashMap<>();
+    @Builder.Default private List<CloudProvider> providers = new ArrayList<>();
+    @Builder.Default private Map<String, LocalCmdbTenantHolder> tenants = new HashMap<>();
 
     @Deprecated
     protected LocalCmdbInfoHolder() {
@@ -200,10 +175,8 @@ public class CmdbServiceLocalImpl extends AbstractCmdbServiceImpl {
   public static class LocalCmdbTenantHolder {
 
     private Tenant tenant;
-    @Builder.Default
-    private List<Image> images = new ArrayList<>();
-    @Builder.Default
-    private List<Flavor> flavors = new ArrayList<>();
+    @Builder.Default private List<Image> images = new ArrayList<>();
+    @Builder.Default private List<Flavor> flavors = new ArrayList<>();
 
     @Deprecated
     protected LocalCmdbTenantHolder() {

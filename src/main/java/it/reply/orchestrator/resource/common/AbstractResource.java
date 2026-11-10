@@ -18,17 +18,13 @@
 package it.reply.orchestrator.resource.common;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.util.Date;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.hateoas.ResourceSupport;
@@ -39,9 +35,7 @@ import org.springframework.hateoas.ResourceSupport;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class AbstractResource extends ResourceSupport {
 
-  @NotNull
-  @NonNull
-  private String uuid;
+  @NotNull @NonNull private String uuid;
 
   @Nullable
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd'T'HH:mmZ")
@@ -51,6 +45,5 @@ public abstract class AbstractResource extends ResourceSupport {
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd'T'HH:mmZ")
   private Date updateTime;
 
-  @Nullable
-  private String physicalId;
+  @Nullable private String physicalId;
 }

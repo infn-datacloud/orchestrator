@@ -73,49 +73,33 @@ public class CmdbServiceV2Impl implements CmdbService {
   private OAuth2TokenService oauth2TokenService;
 
   private static final ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>
-      PROVIDER_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>() {
-      };
+      PROVIDER_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<CloudService>>
       CLOUD_SERVICES_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<CloudService>>() {
-      };
+          new ParameterizedTypeReference<CmdbHasManyList<CloudService>>() {};
 
   private static final ParameterizedTypeReference<CmdbDataWrapper<CloudService>>
       CLOUD_SERVICE_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<CloudService>>() {
-      };
+          new ParameterizedTypeReference<CmdbDataWrapper<CloudService>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Image>>
-      IMAGES_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Image>>() {
-      };
+      IMAGES_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Image>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Image>>
-      IMAGE_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Image>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Image>> IMAGE_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Image>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Flavor>>
-      FLAVORS_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Flavor>>() {
-      };
+      FLAVORS_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Flavor>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Flavor>>
-      FLAVOR_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Flavor>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Flavor>> FLAVOR_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Flavor>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Tenant>>
-      TENANTS_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Tenant>>() {
-      };
+      TENANTS_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Tenant>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Tenant>>
-      TENANT_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Tenant>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Tenant>> TENANT_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Tenant>>() {};
 
   private CmdbProperties cmdbProperties;
 
@@ -128,7 +112,9 @@ public class CmdbServiceV2Impl implements CmdbService {
    * @param oauth2TokenService the service used to handle tokens
    * @param restTemplateBuilder the builder for restTemplate
    */
-  public CmdbServiceV2Impl(CmdbProperties cmdbProperties, OAuth2TokenService oauth2TokenService,
+  public CmdbServiceV2Impl(
+      CmdbProperties cmdbProperties,
+      OAuth2TokenService oauth2TokenService,
       RestTemplateBuilder restTemplateBuilder) {
     this.cmdbProperties = cmdbProperties;
     this.restTemplate = restTemplateBuilder.build();
@@ -142,20 +128,14 @@ public class CmdbServiceV2Impl implements CmdbService {
     return unwrapped;
   }
 
-  private <T extends CmdbIdentifiable> T get(URI from,
-      ParameterizedTypeReference<CmdbDataWrapper<T>> type) {
-    return unwrap(restTemplate
-        .exchange(from, HttpMethod.GET, null, type)
-        .getBody());
+  private <T extends CmdbIdentifiable> T get(
+      URI from, ParameterizedTypeReference<CmdbDataWrapper<T>> type) {
+    return unwrap(restTemplate.exchange(from, HttpMethod.GET, null, type).getBody());
   }
 
-  private <T extends CmdbIdentifiable> List<T> getAll(URI from,
-      ParameterizedTypeReference<CmdbHasManyList<T>> type) {
-    return restTemplate
-        .exchange(from, HttpMethod.GET, null, type)
-        .getBody()
-        .getRows()
-        .stream()
+  private <T extends CmdbIdentifiable> List<T> getAll(
+      URI from, ParameterizedTypeReference<CmdbHasManyList<T>> type) {
+    return restTemplate.exchange(from, HttpMethod.GET, null, type).getBody().getRows().stream()
         .map(CmdbRow::getDoc)
         .map(this::unwrap)
         .collect(Collectors.toList());
@@ -164,11 +144,12 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public CloudProvider getProviderById(String providerId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getProviderByIdPath())
-        .buildAndExpand(providerId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getProviderByIdPath())
+            .buildAndExpand(providerId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, PROVIDER_RESPONSE_TYPE);
@@ -181,29 +162,30 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public CloudService getServiceById(String serviceId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getServiceByIdPath())
-        .buildAndExpand(serviceId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getServiceByIdPath())
+            .buildAndExpand(serviceId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, CLOUD_SERVICE_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for service <" + serviceId + "> from CMDB.",
-          ex);
+          "Error loading info for service <" + serviceId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<CloudService> getServicesByProvider(String providerId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getServicesByProviderIdPath())
-        .buildAndExpand(providerId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getServicesByProviderIdPath())
+            .buildAndExpand(providerId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, CLOUD_SERVICES_LIST_RESPONSE_TYPE);
@@ -216,28 +198,30 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public Image getImageById(String imageId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getImageByIdPath())
-        .buildAndExpand(imageId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getImageByIdPath())
+            .buildAndExpand(imageId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, IMAGE_RESPONSE_TYPE);
     } catch (RestClientException ex) {
-      throw new DeploymentException("Error loading info for image <" + imageId + "> from CMDB.",
-          ex);
+      throw new DeploymentException(
+          "Error loading info for image <" + imageId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<Image> getImagesByTenant(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getImagesByTenantIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getImagesByTenantIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, IMAGES_LIST_RESPONSE_TYPE);
@@ -250,29 +234,30 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public Flavor getFlavorById(String flavorId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getFlavorByIdPath())
-        .buildAndExpand(flavorId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getFlavorByIdPath())
+            .buildAndExpand(flavorId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, FLAVOR_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for flavor <" + flavorId + "> from CMDB.",
-          ex);
+          "Error loading info for flavor <" + flavorId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<Flavor> getFlavorsByTenant(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getFlavorsByTenantIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getFlavorsByTenantIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, FLAVORS_LIST_RESPONSE_TYPE);
@@ -285,11 +270,12 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public List<Tenant> getTenantsByService(String serviceId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsByServiceIdPath())
-        .buildAndExpand(serviceId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsByServiceIdPath())
+            .buildAndExpand(serviceId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, TENANTS_LIST_RESPONSE_TYPE);
@@ -318,23 +304,28 @@ public class CmdbServiceV2Impl implements CmdbService {
   */
 
   /**
-   * Temporary hack: cmdbProperties.getTenantsByOrganizationIdPath() does not work with
-   * organization names that contain slash, e.g. kube/users. Therefore, as a workaround
-   * here we first get the full list of tenants and then we filter the list
+   * Temporary hack: cmdbProperties.getTenantsByOrganizationIdPath() does not work with organization
+   * names that contain slash, e.g. kube/users. Therefore, as a workaround here we first get the
+   * full list of tenants and then we filter the list
    */
   @Override
   public List<Tenant> getTenantsByOrganisation(String organisationId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
+            .build()
+            .normalize()
+            .toUri();
 
     try {
       List<Tenant> tenants = getAll(requestUri, TENANTS_LIST_RESPONSE_TYPE);
-      return tenants.stream().filter(t -> Objects.nonNull(t.getIamOrganisation())
-                  && t.getIamOrganisation().equals(organisationId)).collect(Collectors.toList());
+      return tenants.stream()
+          .filter(
+              t ->
+                  Objects.nonNull(t.getIamOrganisation())
+                      && t.getIamOrganisation().equals(organisationId))
+          .collect(Collectors.toList());
     } catch (RestClientException ex) {
       throw new DeploymentException(
           "Error loading tenant list for organisation <" + organisationId + "> from CMDB.", ex);
@@ -344,18 +335,18 @@ public class CmdbServiceV2Impl implements CmdbService {
   @Override
   public Tenant getTenantById(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantByIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantByIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, TENANT_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for tenant <" + tenantId + "> from CMDB.",
-          ex);
+          "Error loading info for tenant <" + tenantId + "> from CMDB.", ex);
     }
   }
 
@@ -364,10 +355,18 @@ public class CmdbServiceV2Impl implements CmdbService {
     List<VolumeType> volumeTypes = new ArrayList<>();
     AtomicReference<String> idpProtocol = new AtomicReference<>(null);
     HashMap<String, CloudService> mapOfCloudServices = new HashMap<>();
-    AuthMethod relationship = project.getSla().getUserGroup().getIdentityProvider().getProviders()
-        .get(0).getRelationship();
-    SupportedIdp supportedIdp = new SupportedIdp(relationship.getIdpName(),
-        project.getSla().getUserGroup().getIdentityProvider().getEndpoint());
+    AuthMethod relationship =
+        project
+            .getSla()
+            .getUserGroup()
+            .getIdentityProvider()
+            .getProviders()
+            .get(0)
+            .getRelationship();
+    SupportedIdp supportedIdp =
+        new SupportedIdp(
+            relationship.getIdpName(),
+            project.getSla().getUserGroup().getIdentityProvider().getEndpoint());
     supportedIdps.add(supportedIdp);
     idpProtocol.set(relationship.getProtocol());
 
@@ -381,8 +380,11 @@ public class CmdbServiceV2Impl implements CmdbService {
 
       String serviceType = quotaFedReg.getService().getType().replace('-', '_').toUpperCase();
       String regionName = quotaFedReg.getService().getRegion().getName();
-      Region region = project.getProvider().getRegions().stream()
-          .filter(r -> r.getName().equals(regionName)).collect(Collectors.toList()).get(0);
+      Region region =
+          project.getProvider().getRegions().stream()
+              .filter(r -> r.getName().equals(regionName))
+              .collect(Collectors.toList())
+              .get(0);
       String serviceEndpoint = region.getIdentityServices().get(0).getEndpoint();
       URL url = null;
       try {
@@ -397,20 +399,47 @@ public class CmdbServiceV2Impl implements CmdbService {
       if (CloudServiceType.valueOf(serviceType).equals(CloudServiceType.COMPUTE)) {
         List<Image> listOfImages = new ArrayList<>();
         List<Flavor> listOfFlavors = new ArrayList<>();
-        project.getImages().forEach(imageElem -> {
-          Image image = new Image(imageElem.getUid(), imageElem.getUuid(), imageElem.getName(),
-              imageElem.getDescription(), imageElem.getArchitecture(), imageElem.getOsType(),
-              imageElem.getOsDistro(), imageElem.getOsVersion(), null, null,
-              imageElem.getGpuDriver(), null, imageElem.getCudaSupport(), null, null);
-          listOfImages.add(image);
-        });
-        project.getFlavors().forEach(flavorElem -> {
-          Flavor flavor = new Flavor(flavorElem.getUid(), flavorElem.getUuid(),
-              flavorElem.getName(), flavorElem.getRam().doubleValue(), flavorElem.getVcpus(),
-              flavorElem.getDisk().doubleValue(), flavorElem.getGpus(), flavorElem.getGpuVendor(),
-              flavorElem.getGpuModel(), flavorElem.getInfiniband());
-          listOfFlavors.add(flavor);
-        });
+        project
+            .getImages()
+            .forEach(
+                imageElem -> {
+                  Image image =
+                      new Image(
+                          imageElem.getUid(),
+                          imageElem.getUuid(),
+                          imageElem.getName(),
+                          imageElem.getDescription(),
+                          imageElem.getArchitecture(),
+                          imageElem.getOsType(),
+                          imageElem.getOsDistro(),
+                          imageElem.getOsVersion(),
+                          null,
+                          null,
+                          imageElem.getGpuDriver(),
+                          null,
+                          imageElem.getCudaSupport(),
+                          null,
+                          null);
+                  listOfImages.add(image);
+                });
+        project
+            .getFlavors()
+            .forEach(
+                flavorElem -> {
+                  Flavor flavor =
+                      new Flavor(
+                          flavorElem.getUid(),
+                          flavorElem.getUuid(),
+                          flavorElem.getName(),
+                          flavorElem.getRam().doubleValue(),
+                          flavorElem.getVcpus(),
+                          flavorElem.getDisk().doubleValue(),
+                          flavorElem.getGpus(),
+                          flavorElem.getGpuVendor(),
+                          flavorElem.getGpuModel(),
+                          flavorElem.getInfiniband());
+                  listOfFlavors.add(flavor);
+                });
 
         String publicNetworkName = null;
         String privateNetworkName = null;
@@ -429,75 +458,130 @@ public class CmdbServiceV2Impl implements CmdbService {
           }
         }
 
-        ComputeService computeService = new ComputeService(quotaFedReg.getService().getUid(),
-            quotaFedReg.getService().getName(), serviceEndpoint, null,
-            project.getProvider().getUid(), CloudServiceType.valueOf(serviceType),
-            project.getProvider().getIsPublic(), project.getName(), regionName, url.getHost(), null,
-            listOfImages, listOfFlavors, true, idpProtocol.get(), true, supportedIdps, volumeTypes,
-            publicNetworkName, null, privateNetworkName, privateNetworkProxyHost,
-            privateNetworkProxyUser);
+        ComputeService computeService =
+            new ComputeService(
+                quotaFedReg.getService().getUid(),
+                quotaFedReg.getService().getName(),
+                serviceEndpoint,
+                null,
+                project.getProvider().getUid(),
+                CloudServiceType.valueOf(serviceType),
+                project.getProvider().getIsPublic(),
+                project.getName(),
+                regionName,
+                url.getHost(),
+                null,
+                listOfImages,
+                listOfFlavors,
+                true,
+                idpProtocol.get(),
+                true,
+                supportedIdps,
+                volumeTypes,
+                publicNetworkName,
+                null,
+                privateNetworkName,
+                privateNetworkProxyHost,
+                privateNetworkProxyUser);
         mapOfCloudServices.put(quotaFedReg.getService().getUid(), computeService);
       } else {
-        CloudService cloudService = new CloudService(quotaFedReg.getService().getUid(),
-            quotaFedReg.getService().getName(), serviceEndpoint, null,
-            project.getProvider().getUid(), CloudServiceType.valueOf(serviceType),
-            project.getProvider().getIsPublic(), project.getName(), regionName, url.getHost(), null,
-            true, idpProtocol.get(), true, supportedIdps, volumeTypes);
+        CloudService cloudService =
+            new CloudService(
+                quotaFedReg.getService().getUid(),
+                quotaFedReg.getService().getName(),
+                serviceEndpoint,
+                null,
+                project.getProvider().getUid(),
+                CloudServiceType.valueOf(serviceType),
+                project.getProvider().getIsPublic(),
+                project.getName(),
+                regionName,
+                url.getHost(),
+                null,
+                true,
+                idpProtocol.get(),
+                true,
+                supportedIdps,
+                volumeTypes);
         mapOfCloudServices.put(quotaFedReg.getService().getUid(), cloudService);
       }
     }
 
-    return new CloudProvider(project.getProvider().getUid(), project.getProvider().getName(),
-        mapOfCloudServices);
+    return new CloudProvider(
+        project.getProvider().getUid(), project.getProvider().getName(), mapOfCloudServices);
   }
 
   @Override
-  public CloudProvider fillCloudProviderInfo(String providerId, Set<String> servicesWithSla,
-      String organisation, RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public CloudProvider fillCloudProviderInfo(
+      String providerId,
+      Set<String> servicesWithSla,
+      String organisation,
+      RankCloudProvidersMessage rankCloudProvidersMessage) {
     OidcTokenId requestedWithToken = rankCloudProvidersMessage.getRequestedWithToken();
     String userGroup =
         rankCloudProvidersMessage.getSlamPreferences().getPreferences().get(0).getCustomer();
 
-    URI requestUriFedRegProject = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
-        .queryParam("with_conn", true).queryParam("user_group_uid", userGroup)
-        .queryParam("provider_uid", providerId).build().normalize().toUri();
+    URI requestUriFedRegProject =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
+            .queryParam("with_conn", true)
+            .queryParam("user_group_uid", userGroup)
+            .queryParam("provider_uid", providerId)
+            .build()
+            .normalize()
+            .toUri();
 
     List<Project> projectCall =
-        oauth2TokenService.executeWithClientForResult(requestedWithToken, accessToken -> {
-          HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUriFedRegProject);
-          if (accessToken != null) {
-            requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-          }
-          return restTemplate.exchange(requestBuilder.build(),
-              new ParameterizedTypeReference<List<Project>>() {});
-        }, OAuth2TokenService.restTemplateTokenRefreshEvaluator).getBody();
+        oauth2TokenService
+            .executeWithClientForResult(
+                requestedWithToken,
+                accessToken -> {
+                  HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUriFedRegProject);
+                  if (accessToken != null) {
+                    requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+                  }
+                  return restTemplate.exchange(
+                      requestBuilder.build(), new ParameterizedTypeReference<List<Project>>() {});
+                },
+                OAuth2TokenService.restTemplateTokenRefreshEvaluator)
+            .getBody();
 
     return remapAttributes(projectCall.get(0));
   }
 
   @Override
-  public CloudProvider getUpdatedCloudProviderInfo(Deployment deployment, String organisation,
+  public CloudProvider getUpdatedCloudProviderInfo(
+      Deployment deployment,
+      String organisation,
       RankCloudProvidersMessage rankCloudProvidersMessage) {
     OidcTokenId requestedWithToken = rankCloudProvidersMessage.getRequestedWithToken();
     Optional<String> regionName = deployment.getCloudProviderEndpoint().getRegion();
     String identityServiceEndpoint = deployment.getCloudProviderEndpoint().getCpEndpoint();
 
-    URI requestUriFedRegProject = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
-        .queryParam("with_conn", true).queryParam("region_name", regionName.orElseGet(() -> null))
-        .queryParam("identity_service_endpoint", identityServiceEndpoint).build().normalize()
-        .toUri();
+    URI requestUriFedRegProject =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
+            .queryParam("with_conn", true)
+            .queryParam("region_name", regionName.orElseGet(() -> null))
+            .queryParam("identity_service_endpoint", identityServiceEndpoint)
+            .build()
+            .normalize()
+            .toUri();
 
     List<Project> projectCall =
-        oauth2TokenService.executeWithClientForResult(requestedWithToken, accessToken -> {
-          HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUriFedRegProject);
-          if (accessToken != null) {
-            requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-          }
-          return restTemplate.exchange(requestBuilder.build(),
-              new ParameterizedTypeReference<List<Project>>() {});
-        }, OAuth2TokenService.restTemplateTokenRefreshEvaluator).getBody();
+        oauth2TokenService
+            .executeWithClientForResult(
+                requestedWithToken,
+                accessToken -> {
+                  HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUriFedRegProject);
+                  if (accessToken != null) {
+                    requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+                  }
+                  return restTemplate.exchange(
+                      requestBuilder.build(), new ParameterizedTypeReference<List<Project>>() {});
+                },
+                OAuth2TokenService.restTemplateTokenRefreshEvaluator)
+            .getBody();
 
     return remapAttributes(projectCall.get(0));
   }

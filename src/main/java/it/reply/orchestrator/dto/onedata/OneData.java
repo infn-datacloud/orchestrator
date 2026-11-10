@@ -19,16 +19,13 @@ package it.reply.orchestrator.dto.onedata;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -44,39 +41,27 @@ public class OneData {
   @AllArgsConstructor(access = AccessLevel.PROTECTED)
   public static class OneDataProviderInfo {
 
-    @Nullable
-    private String id;
+    @Nullable private String id;
 
-    @Nullable
-    private String endpoint;
+    @Nullable private String endpoint;
 
-    @Nullable
-    private String cloudProviderId;
+    @Nullable private String cloudProviderId;
 
-    @Nullable
-    private String cloudServiceId;
-
+    @Nullable private String cloudServiceId;
   }
 
-  @Nullable
-  private String token;
+  @Nullable private String token;
 
-  @Nullable
-  private String space;
+  @Nullable private String space;
 
-  @Nullable
-  private String path;
+  @Nullable private String path;
 
-  @Nullable
-  private String onezone;
+  @Nullable private String onezone;
 
-  @NonNull
-  @NotNull
-  @Builder.Default
+  @NonNull @NotNull @Builder.Default
   private List<OneDataProviderInfo> oneproviders = new ArrayList<>();
 
-  @Nullable
-  private OneDataProviderInfo selectedOneprovider;
+  @Nullable private OneDataProviderInfo selectedOneprovider;
 
   private boolean smartScheduling;
 
@@ -86,5 +71,4 @@ public class OneData {
   protected OneData() {
     oneproviders = new ArrayList<>();
   }
-
 }

@@ -18,12 +18,9 @@
 package it.reply.orchestrator.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.net.URI;
-
 import lombok.Builder;
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

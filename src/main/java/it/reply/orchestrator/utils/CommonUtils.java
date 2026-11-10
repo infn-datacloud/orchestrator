@@ -21,7 +21,6 @@ import com.google.common.base.Equivalence;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,10 +36,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import lombok.experimental.UtilityClass;
-import lombok.experimental.var;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -49,25 +45,24 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @UtilityClass
 public class CommonUtils {
 
-  private static final Set<Class<?>> PRIMITIVE_CLASSES = ImmutableSet.of(
-      String.class,
-      Boolean.class,
-      Byte.class,
-      Character.class,
-      Double.class,
-      Float.class,
-      Integer.class,
-      Long.class,
-      Short.class
-  );
+  private static final Set<Class<?>> PRIMITIVE_CLASSES =
+      ImmutableSet.of(
+          String.class,
+          Boolean.class,
+          Byte.class,
+          Character.class,
+          Double.class,
+          Float.class,
+          Integer.class,
+          Long.class,
+          Short.class);
 
   /**
-   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a
-   * <code>@NonNull</code> reference. If the reference is instead null, a NPE is thrown
+   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a <code>
+   * @NonNull</code> reference. If the reference is instead null, a NPE is thrown
    *
    * @param <T> The type of object
-   * @param reference
-   *          the nullable reference
+   * @param reference the nullable reference
    * @return the non null reference
    */
   @NonNull
@@ -79,15 +74,13 @@ public class CommonUtils {
   }
 
   /**
-   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a
-   * <code>@NonNull</code> reference. If the reference is instead null, the <code>@NonNull</code>
-   * default value is returned
+   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a <code>
+   * @NonNull</code> reference. If the reference is instead null, the <code>@NonNull</code> default
+   * value is returned
    *
    * @param <T> The type of object
-   * @param reference
-   *          the <code>@Nullable</code> reference
-   * @param defaultValue
-   *          the <code>@NonNull</code> default value
+   * @param reference the <code>@Nullable</code> reference
+   * @param defaultValue the <code>@NonNull</code> default value
    * @return the <code>@NonNull</code> reference
    */
   @NonNull
@@ -100,20 +93,18 @@ public class CommonUtils {
   }
 
   /**
-   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a
-   * <code>@NonNull</code> reference. If the reference is instead null, the <code>@NonNull</code> a
+   * Verify that a <code>@Nullable</code> reference is effectively non null and cast it to a <code>
+   * @NonNull</code> reference. If the reference is instead null, the <code>@NonNull</code> a
    * default value will be generated through the provided supplier and returned.
    *
    * @param <T> The type of object
-   * @param reference
-   *          the <code>@Nullable</code> reference
-   * @param defaultValueSupplier
-   *          the <code>@NonNull</code> default value supplier
+   * @param reference the <code>@Nullable</code> reference
+   * @param defaultValueSupplier the <code>@NonNull</code> default value supplier
    * @return the <code>@NonNull</code> reference
    */
   @NonNull
-  public static <T> T notNullOrDefaultValue(@Nullable T reference,
-      Supplier<@NonNull T> defaultValueSupplier) {
+  public static <T> T notNullOrDefaultValue(
+      @Nullable T reference, Supplier<@NonNull T> defaultValueSupplier) {
     if (reference == null) {
       return checkNotNull(defaultValueSupplier.get());
     } else {
@@ -133,14 +124,15 @@ public class CommonUtils {
    * Cast, if present, the object wrapped inside an {@link Optional}.
    *
    * @param <S> The type of object
-   * @param optionalObject
-   *          the wrapped object
+   * @param optionalObject the wrapped object
    * @return the casted object wrapped in a Optional
    */
   @SuppressWarnings("unchecked") // no escape from Java erasure
   public static <S> Optional<S> optionalCast(@Nullable Object optionalObject) {
-    Optional<?> optional = optionalObject instanceof Optional ? (Optional<?>) optionalObject
-        : Optional.ofNullable(optionalObject);
+    Optional<?> optional =
+        optionalObject instanceof Optional
+            ? (Optional<?>) optionalObject
+            : Optional.ofNullable(optionalObject);
     return optional.map(object -> (S) object);
   }
 
@@ -153,13 +145,12 @@ public class CommonUtils {
    * {@link Iterator}.
    *
    * @param <E> the thrown exception type
-   * @param iterator
-   *          the iterator from which generate the stream
+   * @param iterator the iterator from which generate the stream
    * @return the stream
    */
   public static <E> Stream<E> iteratorToStream(Iterator<E> iterator) {
-    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED),
-        false);
+    return StreamSupport.stream(
+        Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
   }
 
   public static <E> Stream<E> nullableCollectionToStream(Collection<E> collection) {
@@ -172,8 +163,7 @@ public class CommonUtils {
    * @return true if inside of a HTTP request, false otherwise
    */
   public static boolean isInHttpRequest() {
-    return Optional
-        .ofNullable(RequestContextHolder.getRequestAttributes())
+    return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
         .filter(ServletRequestAttributes.class::isInstance)
         .map(ServletRequestAttributes.class::cast)
         .map(ServletRequestAttributes::getRequest)
@@ -187,52 +177,44 @@ public class CommonUtils {
    *
    * @param <T> The type of return object stream
    * @param <V> The type of the object to evaluate
-   * @param stream
-   *          the stream to filter
-   * @param mapper
-   *          the mapping function on which evaluate the uniqueness
+   * @param stream the stream to filter
+   * @param mapper the mapping function on which evaluate the uniqueness
    * @return the filtered stream
    */
   public static <T, V> Stream<T> distinct(Stream<T> stream, Function<T, V> mapper) {
     Equivalence<T> wrapper = Equivalence.equals().onResultOf(mapper::apply);
-    return stream
-        .map(wrapper::wrap)
-        .distinct()
-        .map(Equivalence.Wrapper::get);
+    return stream.map(wrapper::wrap).distinct().map(Equivalence.Wrapper::get);
   }
 
   /**
    * Returns a {@code Collector} that accumulates elements into a {@code Map} whose keys and values
    * are the result of applying the provided mapping functions to the input elements.
    *
-   * <p>
-   * If the mapped keys contains duplicates (according to {@link Object#equals(Object)}), an
+   * <p>If the mapped keys contains duplicates (according to {@link Object#equals(Object)}), an
    * {@code IllegalStateException} is thrown when the collection operation is performed.
-   * </p>
    *
    * @param <T> the type of object
    * @param <K> the type of object
    * @param <U> the type of object
-   * @param keyMapper
-   *          a mapping function to produce keys
-   * @param valueMapper
-   *          a mapping function to produce values
+   * @param keyMapper a mapping function to produce keys
+   * @param valueMapper a mapping function to produce values
    * @return a {@code Collector} which collects elements into a {@code Map} whose keys and values
-   *         are the result of applying mapping functions to the input elements
+   *     are the result of applying mapping functions to the input elements
    */
   public static <T, K, U> Collector<T, Map<K, U>, Map<K, U>> toMap(
-      Function<? super T, ? extends K> keyMapper,
-      Function<? super T, ? extends U> valueMapper) {
+      Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends U> valueMapper) {
 
     BiConsumer<Map<K, U>, T> accumulator =
         (map, element) -> map.put(keyMapper.apply(element), valueMapper.apply(element));
-    BinaryOperator<Map<K, U>> combiner = (map1, map2) -> {
-      map2.forEach((key, value) -> {
-        U oldMapping = map1.put(key, value);
-        Preconditions.checkState(oldMapping == null, "Duplicate key %s", key);
-      });
-      return map1;
-    };
+    BinaryOperator<Map<K, U>> combiner =
+        (map1, map2) -> {
+          map2.forEach(
+              (key, value) -> {
+                U oldMapping = map1.put(key, value);
+                Preconditions.checkState(oldMapping == null, "Duplicate key %s", key);
+              });
+          return map1;
+        };
     return Collector.of(HashMap::new, accumulator, combiner);
   }
 

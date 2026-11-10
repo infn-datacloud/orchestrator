@@ -19,7 +19,6 @@ package it.reply.orchestrator.controller;
 
 import it.reply.orchestrator.dto.SystemEndpoints;
 import it.reply.orchestrator.service.ConfigurationService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,13 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConfigurationController {
 
-  @Autowired
-  private ConfigurationService configurationService;
+  @Autowired private ConfigurationService configurationService;
 
   @ResponseStatus(HttpStatus.OK)
   @RequestMapping(value = "/configuration", method = RequestMethod.GET)
   public SystemEndpoints getConfiguration() {
     return configurationService.getConfiguration();
   }
-
 }

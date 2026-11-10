@@ -17,6 +17,4 @@
 
 package it.reply.orchestrator.dto.security;
 
-public interface ServiceCredential {
-
-}
+public interface ServiceCredential {}

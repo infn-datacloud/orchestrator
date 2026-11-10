@@ -32,5 +32,4 @@ public class TokenAuthenticationExtended extends TokenAuthentication {
   public String getEntityId() {
     return entityId;
   }
-
 }

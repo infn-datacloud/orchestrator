@@ -37,27 +37,29 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class GetMonitoringData extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private MonitoringService monitoringService;
+  @Autowired private MonitoringService monitoringService;
 
-  @Autowired
-  private MonitoringProperties monitoringProperties;
+  @Autowired private MonitoringProperties monitoringProperties;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
 
     if (isValid(monitoringProperties.getUrl())) {
       // Get monitoring data for each Cloud Provider
       Map<String, List<PaasMachine>> metrics =
-          rankCloudProvidersMessage.getCloudProviders().keySet().stream().map(providerId -> {
-            try {
-              return monitoringService.getProviderData(providerId);
-            } catch (RuntimeException ex) {
-              LOG.warn("Error retrieving monitoring data for provider <{}>", providerId, ex);
-              return null;
-            }
-          }).filter(Objects::nonNull)
+          rankCloudProvidersMessage.getCloudProviders().keySet().stream()
+              .map(
+                  providerId -> {
+                    try {
+                      return monitoringService.getProviderData(providerId);
+                    } catch (RuntimeException ex) {
+                      LOG.warn(
+                          "Error retrieving monitoring data for provider <{}>", providerId, ex);
+                      return null;
+                    }
+                  })
+              .filter(Objects::nonNull)
               .collect(Collectors.toMap(Group::getGroupName, Group::getPaasMachines));
 
       rankCloudProvidersMessage.setCloudProvidersMonitoringData(metrics);

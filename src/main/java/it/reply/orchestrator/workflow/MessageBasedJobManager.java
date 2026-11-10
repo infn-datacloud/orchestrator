@@ -40,5 +40,4 @@ public class MessageBasedJobManager extends AbstractMessageBasedJobManager {
     String topic = (job instanceof HistoryJob) ? HISTORY_JOBS_TOPIC : JOBS_TOPIC;
     ignite.message().sendOrdered(topic, job.getId(), 0);
   }
-
 }

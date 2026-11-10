@@ -22,12 +22,9 @@ import static org.mockito.Mockito.when;
 
 import it.reply.orchestrator.service.CallbackService;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import java.util.UUID;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,44 +33,39 @@ import org.mockito.Mock;
 @RunWith(JUnitParamsRunner.class)
 public class NotifyTest extends BaseJavaDelegateTest<Notify> {
 
-  @Mock
-  private CallbackService callbackService;
+  @Mock private CallbackService callbackService;
 
   public NotifyTest() {
     super(new Notify());
   }
 
   @Test
-  @Parameters({ "true", "false" })
+  @Parameters({"true", "false"})
   public void doExecuteSuccesfully(boolean serviceResult) throws Exception {
     String deploymentId = UUID.randomUUID().toString();
 
-    DelegateExecution delegateExecution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_ID, deploymentId)
-        .build();
+    DelegateExecution delegateExecution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_ID, deploymentId)
+            .build();
 
-    when(callbackService.doCallback(deploymentId))
-        .thenReturn(serviceResult);
+    when(callbackService.doCallback(deploymentId)).thenReturn(serviceResult);
 
-    assertThatCode(() -> command.execute(delegateExecution))
-        .doesNotThrowAnyException();
-
+    assertThatCode(() -> command.execute(delegateExecution)).doesNotThrowAnyException();
   }
 
   @Test
   public void doExecuteWithRuntimeException() throws Exception {
     String deploymentId = UUID.randomUUID().toString();
 
-    DelegateExecution delegateExecution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_ID, deploymentId)
-        .build();
+    DelegateExecution delegateExecution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_ID, deploymentId)
+            .build();
 
-    when(callbackService.doCallback(deploymentId))
-        .thenThrow(new RuntimeException("some error"));
+    when(callbackService.doCallback(deploymentId)).thenThrow(new RuntimeException("some error"));
 
-    assertThatCode(() -> command.execute(delegateExecution))
-        .doesNotThrowAnyException();
-
+    assertThatCode(() -> command.execute(delegateExecution)).doesNotThrowAnyException();
   }
 
   @Test
@@ -81,8 +73,6 @@ public class NotifyTest extends BaseJavaDelegateTest<Notify> {
 
     DelegateExecution delegateExecution = new ExecutionEntityBuilder().build();
 
-    assertThatCode(() -> command.execute(delegateExecution))
-        .doesNotThrowAnyException();
-
+    assertThatCode(() -> command.execute(delegateExecution)).doesNotThrowAnyException();
   }
 }

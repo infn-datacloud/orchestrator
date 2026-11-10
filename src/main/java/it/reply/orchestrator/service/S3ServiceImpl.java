@@ -57,8 +57,7 @@ import software.amazon.awssdk.services.s3.paginators.ListObjectVersionsIterable;
 @Slf4j
 public class S3ServiceImpl implements S3Service {
 
-  @Autowired
-  private CredentialProviderService credProvServ;
+  @Autowired private CredentialProviderService credProvServ;
 
   private static final String S3_TOSCA_NODE_TYPE = "tosca.nodes.indigo.S3Bucket";
   private static final String BUCKET_NAME_PROPERTY = "bucket_name";
@@ -77,8 +76,11 @@ public class S3ServiceImpl implements S3Service {
   public void enableBucketVersioning(S3Client s3Client, String bucketName)
       throws S3ServiceException {
     try {
-      PutBucketVersioningRequest request = PutBucketVersioningRequest.builder().bucket(bucketName)
-          .versioningConfiguration(conf -> conf.status(BucketVersioningStatus.ENABLED)).build();
+      PutBucketVersioningRequest request =
+          PutBucketVersioningRequest.builder()
+              .bucket(bucketName)
+              .versioningConfiguration(conf -> conf.status(BucketVersioningStatus.ENABLED))
+              .build();
       s3Client.putBucketVersioning(request);
       GetBucketVersioningResponse response =
           s3Client.getBucketVersioning(builder -> builder.bucket(bucketName));
@@ -91,8 +93,10 @@ public class S3ServiceImpl implements S3Service {
         throw new RuntimeException(errorMessage);
       }
     } catch (RuntimeException e) {
-      String errorMessage = String.format(
-          "Failure in the creation of bucket with bucket name %s. %s", bucketName, e.getMessage());
+      String errorMessage =
+          String.format(
+              "Failure in the creation of bucket with bucket name %s. %s",
+              bucketName, e.getMessage());
       LOG.error(errorMessage);
       throw new S3ServiceException(errorMessage, e);
     }
@@ -112,8 +116,10 @@ public class S3ServiceImpl implements S3Service {
       s3Client.createBucket(createBucketRequest);
       LOG.info("Bucket successfully created: {}", bucketName);
     } catch (RuntimeException e) {
-      String errorMessage = String.format(
-          "Failure in the creation of bucket with bucket name %s. %s", bucketName, e.getMessage());
+      String errorMessage =
+          String.format(
+              "Failure in the creation of bucket with bucket name %s. %s",
+              bucketName, e.getMessage());
       LOG.error(errorMessage);
       throw new S3ServiceException(errorMessage, e);
     }
@@ -141,8 +147,11 @@ public class S3ServiceImpl implements S3Service {
           objectsToDelete.add(ObjectIdentifier.builder().key(s3Object.key()).build());
         }
 
-        DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
-            .bucket(bucketName).delete(Delete.builder().objects(objectsToDelete).build()).build();
+        DeleteObjectsRequest deleteObjectsRequest =
+            DeleteObjectsRequest.builder()
+                .bucket(bucketName)
+                .delete(Delete.builder().objects(objectsToDelete).build())
+                .build();
 
         s3Client.deleteObjects(deleteObjectsRequest);
         LOG.info("Objects deleted from bucket {}", bucketName);
@@ -156,19 +165,27 @@ public class S3ServiceImpl implements S3Service {
       for (ListObjectVersionsResponse listObjectVersionsResponse : listObjectVersionsIterable) {
         List<ObjectIdentifier> versionsToDelete = new ArrayList<>();
         for (ObjectVersion objectVersion : listObjectVersionsResponse.versions()) {
-          versionsToDelete.add(ObjectIdentifier.builder().key(objectVersion.key())
-              .versionId(objectVersion.versionId()).build());
+          versionsToDelete.add(
+              ObjectIdentifier.builder()
+                  .key(objectVersion.key())
+                  .versionId(objectVersion.versionId())
+                  .build());
         }
 
         for (DeleteMarkerEntry deleteMarkerEntry : listObjectVersionsResponse.deleteMarkers()) {
-          versionsToDelete.add(ObjectIdentifier.builder().key(deleteMarkerEntry.key())
-              .versionId(deleteMarkerEntry.versionId()).build());
+          versionsToDelete.add(
+              ObjectIdentifier.builder()
+                  .key(deleteMarkerEntry.key())
+                  .versionId(deleteMarkerEntry.versionId())
+                  .build());
         }
 
         if (!versionsToDelete.isEmpty()) {
           DeleteObjectsRequest deleteObjectsRequest =
-              DeleteObjectsRequest.builder().bucket(bucketName)
-                  .delete(Delete.builder().objects(versionsToDelete).build()).build();
+              DeleteObjectsRequest.builder()
+                  .bucket(bucketName)
+                  .delete(Delete.builder().objects(versionsToDelete).build())
+                  .build();
 
           s3Client.deleteObjects(deleteObjectsRequest);
           LOG.info("Object versions and delete markers deleted from bucket {}", bucketName);
@@ -182,8 +199,10 @@ public class S3ServiceImpl implements S3Service {
     } catch (NoSuchBucketException e) {
       LOG.warn("Bucket {} was not found", bucketName);
     } catch (RuntimeException e) {
-      String errorMessage = String.format(
-          "Failure in the deletion of bucket with bucket name %s. %s", bucketName, e.getMessage());
+      String errorMessage =
+          String.format(
+              "Failure in the deletion of bucket with bucket name %s. %s",
+              bucketName, e.getMessage());
       LOG.error(errorMessage);
       throw new S3ServiceException(errorMessage, e);
     }
@@ -196,8 +215,9 @@ public class S3ServiceImpl implements S3Service {
    * @param accessToken the identity provider
    * @throws S3ServiceException when fails to delete a bucket
    */
-  public void deleteAllBuckets(Map<Boolean, Set<Resource>> resources, String userGroup,
-      String accessToken, Boolean force) throws S3ServiceException {
+  public void deleteAllBuckets(
+      Map<Boolean, Set<Resource>> resources, String userGroup, String accessToken, Boolean force)
+      throws S3ServiceException {
     if (Boolean.TRUE.equals(force)) {
       LOG.info("Skipping deletion of S3 buckets");
       return;
@@ -205,7 +225,8 @@ public class S3ServiceImpl implements S3Service {
     for (Resource resource : resources.get(false)) {
       if (resource.getToscaNodeType().equals(S3_TOSCA_NODE_TYPE)) {
         Map<String, String> resourceMetadata = resource.getMetadata();
-        if (resourceMetadata != null && resourceMetadata.containsKey(BUCKET_NAME_PROPERTY)
+        if (resourceMetadata != null
+            && resourceMetadata.containsKey(BUCKET_NAME_PROPERTY)
             && resourceMetadata.containsKey(S3_URL_PROPERTY)) {
           String bucketName = resourceMetadata.get(BUCKET_NAME_PROPERTY);
           String s3Url = resourceMetadata.get(S3_URL_PROPERTY);
@@ -214,7 +235,8 @@ public class S3ServiceImpl implements S3Service {
           // Delete the bucket
           deleteBucket(s3Client, bucketName);
         } else {
-          LOG.info("Found node of type {} but no bucket info is registered in metadata",
+          LOG.info(
+              "Found node of type {} but no bucket info is registered in metadata",
               S3_TOSCA_NODE_TYPE);
         }
       }
@@ -252,14 +274,20 @@ public class S3ServiceImpl implements S3Service {
 
     // Configure S3 client with credentials
     try {
-      s3Client = S3Client.builder().endpointOverride(URI.create(s3Url))
-          .region(Region.of(AWS_REGION)).forcePathStyle(true)
-          .credentialsProvider(
-              StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretKey)))
-          .build();
+      s3Client =
+          S3Client.builder()
+              .endpointOverride(URI.create(s3Url))
+              .region(Region.of(AWS_REGION))
+              .forcePathStyle(true)
+              .credentialsProvider(
+                  StaticCredentialsProvider.create(
+                      AwsBasicCredentials.create(accessKeyId, secretKey)))
+              .build();
     } catch (RuntimeException e) {
-      String errorMessage = String.format(
-          "Cannot create an S3Client using the credentials read from Vault. %s", e.getMessage());
+      String errorMessage =
+          String.format(
+              "Cannot create an S3Client using the credentials read from Vault. %s",
+              e.getMessage());
       LOG.error(errorMessage);
       throw new S3ServiceException(errorMessage, e);
     }
@@ -278,8 +306,9 @@ public class S3ServiceImpl implements S3Service {
    * @return the s3Result map containing the s3Client, the accessKeyId, and secretKey
    * @throws S3ServiceException when fails to create a bucket
    */
-  public Map<String, Object> manageBucketCreation(String bucketName, String s3Url, String userGroup,
-      String accessToken) throws S3ServiceException {
+  public Map<String, Object> manageBucketCreation(
+      String bucketName, String s3Url, String userGroup, String accessToken)
+      throws S3ServiceException {
     // Try to create an S3Client
     Map<String, Object> s3Result = setupS3Client(s3Url, userGroup, accessToken);
     S3Client s3Client = (S3Client) s3Result.get("s3Client");

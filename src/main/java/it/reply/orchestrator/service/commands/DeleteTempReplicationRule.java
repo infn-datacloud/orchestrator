@@ -31,18 +31,15 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.DELETE_TEMP_REPLICATION_RULE)
 public class DeleteTempReplicationRule extends BaseDeployCommand {
 
-  @Autowired
-  private RucioService rucioService;
+  @Autowired private RucioService rucioService;
 
   @Override
   protected void execute(DelegateExecution execution, DeploymentMessage message) {
     OidcTokenId requestedWithToken = message.getRequestedWithToken();
-    Optional
-        .of(getDeployment(message))
+    Optional.of(getDeployment(message))
         .map(Deployment::getDeploymentScheduleEvent)
         .map(DeploymentScheduleEvent::getTempReplicationRule)
         .ifPresent(rule -> rucioService.deleteReplicationRuleIfUnused(requestedWithToken, rule));
-
   }
 
   @Override

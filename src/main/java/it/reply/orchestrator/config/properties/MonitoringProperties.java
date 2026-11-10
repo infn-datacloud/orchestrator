@@ -33,9 +33,7 @@ public class MonitoringProperties {
 
   private URI url;
 
-  @NotNull
-  @NonNull
+  @NotNull @NonNull
   private String providerMetricsPath =
       "/monitoring/adapters/zabbix/zones/indigo/types/infrastructure/groups/{cloudProviderName}";
-
 }

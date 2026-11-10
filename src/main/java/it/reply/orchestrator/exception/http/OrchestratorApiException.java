@@ -19,31 +19,25 @@ package it.reply.orchestrator.exception.http;
 
 import it.reply.orchestrator.exception.OrchestratorException;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import lombok.Getter;
-
 import org.springframework.http.HttpStatus;
 
 /**
  * Base exception used for HTTP errors.
  *
  * @author m.bassi
- *
  */
 public class OrchestratorApiException extends OrchestratorException {
 
   private static final long serialVersionUID = 1L;
 
-  @Getter
-  private final HttpStatus httpStatus;
+  @Getter private final HttpStatus httpStatus;
 
   /**
    * Creates a OrchestratorApiException.
    *
-   * @param httpStatus
-   *          the HTTP status code
-   * @param message
-   *          the message
+   * @param httpStatus the HTTP status code
+   * @param message the message
    */
   public OrchestratorApiException(HttpStatus httpStatus, String message) {
     super(message);
@@ -54,12 +48,9 @@ public class OrchestratorApiException extends OrchestratorException {
   /**
    * Creates a OrchestratorApiException.
    *
-   * @param httpStatus
-   *          the HTTP status code
-   * @param message
-   *          the message
-   * @param ex
-   *          the cause
+   * @param httpStatus the HTTP status code
+   * @param message the message
+   * @param ex the cause
    */
   public OrchestratorApiException(HttpStatus httpStatus, String message, Throwable ex) {
     super(message, ex);

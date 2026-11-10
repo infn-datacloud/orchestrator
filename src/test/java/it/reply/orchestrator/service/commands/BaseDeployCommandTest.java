@@ -23,18 +23,15 @@ import static org.mockito.Mockito.*;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderService;
 import it.reply.orchestrator.service.deployment.providers.DeploymentProviderServiceRegistry;
-
 import org.junit.Before;
 import org.mockito.Mock;
 
 public abstract class BaseDeployCommandTest<T extends BaseDeployCommand>
     extends BaseWorkflowCommandTest<DeploymentMessage, T> {
 
-  @Mock
-  protected DeploymentProviderService deploymentProviderService;
+  @Mock protected DeploymentProviderService deploymentProviderService;
 
-  @Mock
-  protected DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
+  @Mock protected DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
 
   public BaseDeployCommandTest(T command) {
     super(command);
@@ -45,5 +42,4 @@ public abstract class BaseDeployCommandTest<T extends BaseDeployCommand>
     when(deploymentProviderServiceRegistry.getDeploymentProviderService(anyString()))
         .thenReturn(deploymentProviderService);
   }
-
 }

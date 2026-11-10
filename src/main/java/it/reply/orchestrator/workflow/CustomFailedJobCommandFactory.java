@@ -26,5 +26,4 @@ public class CustomFailedJobCommandFactory implements FailedJobCommandFactory {
   public Command<Object> getCommand(String jobId, Throwable exception) {
     return new CustomJobRetryCmd(jobId, exception);
   }
-
 }

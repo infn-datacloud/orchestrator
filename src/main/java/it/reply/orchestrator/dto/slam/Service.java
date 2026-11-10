@@ -50,5 +50,4 @@ public class Service {
   protected Service() {
     targets = new ArrayList<>();
   }
-
 }

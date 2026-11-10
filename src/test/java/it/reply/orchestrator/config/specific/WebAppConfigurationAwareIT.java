@@ -36,9 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(properties = "alien4cloud.elasticSearch.clusterName=es-cluster-it-test")
 @Category(IntegrationTest.class)
 @Transactional
-@TestExecutionListeners(listeners = { DbUnitTestExecutionListener.class },
+@TestExecutionListeners(
+    listeners = {DbUnitTestExecutionListener.class},
     mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class WebAppConfigurationAwareIT {
-  @MockBean
-  private ClientConfigurationService staticClientConfigurationService;
+  @MockBean private ClientConfigurationService staticClientConfigurationService;
 }

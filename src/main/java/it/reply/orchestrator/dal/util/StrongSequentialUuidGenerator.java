@@ -21,17 +21,15 @@ import com.fasterxml.uuid.EthernetAddress;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedGenerator;
 import com.google.common.annotations.VisibleForTesting;
-
 import java.io.Serializable;
-
 import org.flowable.common.engine.impl.cfg.IdGenerator;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
 public class StrongSequentialUuidGenerator implements IdGenerator, IdentifierGenerator {
 
-  private static TimeBasedGenerator timeBasedGenerator = Generators
-      .timeBasedGenerator(EthernetAddress.fromInterface());
+  private static TimeBasedGenerator timeBasedGenerator =
+      Generators.timeBasedGenerator(EthernetAddress.fromInterface());
 
   public static String generate() {
     return toSequentialUuid(timeBasedGenerator.generate().toString());
@@ -74,5 +72,4 @@ public class StrongSequentialUuidGenerator implements IdGenerator, IdentifierGen
     System.arraycopy(oldChars, 18, newChars, 18, 18);
     return new String(newChars);
   }
-
 }

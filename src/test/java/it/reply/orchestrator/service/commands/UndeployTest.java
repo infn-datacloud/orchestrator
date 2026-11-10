@@ -22,10 +22,8 @@ import static org.mockito.Mockito.when;
 
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,22 +35,19 @@ public class UndeployTest extends BaseDeployCommandTest<Undeploy> {
     super(new Undeploy());
   }
 
-
   @Test
   @Parameters({"true", "false"})
   public void testUndeploy(boolean complete) throws Exception {
     DeploymentMessage dm = new DeploymentMessage();
-    ExecutionEntity execution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
-        .build();
+    ExecutionEntity execution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
+            .build();
 
-    when(deploymentProviderService.doUndeploy(dm))
-        .thenReturn(complete);
+    when(deploymentProviderService.doUndeploy(dm)).thenReturn(complete);
 
     command.execute(execution);
 
-    assertThat(dm.isDeleteComplete())
-        .isEqualTo(complete);
+    assertThat(dm.isDeleteComplete()).isEqualTo(complete);
   }
-
 }

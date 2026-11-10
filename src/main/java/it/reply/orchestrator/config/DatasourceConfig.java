@@ -18,17 +18,12 @@
 package it.reply.orchestrator.config;
 
 import com.google.common.base.Strings;
-
 import java.util.Optional;
-
 import javax.sql.DataSource;
 import javax.sql.XADataSource;
-
 import liquibase.integration.spring.SpringLiquibase;
-
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -120,8 +115,8 @@ public class DatasourceConfig implements BeanClassLoaderAware {
     return springLiquibase(workflowDataSource(wrapper), workflowLiquibaseProperties());
   }
 
-  private static SpringLiquibase springLiquibase(@NonNull DataSource dataSource,
-      @NonNull LiquibaseProperties properties) {
+  private static SpringLiquibase springLiquibase(
+      @NonNull DataSource dataSource, @NonNull LiquibaseProperties properties) {
     SpringLiquibase liquibase = new SpringLiquibase();
     liquibase.setDataSource(dataSource);
     liquibase.setChangeLog(properties.getChangeLog());
@@ -148,8 +143,7 @@ public class DatasourceConfig implements BeanClassLoaderAware {
         throws BeansException {
       if (bean instanceof DataSource) {
         DataSource dataSourceBean = (DataSource) bean;
-        return ProxyDataSourceBuilder
-            .create(dataSourceBean)
+        return ProxyDataSourceBuilder.create(dataSourceBean)
             .logQueryBySlf4j(SLF4JLogLevel.TRACE, "it.reply.orchestrator.datasources." + beanName)
             .build();
       }
@@ -159,16 +153,17 @@ public class DatasourceConfig implements BeanClassLoaderAware {
 
   private XADataSource createXaDataSource(DataSourceProperties properties)
       throws ClassNotFoundException, LinkageError {
-    String className = Optional
-        .ofNullable(properties.getXa())
-        .map(Xa::getDataSourceClassName)
-        .map(String::trim)
-        .map(Strings::emptyToNull)
-        .orElseGet(() -> DatabaseDriver
-            .fromJdbcUrl(properties.determineUrl())
-            .getXaDataSourceClassName());
-    Assert.state(StringUtils.hasLength(className),
-        "No XA DataSource class name specified or inferred");
+    String className =
+        Optional.ofNullable(properties.getXa())
+            .map(Xa::getDataSourceClassName)
+            .map(String::trim)
+            .map(Strings::emptyToNull)
+            .orElseGet(
+                () ->
+                    DatabaseDriver.fromJdbcUrl(properties.determineUrl())
+                        .getXaDataSourceClassName());
+    Assert.state(
+        StringUtils.hasLength(className), "No XA DataSource class name specified or inferred");
     XADataSource dataSource = createXaDataSourceInstance(className);
     bindXaProperties(dataSource, properties);
     return dataSource;
@@ -183,12 +178,12 @@ public class DatasourceConfig implements BeanClassLoaderAware {
   }
 
   private void bindXaProperties(XADataSource target, DataSourceProperties properties) {
-    MutablePropertyValues values = new MutablePropertyValues()
-        .add("user", properties.determineUsername())
-        .add("password", properties.determinePassword())
-        .add("url", properties.determineUrl());
-    Optional
-        .ofNullable(properties.getXa())
+    MutablePropertyValues values =
+        new MutablePropertyValues()
+            .add("user", properties.determineUsername())
+            .add("password", properties.determinePassword())
+            .add("url", properties.determineUrl());
+    Optional.ofNullable(properties.getXa())
         .ifPresent(xa -> values.addPropertyValues(xa.getProperties()));
     new RelaxedDataBinder(target).withAlias("user", "username").bind(values);
   }
@@ -198,5 +193,4 @@ public class DatasourceConfig implements BeanClassLoaderAware {
       jtaTransactionManagerCustomizer() {
     return transactionManager -> transactionManager.setAllowCustomIsolationLevels(true);
   }
-
 }

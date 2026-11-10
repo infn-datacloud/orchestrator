@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatus;
  * of the resource.
  *
  * @author m.bassi
- *
  */
 public class ConflictException extends OrchestratorApiException {
 
@@ -33,5 +32,4 @@ public class ConflictException extends OrchestratorApiException {
   public ConflictException(String message) {
     super(HttpStatus.CONFLICT, message);
   }
-
 }

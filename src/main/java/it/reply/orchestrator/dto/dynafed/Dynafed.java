@@ -19,7 +19,6 @@ package it.reply.orchestrator.dto.dynafed;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +30,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Dynafed {
 
-  @Builder.Default
-  private List<File> files = new ArrayList<>();
+  @Builder.Default private List<File> files = new ArrayList<>();
 
   @Deprecated
   private Dynafed() {
@@ -48,14 +46,12 @@ public class Dynafed {
 
     private Long size;
 
-    @Builder.Default
-    private List<Resource> resources = new ArrayList<>();
+    @Builder.Default private List<Resource> resources = new ArrayList<>();
 
     @Deprecated
     private File() {
       resources = new ArrayList<>();
     }
-
   }
 
   @Data
@@ -69,7 +65,5 @@ public class Dynafed {
     private String cloudProviderId;
 
     private String cloudServiceId;
-
   }
-
 }

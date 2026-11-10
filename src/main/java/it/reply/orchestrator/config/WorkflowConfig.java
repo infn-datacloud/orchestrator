@@ -19,9 +19,7 @@ package it.reply.orchestrator.config;
 
 import it.reply.orchestrator.dal.util.StrongSequentialUuidGenerator;
 import it.reply.orchestrator.workflow.CustomFailedJobCommandFactory;
-
 import javax.persistence.EntityManagerFactory;
-
 import liquibase.integration.spring.SpringLiquibase;
 import org.flowable.spring.SpringProcessEngineConfiguration;
 import org.flowable.spring.boot.EngineConfigurationConfigurer;
@@ -35,8 +33,7 @@ public class WorkflowConfig {
   @Bean
   EngineConfigurationConfigurer<SpringProcessEngineConfiguration> workflowConfigurer(
       @Qualifier("workflowLiquibase") SpringLiquibase liquibase,
-      EntityManagerFactory entityManagerFactory
-  ) {
+      EntityManagerFactory entityManagerFactory) {
     return engineConfiguration -> {
       engineConfiguration.setDataSource(liquibase.getDataSource());
       engineConfiguration.setJpaEntityManagerFactory(entityManagerFactory);

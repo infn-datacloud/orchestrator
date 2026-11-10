@@ -26,7 +26,7 @@ import org.springframework.web.client.RestTemplate;
 public interface IamService {
 
   /**
-   * getOrchestratorScopes. 
+   * getOrchestratorScopes.
    *
    * @return the orchestrator scopes
    */
@@ -52,12 +52,16 @@ public interface IamService {
    * @param iamTokenEndpoint IAM token endpoint
    * @return the token with client credentials as grant type
    */
-  public String getTokenClientCredentials(RestTemplate restTemplate, String iamClientId,
-      String iamClientSecret, String iamClientScopes, String iamTokenEndpoint);
+  public String getTokenClientCredentials(
+      RestTemplate restTemplate,
+      String iamClientId,
+      String iamClientSecret,
+      String iamClientScopes,
+      String iamTokenEndpoint);
 
   /**
-   * Create an IAM client setting the minimal information, in addition to the mail field.
-   * As output it gives the client_id and registration_access_token of the created client.
+   * Create an IAM client setting the minimal information, in addition to the mail field. As output
+   * it gives the client_id and registration_access_token of the created client.
    *
    * @param restTemplate object used to make HTTP requests
    * @param iamRegistration registration endpoint used to create a client
@@ -66,8 +70,12 @@ public interface IamService {
    * @param scopes scopes to set for the new client
    * @return a map of client_id:registration_access_token
    */
-  public Map<String, String> createClient(RestTemplate restTemplate, String iamRegistration,
-      String uuid, String userEmail, String scopes);
+  public Map<String, String> createClient(
+      RestTemplate restTemplate,
+      String iamRegistration,
+      String uuid,
+      String userEmail,
+      String scopes);
 
   /**
    * Delete a client.
@@ -78,8 +86,8 @@ public interface IamService {
    * @param token the registration_access_token used for the deletion
    * @return true if the deletion has been successful
    */
-  public boolean deleteClient(RestTemplate restTemplate, String clientId, String iamUrl,
-      String token);
+  public boolean deleteClient(
+      RestTemplate restTemplate, String clientId, String iamUrl, String token);
 
   /**
    * Delete all the clients stored in resources.
@@ -88,8 +96,8 @@ public interface IamService {
    * @param resources resources linked to a given deployment
    * @param force flag to force the deletion of a deployment skipping the deletion of IAM clients
    */
-  public void deleteAllClients(RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources,
-      Boolean force);
+  public void deleteAllClients(
+      RestTemplate restTemplate, Map<Boolean, Set<Resource>> resources, Boolean force);
 
   /**
    * Assign the ownership of a client.
@@ -100,8 +108,8 @@ public interface IamService {
    * @param accountId the id of the owner to be assigned to the client
    * @param token the token with client credentials as grant type using the orchestrator client
    */
-  public void assignOwnership(RestTemplate restTemplate, String clientId, String iamUrl,
-      String accountId, String token);
+  public void assignOwnership(
+      RestTemplate restTemplate, String clientId, String iamUrl, String accountId, String token);
 
   /**
    * Check if a given idp ia an IAM.
@@ -121,8 +129,8 @@ public interface IamService {
    * @param token the token to use
    * @return the json obtained as output from the HTPP request
    */
-  public String getInfoIamClient(RestTemplate restTemplate, String clientId, String iamUrl,
-      String token);
+  public String getInfoIamClient(
+      RestTemplate restTemplate, String clientId, String iamUrl, String token);
 
   /**
    * Update information about a client.
@@ -134,7 +142,6 @@ public interface IamService {
    * @param jsonUpdated the updated json obtained as output
    * @return the json with the updated info about the client
    */
-  public String updateClient(RestTemplate restTemplate, String clientId, String iamUrl,
-      String token, String jsonUpdated);
-
+  public String updateClient(
+      RestTemplate restTemplate, String clientId, String iamUrl, String token, String jsonUpdated);
 }

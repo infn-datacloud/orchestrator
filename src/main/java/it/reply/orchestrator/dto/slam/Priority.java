@@ -42,5 +42,4 @@ public class Priority {
   @JsonProperty("weight")
   @Nullable
   private Double weight;
-
 }

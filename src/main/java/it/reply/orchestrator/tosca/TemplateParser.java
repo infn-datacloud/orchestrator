@@ -48,40 +48,33 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 @Slf4j
-@ComponentScan(basePackages = { "alien4cloud", "org.alien4cloud" })
+@ComponentScan(basePackages = {"alien4cloud", "org.alien4cloud"})
 @EnableConfigurationProperties(ToscaProperties.class)
 public class TemplateParser {
 
-  @Autowired
-  private ToscaParser toscaParser;
+  @Autowired private ToscaParser toscaParser;
 
   /**
-   * Parse the TOSCA template (string) and get the in-memory representation.
-   * This also checks for validation errors.
+   * Parse the TOSCA template (string) and get the in-memory representation. This also checks for
+   * validation errors.
    *
-   * @param template
-   *          the TOSCA template as string.
+   * @param template the TOSCA template as string.
    * @return an {@link ArchiveRoot} representing the template..
-   * @throws ToscaException
-   *           if validation errors occur.
+   * @throws ToscaException if validation errors occur.
    */
   public ArchiveRoot parse(String template) {
     return parse("template", "template", template);
   }
 
   /**
-   * Parse the TOSCA template (string) and get the in-memory representation.
-   * This also checks for validation errors.
+   * Parse the TOSCA template (string) and get the in-memory representation. This also checks for
+   * validation errors.
    *
-   * @param filePath
-   *          the path of the TOSCA template file.
-   * @param fileName
-   *          the name of the TOSCA template file.
-   * @param template
-   *          the TOSCA template as string.
+   * @param filePath the path of the TOSCA template file.
+   * @param fileName the name of the TOSCA template file.
+   * @param template the TOSCA template as string.
    * @return an {@link ArchiveRoot} representing the template..
-   * @throws ToscaException
-   *           if validation errors occur.
+   * @throws ToscaException if validation errors occur.
    */
   @ToscaContextual
   public ArchiveRoot parse(String filePath, String fileName, String template) {
@@ -100,31 +93,30 @@ public class TemplateParser {
           checkParsingErrors(filePath, ex.getParsingErrors());
       throw parsingException.orElse(new ToscaException("Error parsing TOSCA template", ex));
     }
-
   }
 
-  private Optional<ToscaException> checkParsingErrors(String filePath,
-      List<ParsingError> parsingError) {
-    Map<ParsingErrorLevel, List<ParsingError>> parsingErrors = parsingError
-        .stream()
-        .collect(Collectors.groupingBy(ParsingError::getErrorLevel));
+  private Optional<ToscaException> checkParsingErrors(
+      String filePath, List<ParsingError> parsingError) {
+    Map<ParsingErrorLevel, List<ParsingError>> parsingErrors =
+        parsingError.stream().collect(Collectors.groupingBy(ParsingError::getErrorLevel));
     List<ParsingError> warnings = parsingErrors.get(ParsingErrorLevel.WARNING);
     if (!CollectionUtils.isEmpty(warnings) && LOG.isWarnEnabled()) {
-      LOG.warn("Non-fatal error parsing TOSCA template "
-          + filePath
-          + warnings
-              .stream()
-              .map(Object::toString)
-              .collect(Collectors.joining("\n", ":\n", "")));
+      LOG.warn(
+          "Non-fatal error parsing TOSCA template "
+              + filePath
+              + warnings.stream()
+                  .map(Object::toString)
+                  .collect(Collectors.joining("\n", ":\n", "")));
     }
     List<ParsingError> errors = parsingErrors.get(ParsingErrorLevel.ERROR);
     if (!CollectionUtils.isEmpty(errors)) {
-      return Optional.of(new ToscaException("Error parsing TOSCA template "
-          + filePath
-          + errors
-              .stream()
-              .map(Object::toString)
-              .collect(Collectors.joining("\n", ":\n", ""))));
+      return Optional.of(
+          new ToscaException(
+              "Error parsing TOSCA template "
+                  + filePath
+                  + errors.stream()
+                      .map(Object::toString)
+                      .collect(Collectors.joining("\n", ":\n", ""))));
     }
     return Optional.empty();
   }
@@ -132,31 +124,30 @@ public class TemplateParser {
   /**
    * Obtain the string TOSCA template representation from the in-memory representation.
    *
-   * @param archiveRoot
-   *          the {@link ArchiveRoot} from which serialize the TOSCA template
+   * @param archiveRoot the {@link ArchiveRoot} from which serialize the TOSCA template
    * @return the serialized TOSCA template
    */
   public String serialize(ArchiveRoot archiveRoot) {
     Map<String, Object> velocityCtx = new HashMap<>();
-    velocityCtx.put("tosca_definitions_version",
-        archiveRoot.getArchive().getToscaDefinitionsVersion());
+    velocityCtx.put(
+        "tosca_definitions_version", archiveRoot.getArchive().getToscaDefinitionsVersion());
     velocityCtx.put("template_description", archiveRoot.getArchive().getDescription());
     velocityCtx.put("template_name", archiveRoot.getArchive().getName());
     velocityCtx.put("template_version", "1.0.0-SNAPSHOT");
     velocityCtx.put("template_author", "orchestrator");
-    velocityCtx.put("topology",
-        Optional.ofNullable(archiveRoot.getTopology()).orElseGet(Topology::new));
+    velocityCtx.put(
+        "topology", Optional.ofNullable(archiveRoot.getTopology()).orElseGet(Topology::new));
 
     try (StringWriter writer = new StringWriter()) {
-      VelocityUtil.generate("org/alien4cloud/tosca/exporter/topology-tosca_simple_yaml_1_0.yml.vm",
-          writer, velocityCtx);
+      VelocityUtil.generate(
+          "org/alien4cloud/tosca/exporter/topology-tosca_simple_yaml_1_0.yml.vm",
+          writer,
+          velocityCtx);
       String template = writer.toString();
       LOG.info(template);
       return template;
     } catch (IOException ex) {
       throw new OrchestratorException("Error serializing TOSCA template", ex);
     }
-
   }
-
 }

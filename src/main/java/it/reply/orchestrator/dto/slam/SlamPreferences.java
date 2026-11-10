@@ -48,5 +48,4 @@ public class SlamPreferences {
     preferences = new ArrayList<>();
     sla = new ArrayList<>();
   }
-
 }

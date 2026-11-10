@@ -44,17 +44,16 @@ public class KubernetesClientFactory {
     if (cloudProviderEndpoint.isIamEnabled()) {
       return Config.fromToken(cloudProviderEndpoint.getCpEndpoint(), accessToken, false);
     } else {
-      GenericServiceCredential credential = credentialProvider.credentialProvider(
-          cloudProviderEndpoint.getCpComputeServiceId(),
-          accessToken,
-          GenericServiceCredential.class
-          );
-      return Config.fromUserPassword(cloudProviderEndpoint.getCpEndpoint(),
-              credential.getUsername(),
-              credential.getPassword(),
-              false
-      );
+      GenericServiceCredential credential =
+          credentialProvider.credentialProvider(
+              cloudProviderEndpoint.getCpComputeServiceId(),
+              accessToken,
+              GenericServiceCredential.class);
+      return Config.fromUserPassword(
+          cloudProviderEndpoint.getCpEndpoint(),
+          credential.getUsername(),
+          credential.getPassword(),
+          false);
     }
   }
-
 }

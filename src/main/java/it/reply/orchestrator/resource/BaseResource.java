@@ -41,27 +41,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseResource extends AbstractResource {
 
-  @Nullable
-  private NodeStates state;
+  @Nullable private NodeStates state;
 
-  @Nullable
-  private String toscaNodeType;
+  @Nullable private String toscaNodeType;
 
-  @Nullable
-  private String toscaNodeName;
+  @Nullable private String toscaNodeName;
 
-  @NotNull
-  @NonNull
-  private List<String> requiredBy = new ArrayList<>();
+  @NotNull @NonNull private List<String> requiredBy = new ArrayList<>();
 
-  @Nullable
-  private Map<String, String> metadata;
+  @Nullable private Map<String, String> metadata;
 
   @Builder
-  protected BaseResource(@NonNull String uuid, @Nullable Date creationTime,
-      @Nullable Date updateTime, @Nullable String physicalId,
-      @Nullable NodeStates state, @Nullable String toscaNodeType, @Nullable String toscaNodeName,
-      @Nullable List<String> requiredBy, @Nullable Map<String, String> metadata) {
+  protected BaseResource(
+      @NonNull String uuid,
+      @Nullable Date creationTime,
+      @Nullable Date updateTime,
+      @Nullable String physicalId,
+      @Nullable NodeStates state,
+      @Nullable String toscaNodeType,
+      @Nullable String toscaNodeName,
+      @Nullable List<String> requiredBy,
+      @Nullable Map<String, String> metadata) {
     super(uuid, creationTime, updateTime, physicalId);
     this.state = state;
     this.toscaNodeType = toscaNodeType;
@@ -69,5 +69,4 @@ public class BaseResource extends AbstractResource {
     this.requiredBy = CommonUtils.notNullOrDefaultValue(requiredBy, ArrayList::new);
     this.metadata = CommonUtils.notNullOrDefaultValue(metadata, Collections.emptyMap());
   }
-
 }

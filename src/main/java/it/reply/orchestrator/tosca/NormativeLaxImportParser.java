@@ -33,20 +33,15 @@ import org.yaml.snakeyaml.nodes.Node;
 @Primary
 public class NormativeLaxImportParser extends LaxImportParser {
 
-  @Autowired
-  private ScalarParser scalarParser;
+  @Autowired private ScalarParser scalarParser;
 
-  @Autowired
-  private BaseParserFactory baseParserFactory;
+  @Autowired private BaseParserFactory baseParserFactory;
 
   @Override
   public CSARDependency parse(Node node, ParsingContextExecution context) {
     @SuppressWarnings("unchecked")
     MapParser<String> mapParser = baseParserFactory.<String>getMapParser(scalarParser, "string");
-    return mapParser
-        .parse(node, context)
-        .entrySet()
-        .stream()
+    return mapParser.parse(node, context).entrySet().stream()
         .map(entry -> new CSARDependencyWithUrl(entry.getKey(), "1.0.0", entry.getValue()))
         .findFirst()
         .orElse(null);

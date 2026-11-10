@@ -30,8 +30,11 @@ import org.springframework.data.domain.Pageable;
 
 public interface DeploymentService {
 
-  public Page<Deployment> getDeployments(Pageable pageable, @Nullable String owner,
-      @Nullable String userGroup, @Nullable Status[] excludedStatus);
+  public Page<Deployment> getDeployments(
+      Pageable pageable,
+      @Nullable String owner,
+      @Nullable String userGroup,
+      @Nullable Status[] excludedStatus);
 
   public Deployment getDeployment(String id);
 
@@ -39,9 +42,8 @@ public interface DeploymentService {
    * Infer deployment type from provider.
    *
    * @param deploymentProvider the provider
-  */
-  public static DeploymentType inferDeploymentType(
-                DeploymentProvider deploymentProvider) {
+   */
+  public static DeploymentType inferDeploymentType(DeploymentProvider deploymentProvider) {
     switch (deploymentProvider) {
       case CHRONOS:
         return DeploymentType.CHRONOS;
@@ -56,14 +58,13 @@ public interface DeploymentService {
     }
   }
 
-  public Deployment createDeployment(DeploymentRequest request, OidcEntity owner,
-      OidcTokenId requestedWithToken);
+  public Deployment createDeployment(
+      DeploymentRequest request, OidcEntity owner, OidcTokenId requestedWithToken);
 
-  public void updateDeployment(String id, DeploymentRequest request,
-      OidcTokenId requestedWithToken);
+  public void updateDeployment(
+      String id, DeploymentRequest request, OidcTokenId requestedWithToken);
 
-  public void resetDeployment(String id, String status,
-      OidcTokenId requestedWithToken);
+  public void resetDeployment(String id, String status, OidcTokenId requestedWithToken);
 
   public void deleteDeployment(String id, OidcTokenId requestedWithToken, String force);
 
@@ -72,5 +73,4 @@ public interface DeploymentService {
   public String getDeploymentExtendedInfo(String id, OidcTokenId requestedWithToken);
 
   public void throwIfNotOwned(Deployment deployment);
-
 }

@@ -71,11 +71,10 @@ public class ImClientFactory {
 
   private CredentialProviderService credProvServ;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
-  protected OpenStackCredentials getOpenStackAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
-      @NonNull String accessToken) {
+  protected OpenStackCredentials getOpenStackAuthHeader(
+      CloudProviderEndpoint cloudProviderEndpoint, @NonNull String accessToken) {
     String endpoint = cloudProviderEndpoint.getCpEndpoint();
     Matcher matcher = OS_ENDPOINT_PATTERN.matcher(endpoint);
     if (!matcher.matches()) {
@@ -87,19 +86,21 @@ public class ImClientFactory {
         // Use the name of the IDP (that matches the token issuer) as configured in CMDB, if present
         // otherwise use the organization name retrieved from the token.
 
-        OidcEntityId oidcEntityId =  OidcEntityId.fromAccesToken(accessToken);
+        OidcEntityId oidcEntityId = OidcEntityId.fromAccesToken(accessToken);
         OidcEntity oidcEntity = oidcEntityRepository.findByOidcEntityId(oidcEntityId).orElse(null);
         String organization;
         if (oidcEntity == null) {
-          IamUserInfo userInfo = (IamUserInfo) oauth2TokenService.getCurrentAuthentication()
-              .getUserInfo();
+          IamUserInfo userInfo =
+              (IamUserInfo) oauth2TokenService.getCurrentAuthentication().getUserInfo();
           if (userInfo != null) {
-            organization = Preconditions.checkNotNull(userInfo.getOrganizationName(),
-              "Organization name not found between the user info claims");
+            organization =
+                Preconditions.checkNotNull(
+                    userInfo.getOrganizationName(),
+                    "Organization name not found between the user info claims");
           } else {
             throw new OrchestratorException("Client credentials grant not supported");
           }
-          //generate and save oidcEntity for new user
+          // generate and save oidcEntity for new user
           oidcEntity = new OidcEntity();
           oidcEntity.setOidcEntityId(oidcEntityId);
           oidcEntity.setOrganization(organization);
@@ -110,26 +111,24 @@ public class ImClientFactory {
         }
 
         String issuer = oidcEntityId.getIssuer();
-        SupportedIdp supportedidp = cloudProviderEndpoint
-                       .getSupportedIdps().stream()
-                       .filter(idp -> issuer.equals(idp.getIssuer())).findAny()
-                       .orElse(new SupportedIdp(organization, issuer));
+        SupportedIdp supportedidp =
+            cloudProviderEndpoint.getSupportedIdps().stream()
+                .filter(idp -> issuer.equals(idp.getIssuer()))
+                .findAny()
+                .orElse(new SupportedIdp(organization, issuer));
 
         endpoint = matcher.group(1);
-        OpenStackCredentials cred = cloudProviderEndpoint
-            .getIaasHeaderId()
-            .map(OpenStackCredentials::buildCredentials)
-            .orElseGet(OpenStackCredentials::buildCredentials)
-            .withTenant(cloudProviderEndpoint.getIdpProtocol())
-            .withUsername(supportedidp.getName())
-            .withPassword(accessToken)
-            .withHost(endpoint);
-        cloudProviderEndpoint
-            .getMicroversion()
-            .ifPresent(cred::withMicroversion);
-        cloudProviderEndpoint
-            .getRegion()
-            .ifPresent(cred::withServiceRegion);
+        OpenStackCredentials cred =
+            cloudProviderEndpoint
+                .getIaasHeaderId()
+                .map(OpenStackCredentials::buildCredentials)
+                .orElseGet(OpenStackCredentials::buildCredentials)
+                .withTenant(cloudProviderEndpoint.getIdpProtocol())
+                .withUsername(supportedidp.getName())
+                .withPassword(accessToken)
+                .withHost(endpoint);
+        cloudProviderEndpoint.getMicroversion().ifPresent(cred::withMicroversion);
+        cloudProviderEndpoint.getRegion().ifPresent(cred::withServiceRegion);
         cloudProviderEndpoint
             .getTenant()
             .ifPresent(cred::withDomain); // use domain to avoid mapping ambiguity at IaaS level
@@ -141,21 +140,21 @@ public class ImClientFactory {
         return cred;
       } else {
         GenericServiceCredentialWithTenant imCred =
-            credProvServ.credentialProvider(cloudProviderEndpoint.getCpComputeServiceId(),
+            credProvServ.credentialProvider(
+                cloudProviderEndpoint.getCpComputeServiceId(),
                 accessToken,
                 GenericServiceCredentialWithTenant.class);
         endpoint = matcher.group(1);
-        OpenStackCredentials cred = cloudProviderEndpoint
-            .getIaasHeaderId()
-            .map(OpenStackCredentials::buildCredentials)
-            .orElseGet(OpenStackCredentials::buildCredentials)
-            .withTenant(imCred.getTenant())
-            .withUsername(imCred.getUsername())
-            .withPassword(imCred.getPassword())
-            .withHost(endpoint);
-        cloudProviderEndpoint
-            .getRegion()
-            .ifPresent(cred::withServiceRegion);
+        OpenStackCredentials cred =
+            cloudProviderEndpoint
+                .getIaasHeaderId()
+                .map(OpenStackCredentials::buildCredentials)
+                .orElseGet(OpenStackCredentials::buildCredentials)
+                .withTenant(imCred.getTenant())
+                .withUsername(imCred.getUsername())
+                .withPassword(imCred.getPassword())
+                .withHost(endpoint);
+        cloudProviderEndpoint.getRegion().ifPresent(cred::withServiceRegion);
         if ("v2".equals(matcher.group(2))) {
           cred.withAuthVersion(OpenStackAuthVersion.PASSWORD_2_0);
         } else {
@@ -176,10 +175,11 @@ public class ImClientFactory {
           .withHost(cloudProviderEndpoint.getCpEndpoint())
           .withToken(accessToken);
     } else {
-      GenericServiceCredential imCred = credProvServ.credentialProvider(
-          cloudProviderEndpoint.getCpComputeServiceId(),
-          accessToken,
-          GenericServiceCredential.class);
+      GenericServiceCredential imCred =
+          credProvServ.credentialProvider(
+              cloudProviderEndpoint.getCpComputeServiceId(),
+              accessToken,
+              GenericServiceCredential.class);
 
       return cloudProviderEndpoint
           .getIaasHeaderId()
@@ -191,11 +191,14 @@ public class ImClientFactory {
     }
   }
 
-  protected AmazonEc2Credentials getAwsAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
-      String accessToken) {
+  protected AmazonEc2Credentials getAwsAuthHeader(
+      CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     // Get credential from vault Service
-    GenericServiceCredential imCred = credProvServ.credentialProvider(
-        cloudProviderEndpoint.getCpComputeServiceId(), accessToken, GenericServiceCredential.class);
+    GenericServiceCredential imCred =
+        credProvServ.credentialProvider(
+            cloudProviderEndpoint.getCpComputeServiceId(),
+            accessToken,
+            GenericServiceCredential.class);
 
     return cloudProviderEndpoint
         .getIaasHeaderId()
@@ -205,10 +208,12 @@ public class ImClientFactory {
         .withPassword(imCred.getPassword());
   }
 
-  protected AzureCredentials getAzureAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
-      String accessToken) {
+  protected AzureCredentials getAzureAuthHeader(
+      CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     GenericServiceCredentialWithTenant imCred =
-        credProvServ.credentialProvider(cloudProviderEndpoint.getCpComputeServiceId(), accessToken,
+        credProvServ.credentialProvider(
+            cloudProviderEndpoint.getCpComputeServiceId(),
+            accessToken,
             GenericServiceCredentialWithTenant.class);
 
     return cloudProviderEndpoint
@@ -222,30 +227,28 @@ public class ImClientFactory {
 
   protected String getImAuthHeader(@Nullable String accessToken) {
     if (oidcProperties.isEnabled()) {
-      String header = ImCredentials
-          .buildCredentials()
-          .withToken(accessToken)
-          .serialize();
+      String header = ImCredentials.buildCredentials().withToken(accessToken).serialize();
       LOG.debug("IM authorization header built from access token");
       return header;
     } else {
       throw new OrchestratorException(
           "No Authentication info provided for for Infrastructure Manager "
               + "and OAuth2 authentication is disabled");
-
     }
   }
 
-  private OpenStackCredentials getOtcAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
-      String accessToken) {
+  private OpenStackCredentials getOtcAuthHeader(
+      CloudProviderEndpoint cloudProviderEndpoint, String accessToken) {
     String endpoint = cloudProviderEndpoint.getCpEndpoint();
     Matcher endpointMatcher = OS_ENDPOINT_PATTERN.matcher(endpoint);
     if (!endpointMatcher.matches()) {
       throw new DeploymentException("Wrong OS endpoint format: " + endpoint);
     } else {
       GenericServiceCredentialWithTenant imCred =
-          credProvServ.credentialProvider(cloudProviderEndpoint.getCpComputeServiceId(),
-              accessToken, GenericServiceCredentialWithTenant.class);
+          credProvServ.credentialProvider(
+              cloudProviderEndpoint.getCpComputeServiceId(),
+              accessToken,
+              GenericServiceCredentialWithTenant.class);
       String username = imCred.getUsername();
       String password = imCred.getPassword();
       String tenant = imCred.getTenant();
@@ -253,10 +256,12 @@ public class ImClientFactory {
       Pattern pattern = Pattern.compile("\\s*(\\w+)\\s+([\\w\\-]+)\\s*");
       Matcher credentialsMatcher = pattern.matcher(username);
       if (credentialsMatcher.matches()) {
-        String otcUsername = Preconditions.checkNotNull(credentialsMatcher.group(1),
-            "No vaild username provided for Open Telekom Cloud");
-        tenant = Preconditions.checkNotNull(credentialsMatcher.group(2),
-            "No vaild username provided for Open Telekom Cloud");
+        String otcUsername =
+            Preconditions.checkNotNull(
+                credentialsMatcher.group(1), "No vaild username provided for Open Telekom Cloud");
+        tenant =
+            Preconditions.checkNotNull(
+                credentialsMatcher.group(2), "No vaild username provided for Open Telekom Cloud");
         if (!otcUsername.matches("[0-9]+")) {
           // new style username, it domain part not needed
           username = otcUsername;
@@ -278,24 +283,29 @@ public class ImClientFactory {
     }
   }
 
-  private String getIaasAuthHeader(CloudProviderEndpoint cloudProviderEndpoint,
-      @Nullable String accessToken) {
+  private String getIaasAuthHeader(
+      CloudProviderEndpoint cloudProviderEndpoint, @Nullable String accessToken) {
     IaaSType iaasType = cloudProviderEndpoint.getIaasType();
     LOG.debug("Generating {} credentials with: {}", iaasType, cloudProviderEndpoint);
     String computeServiceId = cloudProviderEndpoint.getCpComputeServiceId();
     String iaasHeader;
-    oidcProperties.runIfSecurityDisabled(() -> {
-      throw new OrchestratorException("No Authentication info provided for compute service "
-          + computeServiceId + " and OAuth2 authentication is disabled");
-    });
+    oidcProperties.runIfSecurityDisabled(
+        () -> {
+          throw new OrchestratorException(
+              "No Authentication info provided for compute service "
+                  + computeServiceId
+                  + " and OAuth2 authentication is disabled");
+        });
     switch (iaasType) {
       case OPENSTACK:
-        iaasHeader = getOpenStackAuthHeader(cloudProviderEndpoint,
-            CommonUtils.checkNotNull(accessToken)).serialize();
+        iaasHeader =
+            getOpenStackAuthHeader(cloudProviderEndpoint, CommonUtils.checkNotNull(accessToken))
+                .serialize();
         break;
       case OPENNEBULA:
-        iaasHeader = getOpenNebulaAuthHeader(cloudProviderEndpoint,
-            CommonUtils.checkNotNull(accessToken)).serialize();
+        iaasHeader =
+            getOpenNebulaAuthHeader(cloudProviderEndpoint, CommonUtils.checkNotNull(accessToken))
+                .serialize();
         break;
       case AWS:
         iaasHeader = getAwsAuthHeader(cloudProviderEndpoint, accessToken).serialize();
@@ -322,16 +332,16 @@ public class ImClientFactory {
    * @return the generated client
    */
   @SneakyThrows(ImClientException.class)
-  public InfrastructureManager build(List<CloudProviderEndpoint> cloudProviderEndpoints,
-      @Nullable String accessToken) {
+  public InfrastructureManager build(
+      List<CloudProviderEndpoint> cloudProviderEndpoints, @Nullable String accessToken) {
     String imAuthHeader = getImAuthHeader(accessToken);
-    Stream<String> iaasHeadersStream = cloudProviderEndpoints
-        .stream()
-        .map(cloudProviderEndpoint -> getIaasAuthHeader(cloudProviderEndpoint, accessToken));
+    Stream<String> iaasHeadersStream =
+        cloudProviderEndpoints.stream()
+            .map(cloudProviderEndpoint -> getIaasAuthHeader(cloudProviderEndpoint, accessToken));
 
-    String imHeader = Stream
-        .concat(Stream.of(imAuthHeader), iaasHeadersStream)
-        .collect(Collectors.joining("\\n"));
+    String imHeader =
+        Stream.concat(Stream.of(imAuthHeader), iaasHeadersStream)
+            .collect(Collectors.joining("\\n"));
     LOG.trace("IM auth header: {}", imHeader);
 
     String imUrl = null;
@@ -345,5 +355,4 @@ public class ImClientFactory {
 
     return new InfrastructureManager(imUrl, imHeader);
   }
-
 }

@@ -18,19 +18,14 @@
 package it.reply.orchestrator.dto.cmdb.wrappers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.dto.cmdb.CmdbIdentifiable;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -48,5 +43,4 @@ public class CmdbHasManyList<T extends CmdbIdentifiable> {
   protected CmdbHasManyList() {
     rows = new ArrayList<>();
   }
-
 }

@@ -35,8 +35,8 @@ public class RuleOkEvent extends Event<RuleOkEvent.RuleOkEventPayload> {
 
   public static final String EVENT_TYPE = "rule_ok";
 
-  public RuleOkEvent(@NonNull String eventType, @NonNull String createdAt,
-      @NonNull RuleOkEventPayload payload) {
+  public RuleOkEvent(
+      @NonNull String eventType, @NonNull String createdAt, @NonNull RuleOkEventPayload payload) {
     super(eventType, createdAt, payload);
   }
 

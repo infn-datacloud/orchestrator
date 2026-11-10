@@ -18,9 +18,7 @@
 package it.reply.orchestrator.exception;
 
 import it.reply.orchestrator.dto.common.Error;
-
 import java.util.Optional;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,21 +39,26 @@ public class CustomOAuth2ExceptionRenderer extends DefaultOAuth2ExceptionRendere
       // if there are additional information, use it
       StringBuilder messageBuilder = new StringBuilder(oauth2Exception.getMessage());
       Optional.ofNullable(oauth2Exception.getAdditionalInformation())
-          .ifPresent(info -> info.forEach((key, value) -> messageBuilder.append(", ")
-              .append(key)
-              .append("=\"")
-              .append(value)
-              .append("\"")));
-      Error error = Error.builder()
-          .exception(oauth2Exception)
-          .status(status)
-          .message(messageBuilder.toString())
-          .build();
+          .ifPresent(
+              info ->
+                  info.forEach(
+                      (key, value) ->
+                          messageBuilder
+                              .append(", ")
+                              .append(key)
+                              .append("=\"")
+                              .append(value)
+                              .append("\"")));
+      Error error =
+          Error.builder()
+              .exception(oauth2Exception)
+              .status(status)
+              .message(messageBuilder.toString())
+              .build();
       responseEntityToWrite = new ResponseEntity<>(error, responseEntity.getHeaders(), status);
     } else {
       responseEntityToWrite = responseEntity;
     }
     super.handleHttpEntityResponse(responseEntityToWrite, webRequest);
   }
-
 }

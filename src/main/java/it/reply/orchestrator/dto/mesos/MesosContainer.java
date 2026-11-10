@@ -19,13 +19,10 @@ package it.reply.orchestrator.dto.mesos;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Data;
 import lombok.Getter;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,28 +43,21 @@ public class MesosContainer {
     private final String toscaName;
   }
 
-  @NonNull
-  private Type type;
+  @NonNull private Type type;
 
-  @Nullable
-  private String image;
+  @Nullable private String image;
 
   private String network;
 
-  @NonNull
-  private List<MesosPortMapping> portMappings = new ArrayList<>();
+  @NonNull private List<MesosPortMapping> portMappings = new ArrayList<>();
 
-  @NonNull
-  private Multimap<String, String> parameters = ArrayListMultimap.create();
+  @NonNull private Multimap<String, String> parameters = ArrayListMultimap.create();
 
-  @Nullable
-  private Boolean forcePullImage;
+  @Nullable private Boolean forcePullImage;
 
-  @Nullable
-  private Boolean privileged;
+  @Nullable private Boolean privileged;
 
-  @NonNull
-  private List<String> volumes = new ArrayList<>();
+  @NonNull private List<String> volumes = new ArrayList<>();
 
   public boolean isForcePullImage() {
     return Boolean.TRUE.equals(forcePullImage);
@@ -76,5 +66,4 @@ public class MesosContainer {
   public boolean isPrivileged() {
     return Boolean.TRUE.equals(privileged);
   }
-
 }

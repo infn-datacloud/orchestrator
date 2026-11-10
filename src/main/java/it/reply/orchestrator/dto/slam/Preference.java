@@ -50,5 +50,4 @@ public class Preference {
   protected Preference() {
     preferences = new ArrayList<>();
   }
-
 }

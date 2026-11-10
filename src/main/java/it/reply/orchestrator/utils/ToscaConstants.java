@@ -49,17 +49,17 @@ public class ToscaConstants {
 
       public static final String WORKER_NODE = BASE_INDIGO_NAME + "LRMS.WorkerNode";
       public static final String SLURM_WN = WORKER_NODE + ".Slurm";
-      public static final String TORQUE_WN = WORKER_NODE  + ".Torque";
-      public static final String GALAXY_WN = WORKER_NODE  + ".SlurmGalaxy";
-      public static final String MESOS_WN = WORKER_NODE  + ".Mesos";
-      public static final String KUBERNETES_WN = WORKER_NODE  + ".Kubernetes";
+      public static final String TORQUE_WN = WORKER_NODE + ".Torque";
+      public static final String GALAXY_WN = WORKER_NODE + ".SlurmGalaxy";
+      public static final String MESOS_WN = WORKER_NODE + ".Mesos";
+      public static final String KUBERNETES_WN = WORKER_NODE + ".Kubernetes";
 
-      public static final String FRONT_END = BASE_INDIGO_NAME  + "LRMS.FrontEnd";
-      public static final String SLURM_FE = FRONT_END  + ".Slurm";
-      public static final String TORQUE_FE = FRONT_END  + ".Torque";
-      public static final String GALAXY_FE = FRONT_END  + ".SlurmGalaxy";
-      public static final String MESOS_FE = FRONT_END  + ".Mesos";
-      public static final String KUBERNETES_FE = FRONT_END  + ".Kubernetes";
+      public static final String FRONT_END = BASE_INDIGO_NAME + "LRMS.FrontEnd";
+      public static final String SLURM_FE = FRONT_END + ".Slurm";
+      public static final String TORQUE_FE = FRONT_END + ".Torque";
+      public static final String GALAXY_FE = FRONT_END + ".SlurmGalaxy";
+      public static final String MESOS_FE = FRONT_END + ".Mesos";
+      public static final String KUBERNETES_FE = FRONT_END + ".Kubernetes";
 
       public static final String BASE_NETWORK_NAME = "tosca.nodes.network.";
       public static final String NETWORK = BASE_NETWORK_NAME + "Network";
@@ -68,18 +68,16 @@ public class ToscaConstants {
       public static final String CUSTOM_BASE_NETWORK = "tosca.nodes.indigo.network.";
       public static final String CUSTOM_NETWORK = "tosca.nodes.indigo.network.Network";
 
-      public static final String VOLUME = BASE_INDIGO_NAME +  "BlockStorage";
-
+      public static final String VOLUME = BASE_INDIGO_NAME + "BlockStorage";
     }
 
     @UtilityClass
     public static class RE {
-      public static final String FRONT_END_RE =
-          "^tosca\\.nodes\\.indigo\\.LRMS\\.FrontEnd\\.\\w+$";
+      public static final String FRONT_END_RE = "^tosca\\.nodes\\.indigo\\.LRMS\\.FrontEnd\\.\\w+$";
       public static final String WORKER_NODE_RE =
           "^tosca\\.nodes\\.indigo\\.LRMS\\.WorkerNode\\.\\w+$";
       public static final String NETWORK_NODE_RE =
-              "^tosca\\.nodes\\.(indigo\\.)?network\\.Network$";
+          "^tosca\\.nodes\\.(indigo\\.)?network\\.Network$";
     }
 
     @UtilityClass

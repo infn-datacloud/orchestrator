@@ -22,17 +22,14 @@ import it.reply.orchestrator.dto.cmdb.CloudProvider;
 import it.reply.orchestrator.dto.deployment.BaseWorkflowMessage;
 import it.reply.orchestrator.dto.ranker.RankedCloudService;
 import it.reply.orchestrator.dto.slam.SlamPreferences;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Tolerate;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -42,14 +39,11 @@ public class RankCloudProvidersMessage extends BaseWorkflowMessage {
 
   private SlamPreferences slamPreferences;
 
-  @NonNull
-  private Map<String, CloudProvider> cloudProviders = new HashMap<>();
+  @NonNull private Map<String, CloudProvider> cloudProviders = new HashMap<>();
 
-  @NonNull
-  private Map<String, List<PaasMachine>> cloudProvidersMonitoringData = new HashMap<>();
+  @NonNull private Map<String, List<PaasMachine>> cloudProvidersMonitoringData = new HashMap<>();
 
-  @NonNull
-  private List<RankedCloudService> rankedCloudServices = new ArrayList<>();
+  @NonNull private List<RankedCloudService> rankedCloudServices = new ArrayList<>();
 
   @Tolerate
   public RankCloudProvidersMessage(BaseWorkflowMessage baseWorkflowMessage) {

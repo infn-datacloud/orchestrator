@@ -18,14 +18,11 @@
 package it.reply.orchestrator.config.properties;
 
 import java.net.URI;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.hibernate.validator.constraints.NotBlank;
@@ -39,23 +36,13 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class OneDataProperties {
 
-  @NotNull
-  @NonNull
-  private URI onezoneUrl;
+  @NotNull @NonNull private URI onezoneUrl;
 
-  @NotNull
-  @NonNull
-  private String onezoneBasePath = "/api/v3/onezone/";
+  @NotNull @NonNull private String onezoneBasePath = "/api/v3/onezone/";
 
-  @NotNull
-  @NonNull
-  private String oneproviderBasePath = "/api/v3/oneprovider/";
+  @NotNull @NonNull private String oneproviderBasePath = "/api/v3/oneprovider/";
 
-  @NotNull
-  @NonNull
-  @Valid
-  @NestedConfigurationProperty
-  private ServiceSpaceProperties serviceSpace;
+  @NotNull @NonNull @Valid @NestedConfigurationProperty private ServiceSpaceProperties serviceSpace;
 
   @Validated
   @Data
@@ -63,21 +50,12 @@ public class OneDataProperties {
   @ToString(exclude = "token")
   public static class ServiceSpaceProperties {
 
-    @Nullable
-    private URI onezoneUrl;
+    @Nullable private URI onezoneUrl;
 
-    @NotNull
-    @NonNull
-    private String token;
+    @NotNull @NonNull private String token;
 
-    @NotNull
-    @NonNull
-    private String name;
+    @NotNull @NonNull private String name;
 
-    @NotNull
-    @NonNull
-    @NotBlank
-    private String baseFolderPath = "/";
-
+    @NotNull @NonNull @NotBlank private String baseFolderPath = "/";
   }
 }

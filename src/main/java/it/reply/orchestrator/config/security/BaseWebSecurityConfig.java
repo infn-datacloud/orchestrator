@@ -18,7 +18,6 @@
 package it.reply.orchestrator.config.security;
 
 import it.reply.orchestrator.config.properties.OidcProperties;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -32,8 +31,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
 public abstract class BaseWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  @Autowired
-  protected OidcProperties oidcProperties;
+  @Autowired protected OidcProperties oidcProperties;
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -43,8 +41,7 @@ public abstract class BaseWebSecurityConfig extends WebSecurityConfigurerAdapter
 
   @Override
   public void configure(@NonNull HttpSecurity http) throws Exception {
-    http
-        .csrf()
+    http.csrf()
         .disable()
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -53,5 +50,4 @@ public abstract class BaseWebSecurityConfig extends WebSecurityConfigurerAdapter
         .mvcMatchers("/")
         .anonymous();
   }
-
 }

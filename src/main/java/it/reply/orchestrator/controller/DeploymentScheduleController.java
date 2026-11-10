@@ -55,11 +55,9 @@ public class DeploymentScheduleController {
   private static final String OFFLINE_ACCESS_REQUIRED_CONDITION =
       "#oauth2.throwOnError(#oauth2.hasAnyScope('offline_access', 'fts:submit-transfer'))";
 
-  @Autowired
-  private DeploymentScheduleServiceImpl deploymentScheduleService;
+  @Autowired private DeploymentScheduleServiceImpl deploymentScheduleService;
 
-  @Autowired
-  private DeploymentScheduleResourceAssembler deploymentScheduleResourceAssembler;
+  @Autowired private DeploymentScheduleResourceAssembler deploymentScheduleResourceAssembler;
 
   @Autowired
   private DeploymentScheduleEventResourceAssembler deploymentScheduleEventResourceAssembler;
@@ -67,31 +65,31 @@ public class DeploymentScheduleController {
   /**
    * Get all deployments.
    *
-   * @param createdBy      created by name
-   * @param pageable       {@link Pageable}
+   * @param createdBy created by name
+   * @param pageable {@link Pageable}
    * @param pagedAssembler {@link PagedResourcesAssembler}
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/schedules", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/schedules",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public PagedResources<DeploymentScheduleResource> getDeploymentSchedules(
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
-      @PageableDefault(sort = "createdAt",
-          direction = Direction.DESC) Pageable pageable,
+      @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<DeploymentSchedule> pagedAssembler) {
 
     Page<DeploymentSchedule> deploymentSchedules =
         deploymentScheduleService.getDeploymentSchedules(pageable, createdBy);
 
-    return pagedAssembler.toResource(deploymentSchedules, deploymentScheduleResourceAssembler,
-        ControllerLinkBuilder
-            .linkTo(
-                DummyInvocationUtils
-                    .methodOn(DeploymentScheduleController.class)
+    return pagedAssembler.toResource(
+        deploymentSchedules,
+        deploymentScheduleResourceAssembler,
+        ControllerLinkBuilder.linkTo(
+                DummyInvocationUtils.methodOn(DeploymentScheduleController.class)
                     .getDeploymentSchedules(createdBy, pageable, pagedAssembler))
             .withSelfRel());
-
   }
 
   /**
@@ -101,7 +99,9 @@ public class DeploymentScheduleController {
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.CREATED)
-  @RequestMapping(value = "/schedules", method = RequestMethod.POST,
+  @RequestMapping(
+      value = "/schedules",
+      method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
   public DeploymentScheduleResource createDeploymentSchedule(
@@ -109,7 +109,6 @@ public class DeploymentScheduleController {
     DeploymentSchedule deploymentSchedule =
         deploymentScheduleService.createDeploymentSchedule(request);
     return deploymentScheduleResourceAssembler.toResource(deploymentSchedule);
-
   }
 
   /**
@@ -119,7 +118,9 @@ public class DeploymentScheduleController {
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/schedules/{scheduleId}", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/schedules/{scheduleId}",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DeploymentScheduleResource getDeploymentSchedule(@PathVariable("scheduleId") String id) {
 
@@ -132,20 +133,19 @@ public class DeploymentScheduleController {
    *
    * @param id the deployment id
    * @param createdBy the user that created the resource
-   * @param pageable
-   *          {@link Pageable}
-   * @param pagedAssembler
-   *          {@link PagedResourcesAssembler}
+   * @param pageable {@link Pageable}
+   * @param pagedAssembler {@link PagedResourcesAssembler}
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/schedules/{scheduleId}/events", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/schedules/{scheduleId}/events",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public PagedResources<DeploymentScheduleEventResource> getDeploymentScheduleEvents(
       @PathVariable("scheduleId") String id,
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
-      @PageableDefault(sort = "createdAt",
-          direction = Direction.DESC) Pageable pageable,
+      @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<DeploymentScheduleEvent> pagedAssembler) {
     Page<DeploymentScheduleEvent> scheduleEvents =
         deploymentScheduleService.getDeploymentScheduleEvents(id, pageable);

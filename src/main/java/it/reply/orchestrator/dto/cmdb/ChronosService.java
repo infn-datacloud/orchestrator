@@ -19,16 +19,13 @@ package it.reply.orchestrator.dto.cmdb;
 
 import it.reply.orchestrator.dto.cmdb.ChronosService.ChronosServiceProperties;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -37,10 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChronosService extends MesosFrameworkService<ChronosServiceProperties> {
 
-  /**
-   * Create a new ChronosService.
-   * */
-
+  /** Create a new ChronosService. */
   @Builder(builderMethodName = "chronosBuilder")
   public ChronosService(
       @NonNull String id,
@@ -59,9 +53,23 @@ public class ChronosService extends MesosFrameworkService<ChronosServiceProperti
       boolean publicIpAssignable,
       @NonNull List<SupportedIdp> supportedIdps,
       @NonNull ChronosServiceProperties properties) {
-    super(id, serviceType, endpoint, microversion, providerId, type, publicService,
-          tenant, region, hostname, parentServiceId, iamEnabled, idpProtocol,
-          publicIpAssignable, supportedIdps, properties);
+    super(
+        id,
+        serviceType,
+        endpoint,
+        microversion,
+        providerId,
+        type,
+        publicService,
+        tenant,
+        region,
+        hostname,
+        parentServiceId,
+        iamEnabled,
+        idpProtocol,
+        publicIpAssignable,
+        supportedIdps,
+        properties);
   }
 
   @Data
@@ -74,8 +82,10 @@ public class ChronosService extends MesosFrameworkService<ChronosServiceProperti
         @Nullable String localVolumesHostBasePath,
         boolean gpuSupport,
         @NonNull List<String> persistentStorageDrivers) {
-      super(localVolumesHostBasePath, gpuSupport, CommonUtils
-          .notNullOrDefaultValue(persistentStorageDrivers, ArrayList::new));
+      super(
+          localVolumesHostBasePath,
+          gpuSupport,
+          CommonUtils.notNullOrDefaultValue(persistentStorageDrivers, ArrayList::new));
     }
   }
 }

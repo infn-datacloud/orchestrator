@@ -34,5 +34,4 @@ public class ProviderTimeout extends BaseDeployCommand {
   protected String getErrorMessagePrefix() {
     return "Provider timeout";
   }
-
 }

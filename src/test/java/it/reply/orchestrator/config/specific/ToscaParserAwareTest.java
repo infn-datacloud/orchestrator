@@ -25,7 +25,6 @@ import it.reply.orchestrator.service.security.OAuth2TokenService;
 import it.reply.orchestrator.tosca.NormativeLaxImportParser;
 import it.reply.orchestrator.tosca.RemoteRepositoryServiceImpl;
 import it.reply.orchestrator.tosca.TemplateParser;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
@@ -40,29 +39,22 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 @ActiveProfiles(SpringTestProfile.PROFILE_QUALIFIER)
 @SpringBootTest(
     classes = {
-        AopAutoConfiguration.class,
-        ToscaServiceImpl.class,
-        NormativeLaxImportParser.class,
-        RemoteRepositoryServiceImpl.class,
-        TemplateParser.class
-    }
-)
+      AopAutoConfiguration.class,
+      ToscaServiceImpl.class,
+      NormativeLaxImportParser.class,
+      RemoteRepositoryServiceImpl.class,
+      TemplateParser.class
+    })
 @AutoConfigureWebClient
 public abstract class ToscaParserAwareTest {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @MockBean
-  protected OAuth2TokenService oauth2tokenService;
+  @MockBean protected OAuth2TokenService oauth2tokenService;
 
-  @SpyBean
-  protected IndigoInputsPreProcessorService indigoInputsPreProcessorService;
+  @SpyBean protected IndigoInputsPreProcessorService indigoInputsPreProcessorService;
 
-  @SpyBean
-  protected OrchestratorProperties orchestratorProperties;
-
+  @SpyBean protected OrchestratorProperties orchestratorProperties;
 }

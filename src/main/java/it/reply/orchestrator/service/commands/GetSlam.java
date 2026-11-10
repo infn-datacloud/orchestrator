@@ -18,7 +18,6 @@
 package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.dal.entity.OidcTokenId;
-//import it.reply.orchestrator.dal.repository.OidcTokenRepository;
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.service.SlamService;
 import it.reply.orchestrator.utils.WorkflowConstants;
@@ -29,21 +28,16 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_SLAM)
 public class GetSlam extends BaseRankCloudProvidersCommand {
 
-  @Autowired
-  private SlamService slamService;
-
-  //@Autowired
-  //private OidcTokenRepository tokenRepository;
+  @Autowired private SlamService slamService;
 
   @Override
-  public void execute(DelegateExecution execution,
-      RankCloudProvidersMessage rankCloudProvidersMessage) {
+  public void execute(
+      DelegateExecution execution, RankCloudProvidersMessage rankCloudProvidersMessage) {
     OidcTokenId requestedWithToken = rankCloudProvidersMessage.getRequestedWithToken();
 
-    rankCloudProvidersMessage.setSlamPreferences(slamService
-        .getCustomerPreferences(requestedWithToken, getDeployment(rankCloudProvidersMessage)
-            .getUserGroup()));
-
+    rankCloudProvidersMessage.setSlamPreferences(
+        slamService.getCustomerPreferences(
+            requestedWithToken, getDeployment(rankCloudProvidersMessage).getUserGroup()));
   }
 
   @Override

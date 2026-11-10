@@ -40,13 +40,11 @@ public class DeploymentRequest {
   @NonNull
   private String template;
 
-  @NotNull
-  @NonNull
-  @Builder.Default
-  private Map<String, Object> parameters = new HashMap<>();
+  @NotNull @NonNull @Builder.Default private Map<String, Object> parameters = new HashMap<>();
 
   @Nullable
-  @URL(message = "Callback value, if provided, must be a valid HTTP or HTTPS URL",
+  @URL(
+      message = "Callback value, if provided, must be a valid HTTP or HTTPS URL",
       regexp = "^https?\\:.*")
   private String callback;
 
@@ -55,24 +53,24 @@ public class DeploymentRequest {
   private Integer timeoutMins;
 
   @Nullable
-  @Min(value = 1, message = "Provider timeout value, if provided, must be at least of 1 minute and"
-      + " equal or less than timeoutMins")
+  @Min(
+      value = 1,
+      message =
+          "Provider timeout value, if provided, must be at least of 1 minute and"
+              + " equal or less than timeoutMins")
   private Integer providerTimeoutMins;
 
   @Nullable
   @Min(value = 1, message = "maxProvidersRetry value, if provided, must be at least of 1")
   private Integer maxProvidersRetry;
 
-  @Builder.Default
-  private boolean keepLastAttempt = false;
+  @Builder.Default private boolean keepLastAttempt = false;
 
-  @Nullable
-  private String userGroup;
+  @Nullable private String userGroup;
 
   @SuppressWarnings("null")
   @Deprecated
   protected DeploymentRequest() {
     parameters = new HashMap<>();
   }
-
 }

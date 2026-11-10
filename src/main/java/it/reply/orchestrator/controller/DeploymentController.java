@@ -63,17 +63,13 @@ public class DeploymentController {
   private static final String OFFLINE_ACCESS_REQUIRED_CONDITION =
       "#oauth2.throwOnError(#oauth2.hasAnyScope('offline_access', 'fts:submit-transfer'))";
 
-  @Autowired
-  private DeploymentService deploymentService;
+  @Autowired private DeploymentService deploymentService;
 
-  @Autowired
-  private DeploymentResourceAssembler deploymentResourceAssembler;
+  @Autowired private DeploymentResourceAssembler deploymentResourceAssembler;
 
-  @Autowired
-  private OAuth2TokenService oauth2Tokenservice;
+  @Autowired private OAuth2TokenService oauth2Tokenservice;
 
-  @Autowired
-  private OidcProperties oidcProperties;
+  @Autowired private OidcProperties oidcProperties;
 
   /**
    * Check if there is a group claim in user's token and verify that the group requested by the user
@@ -83,7 +79,7 @@ public class DeploymentController {
    * @param requestedGroup group requested by the user
    * @throws ParseException if the claim value is not of required type when parsing user's token
    * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
-   *         or the requested group is not in the user's allowed groups
+   *     or the requested group is not in the user's allowed groups
    */
   public void authorizeRequestedGroup(String userToken, String requestedGroup)
       throws ParseException, ForbiddenException {
@@ -114,21 +110,19 @@ public class DeploymentController {
   /**
    * Get all deployments.
    *
-   * @param createdBy
-   *          created by name
-   * @param userGroup
-   *          user group
-   * @param pageable
-   *          {@link Pageable}
-   * @param pagedAssembler
-   *          {@link PagedResourcesAssembler}
+   * @param createdBy created by name
+   * @param userGroup user group
+   * @param pageable {@link Pageable}
+   * @param pagedAssembler {@link PagedResourcesAssembler}
    * @return {@link DeploymentResource}
    * @throws ParseException if the claim value is not of required type when parsing user's token
    * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
-   *         or the requested group is not in the user's allowed groups
+   *     or the requested group is not in the user's allowed groups
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/deployments", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/deployments",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public PagedResources<DeploymentResource> getDeployments(
       @RequestParam(name = "createdBy", required = false) @Nullable String createdBy,
@@ -143,17 +137,16 @@ public class DeploymentController {
       authorizeRequestedGroup(userToken, userGroup);
     }
 
-    Page<Deployment> deployments = deploymentService.getDeployments(pageable, createdBy,
-        userGroup, excludedStatus);
+    Page<Deployment> deployments =
+        deploymentService.getDeployments(pageable, createdBy, userGroup, excludedStatus);
 
-    return pagedAssembler.toResource(deployments, deploymentResourceAssembler,
-        ControllerLinkBuilder
-            .linkTo(
-                DummyInvocationUtils
-                    .methodOn(DeploymentController.class)
+    return pagedAssembler.toResource(
+        deployments,
+        deploymentResourceAssembler,
+        ControllerLinkBuilder.linkTo(
+                DummyInvocationUtils.methodOn(DeploymentController.class)
                     .getDeployments(createdBy, userGroup, excludedStatus, pageable, pagedAssembler))
             .withSelfRel());
-
   }
 
   /**
@@ -163,10 +156,12 @@ public class DeploymentController {
    * @return {@link DeploymentResource}
    * @throws ParseException if the claim value is not of required type when parsing user's token
    * @throws ForbiddenException if there is no groups or wlcg groups claim, or they are both empty,
-   *         or the requested group is not in the user's allowed groups
+   *     or the requested group is not in the user's allowed groups
    */
   @ResponseStatus(HttpStatus.CREATED)
-  @RequestMapping(value = "/deployments", method = RequestMethod.POST,
+  @RequestMapping(
+      value = "/deployments",
+      method = RequestMethod.POST,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
   public DeploymentResource createDeployment(@Valid @RequestBody DeploymentRequest request)
@@ -189,18 +184,18 @@ public class DeploymentController {
   /**
    * Update the deployment.
    *
-   * @param id
-   *          the deployment id
-   * @param request
-   *          {@link DeploymentRequest}
+   * @param id the deployment id
+   * @param request {@link DeploymentRequest}
    */
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.PUT,
+  @RequestMapping(
+      value = "/deployments/{deploymentId}",
+      method = RequestMethod.PUT,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void updateDeployment(@PathVariable("deploymentId") String id,
-      @Valid @RequestBody DeploymentRequest request) {
-    //OidcEntity owner = null;
+  public void updateDeployment(
+      @PathVariable("deploymentId") String id, @Valid @RequestBody DeploymentRequest request) {
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
@@ -224,18 +219,18 @@ public class DeploymentController {
   /**
    * Reset the deployment status to an error state.
    *
-   * @param id
-   *          the deployment id
-   * @param status
-   *          {@link DeploymentStatus}
+   * @param id the deployment id
+   * @param status {@link DeploymentStatus}
    */
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.PATCH,
+  @RequestMapping(
+      value = "/deployments/{deploymentId}",
+      method = RequestMethod.PATCH,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void resetDeployment(@PathVariable("deploymentId") String id,
-      @Valid @RequestBody DeploymentStatus status) {
-    //OidcEntity owner = null;
+  public void resetDeployment(
+      @PathVariable("deploymentId") String id, @Valid @RequestBody DeploymentStatus status) {
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
@@ -247,12 +242,13 @@ public class DeploymentController {
   /**
    * Get the deployment.
    *
-   * @param id
-   *          the deployment id
+   * @param id the deployment id
    * @return {@link DeploymentResource}
    */
   @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.GET,
+  @RequestMapping(
+      value = "/deployments/{deploymentId}",
+      method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public DeploymentResource getDeployment(@PathVariable("deploymentId") String id) {
 
@@ -264,15 +260,14 @@ public class DeploymentController {
   /**
    * Get the infrastructure log by deploymentId.
    *
-   * @param id
-   *          the deployment id
+   * @param id the deployment id
    * @return the log
    */
   @GetMapping(path = "/deployments/{deploymentId}/log")
   @ResponseStatus(HttpStatus.OK)
   public CharSequence getDeploymentLog(@PathVariable("deploymentId") String id) {
     MdcUtils.setDeploymentId(id);
-    //OidcEntity owner = null;
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
@@ -284,15 +279,14 @@ public class DeploymentController {
   /**
    * Get the infrastructure info for deploymentId.
    *
-   * @param id
-   *          the deployment id
+   * @param id the deployment id
    * @return the extra info
    */
   @GetMapping(path = "/deployments/{deploymentId}/extrainfo")
   @ResponseStatus(HttpStatus.OK)
   public CharSequence getDeploymentExtraInfo(@PathVariable("deploymentId") String id) {
     MdcUtils.setDeploymentId(id);
-    //OidcEntity owner = null;
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();
@@ -304,16 +298,18 @@ public class DeploymentController {
   /**
    * Delete the deployment.
    *
-   * @param id
-   *          the deployment id
+   * @param id the deployment id
    */
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @RequestMapping(value = "/deployments/{deploymentId}", method = RequestMethod.DELETE,
+  @RequestMapping(
+      value = "/deployments/{deploymentId}",
+      method = RequestMethod.DELETE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OFFLINE_ACCESS_REQUIRED_CONDITION)
-  public void deleteDeployment(@PathVariable("deploymentId") String id,
+  public void deleteDeployment(
+      @PathVariable("deploymentId") String id,
       @RequestParam(name = "force", required = false) @Nullable String force) {
-    //OidcEntity owner = null;
+    // OidcEntity owner = null;
     OidcTokenId requestedWithToken = null;
     if (oidcProperties.isEnabled()) {
       /*owner =*/ oauth2Tokenservice.getOrGenerateOidcEntityFromCurrentAuth();

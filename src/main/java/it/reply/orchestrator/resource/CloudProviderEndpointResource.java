@@ -35,26 +35,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class CloudProviderEndpointResource {
 
-  @NonNull
-  @NotNull
-  private String cpEndpoint;
+  @NonNull @NotNull private String cpEndpoint;
 
-  @Nullable
-  private String region;
+  @Nullable private String region;
 
-  @NonNull
-  @NotNull
-  private String cpComputeServiceId;
+  @NonNull @NotNull private String cpComputeServiceId;
 
   private String vaultUri;
 
-  @NonNull
-  @NotNull
-  private IaaSType deploymentType;
+  @NonNull @NotNull private IaaSType deploymentType;
 
-  @NonNull
-  @NotNull
-  @Builder.Default
+  @NonNull @NotNull @Builder.Default
   private Map<String, CloudProviderEndpointResource> hybridCloudProviderEndpoints = new HashMap<>();
-
 }

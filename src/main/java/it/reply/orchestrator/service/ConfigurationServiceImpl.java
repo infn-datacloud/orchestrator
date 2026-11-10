@@ -31,26 +31,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
 
-  @Autowired
-  private CmdbProperties cmdbProperties;
+  @Autowired private CmdbProperties cmdbProperties;
 
-  @Autowired
-  private CprProperties cprProperties;
+  @Autowired private CprProperties cprProperties;
 
-  @Autowired
-  private ImProperties imProperties;
+  @Autowired private ImProperties imProperties;
 
-  @Autowired
-  private MonitoringProperties monitoringProperties;
+  @Autowired private MonitoringProperties monitoringProperties;
 
-  @Autowired
-  private SlamProperties slamProperties;
+  @Autowired private SlamProperties slamProperties;
 
-  @Autowired
-  private VaultProperties vaultProperties;
+  @Autowired private VaultProperties vaultProperties;
 
-  @Autowired
-  private RucioProperties rucioProperties;
+  @Autowired private RucioProperties rucioProperties;
 
   /**
    * Return the system configuration endpoints.
@@ -58,8 +51,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
    * @return the configuration endpoints
    */
   public SystemEndpoints getConfiguration() {
-    return SystemEndpoints
-        .builder()
+    return SystemEndpoints.builder()
         .cprUrl(cprProperties.getUrl())
         .slamUrl(slamProperties.getUrl())
         .cmdbUrl(cmdbProperties.getUrl())
@@ -69,5 +61,4 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         .rucioUrl(rucioProperties.getUrl())
         .build();
   }
-
 }

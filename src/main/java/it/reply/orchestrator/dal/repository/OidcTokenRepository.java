@@ -19,9 +19,7 @@ package it.reply.orchestrator.dal.repository;
 
 import it.reply.orchestrator.dal.entity.OidcRefreshToken;
 import it.reply.orchestrator.dal.entity.OidcTokenId;
-
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,5 +29,4 @@ import org.springframework.transaction.annotation.Transactional;
 public interface OidcTokenRepository extends JpaRepository<OidcRefreshToken, Long> {
 
   public Optional<OidcRefreshToken> findByOidcTokenId(OidcTokenId oidcTokenId);
-
 }

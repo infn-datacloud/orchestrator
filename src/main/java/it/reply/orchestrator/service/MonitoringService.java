@@ -28,5 +28,4 @@ public interface MonitoringService {
    * @return the provider data
    */
   public Group getProviderData(String providerId);
-
 }

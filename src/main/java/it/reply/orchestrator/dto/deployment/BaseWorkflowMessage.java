@@ -38,35 +38,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseWorkflowMessage {
 
-  @Nullable
-  private OidcTokenId requestedWithToken;
+  @Nullable private OidcTokenId requestedWithToken;
 
-  @NonNull
-  @NotNull
-  private String deploymentId;
+  @NonNull @NotNull private String deploymentId;
 
-  @NonNull
-  @NotNull
-  private DeploymentType deploymentType;
+  @NonNull @NotNull private DeploymentType deploymentType;
 
   private boolean hybrid;
 
-  @NonNull
-  private Map<String, OneData> oneDataRequirements = new HashMap<>();
+  @NonNull private Map<String, OneData> oneDataRequirements = new HashMap<>();
 
-  @NonNull
-  private Map<String, Dynafed> dynafedRequirements = new HashMap<>();
+  @NonNull private Map<String, Dynafed> dynafedRequirements = new HashMap<>();
 
-  @NonNull
-  private Map<String, ToscaPolicy> placementPolicies = new HashMap<>();
+  @NonNull private Map<String, ToscaPolicy> placementPolicies = new HashMap<>();
 
   private boolean dataMovementWorkflow = false;
 
   /**
    * Creates a new BaseWorkflowMessage coping the fields from another one.
    *
-   * @param other
-   *          the other BaseWorkflowMessage
+   * @param other the other BaseWorkflowMessage
    */
   @Tolerate
   public BaseWorkflowMessage(BaseWorkflowMessage other) {

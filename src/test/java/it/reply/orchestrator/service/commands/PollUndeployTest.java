@@ -22,10 +22,8 @@ import static org.mockito.Mockito.when;
 
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,19 +36,18 @@ public class PollUndeployTest extends BaseDeployCommandTest<PollUndeploy> {
   }
 
   @Test
-  @Parameters({ "true", "false" })
+  @Parameters({"true", "false"})
   public void testPollingSuccessful(boolean pollingComplete) {
     DeploymentMessage dm = new DeploymentMessage();
-    ExecutionEntity execution = new ExecutionEntityBuilder()
-        .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
-        .build();
+    ExecutionEntity execution =
+        new ExecutionEntityBuilder()
+            .withMockedVariable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE, dm)
+            .build();
 
-    when(deploymentProviderService.isUndeployed(dm))
-        .thenReturn(pollingComplete);
+    when(deploymentProviderService.isUndeployed(dm)).thenReturn(pollingComplete);
 
     command.execute(execution);
 
-    assertThat(dm.isPollComplete())
-        .isEqualTo(pollingComplete);
+    assertThat(dm.isPollComplete()).isEqualTo(pollingComplete);
   }
 }

@@ -36,20 +36,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeploymentScheduleResource extends AbstractResource {
 
-  @Nullable
-  private DeploymentScheduleStatus status;
+  @Nullable private DeploymentScheduleStatus status;
 
   private String replicationExpression;
 
   private String fileExpression;
 
-  @Nullable
-  private String callback;
+  @Nullable private String callback;
 
   private Integer numberOfReplicas;
 
-  @Nullable
-  private OidcEntityId createdBy;
+  @Nullable private OidcEntityId createdBy;
 
   /**
    * Create a new DeploymentScheduleResource.
@@ -65,10 +62,15 @@ public class DeploymentScheduleResource extends AbstractResource {
    * @param createdBy the {@link OidcEntityId} of the user that created the resource
    */
   @Builder
-  public DeploymentScheduleResource(@NonNull String uuid, @Nullable Date creationTime,
+  public DeploymentScheduleResource(
+      @NonNull String uuid,
+      @Nullable Date creationTime,
       @Nullable Date updateTime,
-      @Nullable DeploymentScheduleStatus status, String replicationExpression,
-      String fileExpression, Integer numberOfReplicas, @Nullable String callback,
+      @Nullable DeploymentScheduleStatus status,
+      String replicationExpression,
+      String fileExpression,
+      Integer numberOfReplicas,
+      @Nullable String callback,
       @Nullable OidcEntityId createdBy) {
     super(uuid, creationTime, updateTime, null);
     this.status = status;

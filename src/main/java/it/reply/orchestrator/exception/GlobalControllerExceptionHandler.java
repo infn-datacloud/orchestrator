@@ -20,11 +20,8 @@ package it.reply.orchestrator.exception;
 import it.reply.orchestrator.dto.common.Error;
 import it.reply.orchestrator.exception.http.OrchestratorApiException;
 import it.reply.orchestrator.utils.CommonUtils;
-
 import java.sql.SQLTransientException;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.flowable.common.engine.api.FlowableOptimisticLockingException;
 import org.springframework.dao.TransientDataAccessException;
@@ -45,10 +42,8 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   /**
    * {@link OrchestratorApiException} handler.
    *
-   * @param ex
-   *          the exception
-   * @param request
-   *          the Web request object
+   * @param ex the exception
+   * @param request the Web request object
    * @return a {@code ResponseEntity} instance
    */
   @ExceptionHandler
@@ -57,13 +52,11 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   }
 
   /**
-   * OAuth2Exception exception handler. This handler will just re-throw the exception and to let
-   * the {@link AbstractOAuth2SecurityExceptionHandler} handle it.
+   * OAuth2Exception exception handler. This handler will just re-throw the exception and to let the
+   * {@link AbstractOAuth2SecurityExceptionHandler} handle it.
    *
-   * @param ex
-   *          the exception
-   * @param request
-   *          the Web request object
+   * @param ex the exception
+   * @param request the Web request object
    * @return a {@code ResponseEntity} instance
    */
   @ExceptionHandler
@@ -76,38 +69,35 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   /**
    * {@link TransientDataAccessException} and {@link FlowableOptimisticLockingException} handler.
    *
-   * @param ex
-   *     the exception
-   * @param request
-   *     the Web request object
+   * @param ex the exception
+   * @param request the Web request object
    * @return a {@code ResponseEntity} instance
    */
   @ExceptionHandler({TransientDataAccessException.class, FlowableOptimisticLockingException.class})
   public ResponseEntity<Object> handleTransientDataException(Exception ex, WebRequest request) {
     HttpHeaders headers = new HttpHeaders();
     headers.set(HttpHeaders.RETRY_AFTER, "0");
-    Error bodyToWrite = Error
-        .builder()
-        .message("The request couldn't be fulfilled because of a concurrent update."
-            + " Please retry later")
-        .exception(ex)
-        .status(HttpStatus.CONFLICT)
-        .build();
+    Error bodyToWrite =
+        Error.builder()
+            .message(
+                "The request couldn't be fulfilled because of a concurrent update."
+                    + " Please retry later")
+            .exception(ex)
+            .status(HttpStatus.CONFLICT)
+            .build();
     return handleExceptionInternal(ex, bodyToWrite, headers, HttpStatus.CONFLICT, request);
   }
 
   /**
    * {@link PersistenceException} handler.
    *
-   * @param ex
-   *     the exception
-   * @param request
-   *     the web request object
+   * @param ex the exception
+   * @param request the web request object
    * @return a {@code ResponseEntity} instance
    */
   @ExceptionHandler
-  public ResponseEntity<Object> handleIbatisPersistenceException(PersistenceException ex,
-      WebRequest request) {
+  public ResponseEntity<Object> handleIbatisPersistenceException(
+      PersistenceException ex, WebRequest request) {
     if (ex.getCause() instanceof SQLTransientException) {
       return handleTransientDataException(ex, request);
     } else {
@@ -118,10 +108,8 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   /**
    * Server Error exception handler.
    *
-   * @param ex
-   *          the exception
-   * @param request
-   *          the web request object
+   * @param ex the exception
+   * @param request the web request object
    * @return a {@code ResponseEntity} instance
    */
   @ExceptionHandler
@@ -134,25 +122,26 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   }
 
   @Override
-  protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
-      HttpHeaders headers, HttpStatus status, WebRequest request) {
+  protected ResponseEntity<Object> handleExceptionInternal(
+      Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
     if (status != HttpStatus.NOT_FOUND && status != HttpStatus.METHOD_NOT_ALLOWED) {
       LOG.error("Error handling request {}", request, ex);
     }
     final HttpHeaders headersToWrite = CommonUtils.notNullOrDefaultValue(headers, HttpHeaders::new);
-    final Object bodyToWrite = CommonUtils.notNullOrDefaultValue(body,
-        () -> CommonUtils.checkNotNull(Error.builder().exception(ex).status(status).build()));
+    final Object bodyToWrite =
+        CommonUtils.notNullOrDefaultValue(
+            body,
+            () -> CommonUtils.checkNotNull(Error.builder().exception(ex).status(status).build()));
     return super.handleExceptionInternal(ex, bodyToWrite, headersToWrite, status, request);
   }
 
-  protected ResponseEntity<Object> handleExceptionInternal(Exception ex, HttpStatus status,
-      WebRequest request) {
+  protected ResponseEntity<Object> handleExceptionInternal(
+      Exception ex, HttpStatus status, WebRequest request) {
     return handleExceptionInternal(ex, null, null, status, request);
   }
 
-  protected ResponseEntity<Object> handleExceptionInternal(Exception ex, HttpStatus status,
-      HttpHeaders headers, WebRequest request) {
+  protected ResponseEntity<Object> handleExceptionInternal(
+      Exception ex, HttpStatus status, HttpHeaders headers, WebRequest request) {
     return handleExceptionInternal(ex, null, headers, status, request);
   }
-
 }

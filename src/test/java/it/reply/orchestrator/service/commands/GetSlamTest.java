@@ -17,6 +17,8 @@
 
 package it.reply.orchestrator.service.commands;
 
+import static org.mockito.Mockito.*;
+
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.config.properties.SlamProperties;
 import it.reply.orchestrator.controller.ControllerTestUtils;
@@ -30,9 +32,7 @@ import it.reply.orchestrator.service.SlamServiceV1Impl;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
 import it.reply.orchestrator.util.IntegrationTestUtil;
 import it.reply.orchestrator.util.TestUtil;
-
 import java.net.URI;
-
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,34 +40,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
-import static org.mockito.Mockito.*;
-
 public class GetSlamTest extends BaseRankCloudProvidersCommandTest<GetSlam> {
 
-  @Spy
-  @InjectMocks
-  private SlamServiceV1Impl slamService;
+  @Spy @InjectMocks private SlamServiceV1Impl slamService;
 
-  @Spy
-  private SlamProperties slamProperties;
+  @Spy private SlamProperties slamProperties;
 
-  @Spy
-  private OidcProperties oidcProperties;
+  @Spy private OidcProperties oidcProperties;
 
-  @Mock
-  private OidcEntityRepository entityRepository;
+  @Mock private OidcEntityRepository entityRepository;
 
-  @Mock
-  private DeploymentRepository deploymentRepository;
+  @Mock private DeploymentRepository deploymentRepository;
 
   public GetSlamTest() {
     super(new GetSlam());
   }
 
-  @Mock
-  private OAuth2TokenService oauth2TokenService;
+  @Mock private OAuth2TokenService oauth2TokenService;
 
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({"rawtypes", "unchecked"})
   @Before
   public void setup() throws Exception {
     slamProperties.setUrl(URI.create("https://www.example.com"));
@@ -77,12 +68,12 @@ public class GetSlamTest extends BaseRankCloudProvidersCommandTest<GetSlam> {
 
     when(oauth2TokenService.getOrganization(any())).thenReturn("indigo-dc");
 
-    Deployment deployment = ControllerTestUtils.createDeployment("mmd34483-d937-4578-bfdb-ebe196bf82dd");
+    Deployment deployment =
+        ControllerTestUtils.createDeployment("mmd34483-d937-4578-bfdb-ebe196bf82dd");
     DeploymentMessage generateDeployDm = TestUtil.generateDeployDm(deployment);
     deployment.setDeploymentProvider(DeploymentProvider.IM);
 
-    when(deploymentRepository.findOne(generateDeployDm.getDeploymentId()))
-        .thenReturn(deployment);
+    when(deploymentRepository.findOne(generateDeployDm.getDeploymentId())).thenReturn(deployment);
   }
 
   @Test
@@ -93,10 +84,7 @@ public class GetSlamTest extends BaseRankCloudProvidersCommandTest<GetSlam> {
     String serializedRankCloudProvidersMessage =
         "{\"deploymentId\":\"mmd34483-d937-4578-bfdb-ebe196bf82dd\"}";
 
-    Assertions
-        .assertThatCode(() -> execute(serializedRankCloudProvidersMessage))
+    Assertions.assertThatCode(() -> execute(serializedRankCloudProvidersMessage))
         .doesNotThrowAnyException();
-
   }
-
 }

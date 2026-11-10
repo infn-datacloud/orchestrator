@@ -19,14 +19,11 @@ package it.reply.orchestrator.dto.security;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -35,8 +32,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @EqualsAndHashCode(callSuper = true)
 public class GenericServiceCredentialWithTenant extends GenericServiceCredential {
 
-  public GenericServiceCredentialWithTenant(@NonNull String username, @NonNull String password,
-      @NonNull String tenant) {
+  public GenericServiceCredentialWithTenant(
+      @NonNull String username, @NonNull String password, @NonNull String tenant) {
     super(username, password);
     this.tenant = tenant;
   }
@@ -46,5 +43,4 @@ public class GenericServiceCredentialWithTenant extends GenericServiceCredential
   @NotNull
   @Getter
   private String tenant;
-
 }

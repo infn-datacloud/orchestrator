@@ -65,52 +65,29 @@ public class ComputeService extends CloudService {
   /**
    * Generate a new ComputeService.
    *
-   * @param id
-   *     the id
-   * @param serviceType
-   *     the serviceType
-   * @param endpoint
-   *     the endpoint
-   * @param microversion
-   *     the microversion
-   * @param providerId
-   *     the providerId
-   * @param type
-   *     the type
-   * @param publicService
-   *     the publicService
-   * @param region
-   *     the region
-   * @param tenant
-   *     the tenant
-   * @param hostname
-   *     the hostname
-   * @param parentServiceId
-   *     the parent service Id
-   * @param images
-   *     the images
-   * @param flavors
-   *     the flavors
-   * @param iamEnabled
-   *     the iamEnabled flag
-   * @param idpProtocol
-   *     the IDP protocol name
-   * @param publicIpAssignable
-   *     the publicIpAssignable flag
-   * @param supportedIdps
-   *     the supportedIdps
-   * @param volumeTypes
-   *     the volumeTypes
-   * @param publicNetworkName
-   *     the public network name
-   * @param privateNetworkCidr
-   *     the private network CIDR
-   * @param privateNetworkName
-   *     the private network name
-   * @param privateNetworkProxyHost
-   *     the private network proxy host ip/dns name
-   * @param privateNetworkProxyUser
-   *     the private network proxy host user
+   * @param id the id
+   * @param serviceType the serviceType
+   * @param endpoint the endpoint
+   * @param microversion the microversion
+   * @param providerId the providerId
+   * @param type the type
+   * @param publicService the publicService
+   * @param region the region
+   * @param tenant the tenant
+   * @param hostname the hostname
+   * @param parentServiceId the parent service Id
+   * @param images the images
+   * @param flavors the flavors
+   * @param iamEnabled the iamEnabled flag
+   * @param idpProtocol the IDP protocol name
+   * @param publicIpAssignable the publicIpAssignable flag
+   * @param supportedIdps the supportedIdps
+   * @param volumeTypes the volumeTypes
+   * @param publicNetworkName the public network name
+   * @param privateNetworkCidr the private network CIDR
+   * @param privateNetworkName the private network name
+   * @param privateNetworkProxyHost the private network proxy host ip/dns name
+   * @param privateNetworkProxyUser the private network proxy host user
    */
   @Builder(builderMethodName = "computeBuilder")
   public ComputeService(
@@ -137,9 +114,23 @@ public class ComputeService extends CloudService {
       @Nullable String privateNetworkName,
       @Nullable String privateNetworkProxyHost,
       @Nullable String privateNetworkProxyUser) {
-    super(id, serviceType, endpoint, microversion, providerId, type, publicService,
-            tenant, region, hostname, parentServiceId, iamEnabled, idpProtocol,
-            publicIpAssignable, supportedIdps, volumeTypes);
+    super(
+        id,
+        serviceType,
+        endpoint,
+        microversion,
+        providerId,
+        type,
+        publicService,
+        tenant,
+        region,
+        hostname,
+        parentServiceId,
+        iamEnabled,
+        idpProtocol,
+        publicIpAssignable,
+        supportedIdps,
+        volumeTypes);
     this.images = CommonUtils.notNullOrDefaultValue(images, ArrayList::new);
     this.flavors = CommonUtils.notNullOrDefaultValue(flavors, ArrayList::new);
     this.publicNetworkName = publicNetworkName;

@@ -32,8 +32,8 @@ public class PollUndeploy extends BaseDeployCommand {
 
   @Override
   public void execute(DelegateExecution execution, DeploymentMessage deploymentMessage) {
-    boolean pollComplete = getDeploymentProviderService(deploymentMessage)
-        .isUndeployed(deploymentMessage);
+    boolean pollComplete =
+        getDeploymentProviderService(deploymentMessage).isUndeployed(deploymentMessage);
     deploymentMessage.setPollComplete(pollComplete);
   }
 }

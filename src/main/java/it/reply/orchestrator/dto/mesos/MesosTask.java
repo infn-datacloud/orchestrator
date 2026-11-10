@@ -22,9 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.Data;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -46,23 +44,17 @@ public abstract class MesosTask<T extends MesosTask<T>> {
 
   private String runAsUser;
 
-  @NonNull
-  private List<T> parents = new ArrayList<>();
+  @NonNull private List<T> parents = new ArrayList<>();
 
-  @NonNull
-  private List<List<String>> constraints = new ArrayList<>();
+  @NonNull private List<List<String>> constraints = new ArrayList<>();
 
-  @NonNull
-  private List<String> uris = new ArrayList<>();
+  @NonNull private List<String> uris = new ArrayList<>();
 
-  @NonNull
-  private Map<String, String> env = new HashMap<>();
+  @NonNull private Map<String, String> env = new HashMap<>();
 
-  @NonNull
-  private Map<String, String> labels = new HashMap<>();
+  @NonNull private Map<String, String> labels = new HashMap<>();
 
   public Optional<MesosContainer> getContainer() {
     return Optional.ofNullable(this.container);
   }
-
 }

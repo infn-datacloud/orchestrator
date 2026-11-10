@@ -46,5 +46,4 @@ public class PreferenceCustomer {
   protected PreferenceCustomer() {
     priority = new ArrayList<>();
   }
-
 }

@@ -54,5 +54,4 @@ public class Restrictions {
   @JsonProperty("user_limit")
   @Nullable
   private Integer userLimit;
-
 }

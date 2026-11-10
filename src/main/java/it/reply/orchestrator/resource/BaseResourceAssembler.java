@@ -28,9 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class BaseResourceAssembler extends ResourceAssemblerSupport<Resource, BaseResource> {
 
-  /**
-   * BaseResourceAssembler.
-   */
+  /** BaseResourceAssembler. */
   public BaseResourceAssembler() {
     super(ResourceController.class, BaseResource.class);
   }
@@ -41,26 +39,28 @@ public class BaseResourceAssembler extends ResourceAssemblerSupport<Resource, Ba
   }
 
   private BaseResource getBaseResource(Resource entity) {
-    BaseResource resource = BaseResource.builder()
-        .uuid(entity.getId())
-        .creationTime(entity.getCreatedAt())
-        .updateTime(entity.getUpdatedAt())
-        .physicalId(entity.getIaasId())
-        .state(entity.getState())
-        .toscaNodeType(entity.getToscaNodeType())
-        .toscaNodeName(entity.getToscaNodeName())
-        .metadata(entity.getMetadata())
-        .build();
-    resource
-        .add(ControllerLinkBuilder.linkTo(DummyInvocationUtils.methodOn(DeploymentController.class)
-            .getDeployment(entity.getDeployment().getId())).withRel("deployment"));
-    resource
-        .add(
-            ControllerLinkBuilder
-                .linkTo(DummyInvocationUtils
-                    .methodOn(ResourceController.class, entity.getDeployment().getId())
+    BaseResource resource =
+        BaseResource.builder()
+            .uuid(entity.getId())
+            .creationTime(entity.getCreatedAt())
+            .updateTime(entity.getUpdatedAt())
+            .physicalId(entity.getIaasId())
+            .state(entity.getState())
+            .toscaNodeType(entity.getToscaNodeType())
+            .toscaNodeName(entity.getToscaNodeName())
+            .metadata(entity.getMetadata())
+            .build();
+    resource.add(
+        ControllerLinkBuilder.linkTo(
+                DummyInvocationUtils.methodOn(DeploymentController.class)
+                    .getDeployment(entity.getDeployment().getId()))
+            .withRel("deployment"));
+    resource.add(
+        ControllerLinkBuilder.linkTo(
+                DummyInvocationUtils.methodOn(
+                        ResourceController.class, entity.getDeployment().getId())
                     .getResource(entity.getDeployment().getId(), entity.getId()))
-                .withSelfRel());
+            .withSelfRel());
     return resource;
   }
 }

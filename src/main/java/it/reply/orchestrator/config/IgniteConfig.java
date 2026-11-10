@@ -18,14 +18,10 @@
 package it.reply.orchestrator.config;
 
 import it.reply.orchestrator.config.properties.OrchestratorProperties;
-
 import java.util.Objects;
-
 import javax.cache.configuration.Factory;
 import javax.transaction.TransactionManager;
-
 import lombok.AllArgsConstructor;
-
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.IgniteSpring;
@@ -48,8 +44,7 @@ public class IgniteConfig {
 
     private static final long serialVersionUID = 1L;
 
-    @NonNull
-    private transient TransactionManager transactionManager;
+    @NonNull private transient TransactionManager transactionManager;
 
     @Override
     public TransactionManager create() {
@@ -62,27 +57,29 @@ public class IgniteConfig {
    *
    * @param transactionManager The transaction manager object
    * @param orchestratorProperties The Orchestrator properties object
-   *
    * @return the generated IgniteConfiguration
    */
   @Bean
-  public IgniteConfiguration igniteConfiguration(JtaTransactionManager transactionManager,
-      OrchestratorProperties orchestratorProperties) {
+  public IgniteConfiguration igniteConfiguration(
+      JtaTransactionManager transactionManager, OrchestratorProperties orchestratorProperties) {
 
-    TransactionConfiguration txCfg = new TransactionConfiguration().setTxManagerFactory(
-        new TransactionManagerFactory(transactionManager.getTransactionManager()));
+    TransactionConfiguration txCfg =
+        new TransactionConfiguration()
+            .setTxManagerFactory(
+                new TransactionManagerFactory(transactionManager.getTransactionManager()));
 
-    IgniteConfiguration igniteConfiguration = new IgniteConfiguration()
-        .setGridLogger(new Slf4jLogger())
-        .setClientMode(false)
-        .setActiveOnStart(true)
-        .setTransactionConfiguration(txCfg)
-        .setMetricsLogFrequency(0)
-        .setLocalHost("127.0.0.1");
+    IgniteConfiguration igniteConfiguration =
+        new IgniteConfiguration()
+            .setGridLogger(new Slf4jLogger())
+            .setClientMode(false)
+            .setActiveOnStart(true)
+            .setTransactionConfiguration(txCfg)
+            .setMetricsLogFrequency(0)
+            .setLocalHost("127.0.0.1");
 
     if (!orchestratorProperties.isClustered()) {
-      TcpDiscoverySpi discoverySpi = new TcpDiscoverySpi()
-          .setIpFinder(new TcpDiscoveryVmIpFinder(true));
+      TcpDiscoverySpi discoverySpi =
+          new TcpDiscoverySpi().setIpFinder(new TcpDiscoveryVmIpFinder(true));
       igniteConfiguration = igniteConfiguration.setDiscoverySpi(discoverySpi);
     }
     return igniteConfiguration;
@@ -93,14 +90,13 @@ public class IgniteConfig {
    *
    * @param applicationContext The Application context
    * @param igniteConfiguration The Ignite configuration object
-   *
    * @throws IgniteCheckedException the exception
-   *
    * @return the generated Ignite instance
    */
   @Bean(destroyMethod = "close")
-  public Ignite ignite(ApplicationContext applicationContext,
-      IgniteConfiguration igniteConfiguration) throws IgniteCheckedException {
+  public Ignite ignite(
+      ApplicationContext applicationContext, IgniteConfiguration igniteConfiguration)
+      throws IgniteCheckedException {
     return IgniteSpring.start(igniteConfiguration, applicationContext);
   }
 }

@@ -74,49 +74,60 @@ public class RemoteRepositoryServiceImpl implements ICSARRepositorySearchService
   }
 
   @Override
-  public boolean isElementExistInDependencies(Class<? extends AbstractToscaType> elementClass,
-      String elementId, Set<CSARDependency> dependencies) {
+  public boolean isElementExistInDependencies(
+      Class<? extends AbstractToscaType> elementClass,
+      String elementId,
+      Set<CSARDependency> dependencies) {
     return getElementInDependencies(elementClass, elementId, dependencies) != null;
   }
 
   @Override
-  public <T extends AbstractToscaType> T getRequiredElementInDependencies(Class<T> elementClass,
-      String elementId, Set<CSARDependency> dependencies) {
+  public <T extends AbstractToscaType> T getRequiredElementInDependencies(
+      Class<T> elementClass, String elementId, Set<CSARDependency> dependencies) {
     T element = getElementInDependencies(elementClass, elementId, dependencies);
     if (element == null) {
       throw new NotFoundException(
-          "Element elementId: <" + elementId + "> of type <" + elementClass.getSimpleName()
-              + "> cannot be found in dependencies " + dependencies);
+          "Element elementId: <"
+              + elementId
+              + "> of type <"
+              + elementClass.getSimpleName()
+              + "> cannot be found in dependencies "
+              + dependencies);
     }
     return element;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T extends AbstractToscaType> T getElementInDependencies(Class<T> elementClass,
-      Set<CSARDependency> dependencies, String... keyValueFilters) {
-    return (T) ToscaContext.get().getElement(elementClass, element -> {
-      if (!dependencies
-          .contains(new CSARDependency(element.getArchiveName(), element.getArchiveVersion()))) {
-        return false;
-      }
+  public <T extends AbstractToscaType> T getElementInDependencies(
+      Class<T> elementClass, Set<CSARDependency> dependencies, String... keyValueFilters) {
+    return (T)
+        ToscaContext.get()
+            .getElement(
+                elementClass,
+                element -> {
+                  if (!dependencies.contains(
+                      new CSARDependency(element.getArchiveName(), element.getArchiveVersion()))) {
+                    return false;
+                  }
 
-      EvaluationContext context = new StandardEvaluationContext(element);
+                  EvaluationContext context = new StandardEvaluationContext(element);
 
-      for (int i = 0; i < keyValueFilters.length; i += 2) {
-        String field = keyValueFilters[0];
-        String value = keyValueFilters[1];
-        if (!value.equals(context.lookupVariable(field).toString())) {
-          return false;
-        }
-      }
-      return true;
-    }).orElse(null);
+                  for (int i = 0; i < keyValueFilters.length; i += 2) {
+                    String field = keyValueFilters[0];
+                    String value = keyValueFilters[1];
+                    if (!value.equals(context.lookupVariable(field).toString())) {
+                      return false;
+                    }
+                  }
+                  return true;
+                })
+            .orElse(null);
   }
 
   @Override
-  public <T extends AbstractToscaType> T getElementInDependencies(Class<T> elementClass,
-      String elementId, Set<CSARDependency> dependencies) {
+  public <T extends AbstractToscaType> T getElementInDependencies(
+      Class<T> elementClass, String elementId, Set<CSARDependency> dependencies) {
     if (recursiveCall.get() == null) {
       recursiveCall.set(true);
       try {
@@ -150,16 +161,14 @@ public class RemoteRepositoryServiceImpl implements ICSARRepositorySearchService
     } else {
       return withNewParsingContext(() -> parseLocalTemplate(dependency));
     }
-
   }
 
   private ArchiveRoot parseLocalTemplate(CSARDependency dependency) {
     String templateFileName =
         String.format("%s-%s.yaml", dependency.getName(), dependency.getVersion());
     try {
-      Resource templateFile = toscaProperties
-          .getDefinitionsFolder()
-          .createRelative(templateFileName);
+      Resource templateFile =
+          toscaProperties.getDefinitionsFolder().createRelative(templateFileName);
       String templatePath = templateFile.getURI().toString();
       LOG.info("Fetching local TOSCA dependency {}", templatePath);
       String template;
@@ -171,11 +180,9 @@ public class RemoteRepositoryServiceImpl implements ICSARRepositorySearchService
       LOG.info("Parsed local TOSCA dependency {}", templatePath);
       return result;
     } catch (ToscaException e) {
-      throw new ToscaException(
-          "Failed to parse local TOSCA dependency " + templateFileName, e);
+      throw new ToscaException("Failed to parse local TOSCA dependency " + templateFileName, e);
     } catch (IOException e) {
-      throw new ToscaException(
-          "Failed to fetch local TOSCA dependency " + templateFileName, e);
+      throw new ToscaException("Failed to fetch local TOSCA dependency " + templateFileName, e);
     }
   }
 
@@ -186,19 +193,16 @@ public class RemoteRepositoryServiceImpl implements ICSARRepositorySearchService
       LOG.info("Fetching remote TOSCA dependency {}", templateUrl);
       String template = restTemplate.getForObject(templateUrl.toString(), String.class);
       LOG.info("Fetched remote TOSCA dependency {}", templateUrl);
-      ArchiveRoot result = templateParser
-          .parse(templateUrl.toString(), templateUrl.getFile(), template);
+      ArchiveRoot result =
+          templateParser.parse(templateUrl.toString(), templateUrl.getFile(), template);
       LOG.info("Parsed remote TOSCA dependency {}", templateUrl);
       return result;
     } catch (RestClientException e) {
-      throw new ToscaException(
-          "Failed to fetch remote TOSCA dependency " + dependency.getUrl(), e);
+      throw new ToscaException("Failed to fetch remote TOSCA dependency " + dependency.getUrl(), e);
     } catch (ToscaException e) {
-      throw new ToscaException(
-          "Failed to parse remote TOSCA dependency " + dependency.getUrl(), e);
+      throw new ToscaException("Failed to parse remote TOSCA dependency " + dependency.getUrl(), e);
     } catch (MalformedURLException e) {
-      throw new ToscaException(
-          "Invalid import url for remote TOSCA dependency " + dependency, e);
+      throw new ToscaException("Invalid import url for remote TOSCA dependency " + dependency, e);
     }
   }
 
@@ -214,5 +218,4 @@ public class RemoteRepositoryServiceImpl implements ICSARRepositorySearchService
       }
     }
   }
-
 }

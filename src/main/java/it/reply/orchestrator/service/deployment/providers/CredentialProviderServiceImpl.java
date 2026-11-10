@@ -33,21 +33,20 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class CredentialProviderServiceImpl implements CredentialProviderService  {
+public class CredentialProviderServiceImpl implements CredentialProviderService {
 
-  @Autowired
-  private VaultService vaultService;
+  @Autowired private VaultService vaultService;
 
   /**
    * Get credentials stored in vault service.
    *
-   * @param  serviceId  is CpComputeServiceId of cloud provider
-   * @param  accessToken with audience
-   * @param  clazz type of return class
+   * @param serviceId is CpComputeServiceId of cloud provider
+   * @param accessToken with audience
+   * @param clazz type of return class
    * @return GenericCredential or GenericCredentialWithTenant
    */
-  public <T extends ServiceCredential> T credentialProvider(String serviceId,
-      String accessToken, Class<T> clazz) {
+  public <T extends ServiceCredential> T credentialProvider(
+      String serviceId, String accessToken, Class<T> clazz) {
 
     if (serviceId == null || serviceId.isEmpty()) {
       LOG.error("ServiceId is empty.");
@@ -57,16 +56,14 @@ public class CredentialProviderServiceImpl implements CredentialProviderService 
       throw new DeploymentException("Vault service is not configured. Service uri is not present.");
     }
     TokenAuthenticationExtended vaultToken =
-        vaultService.retrieveToken(
-            vaultServiceUri.get(),
-            accessToken
-            );
+        vaultService.retrieveToken(vaultServiceUri.get(), accessToken);
 
-    String pathVaultComplete = vaultServiceUri.get()
-        + "/v1/secret/data/"
-        + vaultToken.getEntityId()
-        + vaultService.getServicePath()
-        + serviceId;
+    String pathVaultComplete =
+        vaultServiceUri.get()
+            + "/v1/secret/data/"
+            + vaultToken.getEntityId()
+            + vaultService.getServicePath()
+            + serviceId;
 
     return vaultService.readSecret(vaultToken, pathVaultComplete, clazz);
   }
@@ -79,8 +76,8 @@ public class CredentialProviderServiceImpl implements CredentialProviderService 
    * @param userGroup is the user group
    * @return GenericServiceCredential or GenericServiceCredentialWithTenant
    */
-  public Map<String, Object> credentialProvider(String serviceId, String userGroup,
-      String accessToken) {
+  public Map<String, Object> credentialProvider(
+      String serviceId, String userGroup, String accessToken) {
 
     String sub = null;
 
@@ -102,10 +99,15 @@ public class CredentialProviderServiceImpl implements CredentialProviderService 
     TokenAuthenticationExtended vaultToken =
         vaultService.retrieveToken(vaultServiceUri.get(), accessToken);
 
-    String pathVaultComplete = vaultServiceUri.get() + "/v1/secrets/data/" + sub
-        + vaultService.getServicePath() + serviceId + "/" + userGroup;
+    String pathVaultComplete =
+        vaultServiceUri.get()
+            + "/v1/secrets/data/"
+            + sub
+            + vaultService.getServicePath()
+            + serviceId
+            + "/"
+            + userGroup;
 
     return vaultService.readSecret(vaultToken, pathVaultComplete);
   }
-
 }

@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,14 +36,12 @@ public class EnumUtils {
    * Retrieve a enum value from its class and a user defined predicate.
    *
    * @param <T> The type of object
-   * @param enumClass
-   *          the class of the enum
-   * @param predicate
-   *          the the predicate
+   * @param enumClass the class of the enum
+   * @param predicate the the predicate
    * @return the optional enum value
    */
-  public static <T extends Enum<T>> Optional<T> fromPredicate(Class<T> enumClass,
-      Predicate<? super T> predicate) {
+  public static <T extends Enum<T>> Optional<T> fromPredicate(
+      Class<T> enumClass, Predicate<? super T> predicate) {
     Objects.requireNonNull(enumClass);
     Objects.requireNonNull(predicate);
     return Arrays.stream(enumClass.getEnumConstants()).filter(predicate).findFirst();
@@ -56,34 +53,26 @@ public class EnumUtils {
    *
    * @param <T> The type of object
    * @param <R> The type of object
-   * @param enumClass
-   *          enums the class
-   * @param mapper
-   *          the mapper fuction
+   * @param enumClass enums the class
+   * @param mapper the mapper fuction
    * @return the list
    */
-  public static <T extends Enum<T>, R> List<R> toList(Class<T> enumClass,
-      Function<? super T, R> mapper) {
+  public static <T extends Enum<T>, R> List<R> toList(
+      Class<T> enumClass, Function<? super T, R> mapper) {
     Objects.requireNonNull(enumClass);
     Objects.requireNonNull(mapper);
     return Arrays.stream(enumClass.getEnumConstants()).map(mapper).collect(Collectors.toList());
   }
 
   /**
-   * <p>
    * Retrieve a enum value from its name and its class.
-   * </p>
    *
-   * <p>
-   * The enum must extends {@link Named}, and the name value should be the one that would be
+   * <p>The enum must extends {@link Named}, and the name value should be the one that would be
    * returned from {@link Named#getName()}.
-   * </p>
    *
    * @param <T> The type of object
-   * @param enumClass
-   *          the class of the enum
-   * @param name
-   *          the enum name
+   * @param enumClass the class of the enum
+   * @param name the enum name
    * @return the enum value, can be null
    */
   public static <T extends Enum<T> & Named> Optional<T> fromName(Class<T> enumClass, String name) {
@@ -93,64 +82,53 @@ public class EnumUtils {
   }
 
   /**
-   * <p>
    * Retrieve a enum value from its name and its class.
-   * </p>
    *
-   * <p>
-   * The enum must extends {@link Named}, and the name value should be the one that would be
+   * <p>The enum must extends {@link Named}, and the name value should be the one that would be
    * returned from {@link Named#getName()}.
-   * </p>
    *
-   * <p>
-   * If no enum is found a {@link NoSuchElementException} will be thrown.
-   * </p>
+   * <p>If no enum is found a {@link NoSuchElementException} will be thrown.
    *
    * @param <T> The type of object
-   * @param enumClass
-   *          the class of the enum
-   * @param name
-   *          the enum name
+   * @param enumClass the class of the enum
+   * @param name the enum name
    * @return the enum value, cannot be null
    */
   public static <T extends Enum<T> & Named> T fromNameOrThrow(Class<T> enumClass, String name) {
-    return fromName(enumClass, name).orElseThrow(() -> new NoSuchElementException(
-        "No enum found with name [" + name + "] in class [" + enumClass + "]"));
+    return fromName(enumClass, name)
+        .orElseThrow(
+            () ->
+                new NoSuchElementException(
+                    "No enum found with name [" + name + "] in class [" + enumClass + "]"));
   }
 
   /**
-   * <p>
    * Retrieve a enum value from its name and its class.
-   * </p>
    *
-   * <p>
-   * The enum must extends {@link Named}, and the name value should be the one that would be
+   * <p>The enum must extends {@link Named}, and the name value should be the one that would be
    * returned from {@link Named#getName()}.
-   * </p>
    *
-   * <p>
-   * If no enum is found the default value will be returned.
-   * </p>
+   * <p>If no enum is found the default value will be returned.
    *
    * @param <T> The type of object
-   * @param enumClass
-   *          the class of the enum
-   * @param name
-   *          the enum name
-   * @param defaultValue
-   *          the defaultValue
+   * @param enumClass the class of the enum
+   * @param name the enum name
+   * @param defaultValue the defaultValue
    * @return the enum value, cannot be null
    */
-  public static <T extends Enum<T> & Named> T fromNameOrDefault(Class<T> enumClass, String name,
-      T defaultValue) {
+  public static <T extends Enum<T> & Named> T fromNameOrDefault(
+      Class<T> enumClass, String name, T defaultValue) {
     Objects.requireNonNull(defaultValue);
 
-    return fromName(enumClass, name).orElseGet(() -> {
-      LOG.warn("No enum found with name [{}] in class [{}], using value [{}] as default", name,
-          enumClass, defaultValue);
-      return defaultValue;
-    });
-
+    return fromName(enumClass, name)
+        .orElseGet(
+            () -> {
+              LOG.warn(
+                  "No enum found with name [{}] in class [{}], using value [{}] as default",
+                  name,
+                  enumClass,
+                  defaultValue);
+              return defaultValue;
+            });
   }
-
 }

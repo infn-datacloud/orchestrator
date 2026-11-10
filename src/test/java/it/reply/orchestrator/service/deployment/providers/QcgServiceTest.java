@@ -17,11 +17,14 @@
 
 package it.reply.orchestrator.service.deployment.providers;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Lists;
-
 import it.infn.ba.deep.qcg.client.Qcg;
 import it.infn.ba.deep.qcg.client.model.Job;
 import it.infn.ba.deep.qcg.client.model.JobDescription;
@@ -53,7 +56,6 @@ import it.reply.orchestrator.service.deployment.providers.QcgServiceImpl.JobStat
 import it.reply.orchestrator.service.deployment.providers.factory.QcgClientFactory;
 import it.reply.orchestrator.util.TestUtil;
 import it.reply.orchestrator.utils.ToscaConstants.Nodes;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,10 +63,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,46 +79,29 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.web.client.RestTemplate;
 
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-
 @RunWith(JUnitParamsRunner.class)
 @JsonTest
 public class QcgServiceTest extends ToscaParserAwareTest {
 
-  @InjectMocks
-  private QcgServiceImpl qcgService;
+  @InjectMocks private QcgServiceImpl qcgService;
 
-  @SpyBean
-  @Autowired
-  private ToscaServiceImpl toscaService;
+  @SpyBean @Autowired private ToscaServiceImpl toscaService;
 
-  @MockBean
-  private DeploymentStatusHelper deploymentStatusHelper;
+  @MockBean private DeploymentStatusHelper deploymentStatusHelper;
 
-  @MockBean
-  private DeploymentRepository deploymentRepository;
+  @MockBean private DeploymentRepository deploymentRepository;
 
-  @MockBean
-  private ResourceRepository resourceRepository;
+  @MockBean private ResourceRepository resourceRepository;
 
-  @MockBean
-  private Qcg qcg;
+  @MockBean private Qcg qcg;
 
-  @MockBean
-  private QcgClientFactory qcgClientFactory;
+  @MockBean private QcgClientFactory qcgClientFactory;
 
-  @SpyBean
-  private ObjectMapper objectMapper;
+  @SpyBean private ObjectMapper objectMapper;
 
-  @Spy
-  protected RestTemplate restTemplate;
+  @Spy protected RestTemplate restTemplate;
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Before
   public void setup() throws Exception {
 
@@ -127,16 +110,14 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     when(qcgClientFactory.build(any(CloudProviderEndpoint.class), any(String.class)))
         .thenReturn(qcg);
 
-    Mockito
-        .when(oauth2tokenService.executeWithClientForResult(
-            Mockito.any(), Mockito.any(), Mockito.any()))
-    	        .thenAnswer(y -> ((ThrowingFunction) y.getArguments()[1]).apply("token"));
-
+    Mockito.when(
+            oauth2tokenService.executeWithClientForResult(
+                Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenAnswer(y -> ((ThrowingFunction) y.getArguments()[1]).apply("token"));
   }
 
   private CloudProviderEndpoint generateCloudProviderEndpoint() {
-    return CloudProviderEndpoint
-        .builder()
+    return CloudProviderEndpoint.builder()
         .iaasType(IaaSType.QCG)
         .cpEndpoint("http://www.example.com/api")
         .cpComputeServiceId("qcg-service-id")
@@ -149,15 +130,13 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     Job job = new Job();
     job.setState(jobState);
     if (jobState.equals("")) {
-      assertThatCode(
-          () -> QcgServiceImpl.getLastState(job))
+      assertThatCode(() -> QcgServiceImpl.getLastState(job))
           .isInstanceOf(DeploymentException.class)
           .hasMessage("Empty Qcg job status");
 
     } else {
       if (jobState.equals("?")) {
-        assertThatCode(
-            () -> QcgServiceImpl.getLastState(job))
+        assertThatCode(() -> QcgServiceImpl.getLastState(job))
             .isInstanceOf(DeploymentException.class)
             .hasMessage("Unknown Qcg job status: ?");
       } else {
@@ -173,14 +152,16 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     Deployment deployment = ControllerTestUtils.createDeployment();
     DeploymentMessage dm = generateDeployDmQcg(deployment);
 
-    Resource resource1 = ControllerTestUtils.createResource(deployment,
-        "tosca.nodes.indigo.Qcg.Job", "qcg_job", "1");
-    Map<String,String> metadata1 = new HashMap<>();
+    Resource resource1 =
+        ControllerTestUtils.createResource(
+            deployment, "tosca.nodes.indigo.Qcg.Job", "qcg_job", "1");
+    Map<String, String> metadata1 = new HashMap<>();
     metadata1.put("Job", "{\"Id\": \"1\"}");
     resource1.setMetadata(metadata1);
-    Resource resource2 = ControllerTestUtils.createResource(deployment,
-        "tosca.nodes.indigo.Qcg.Job", "qcg_job", "2");
-    Map<String,String> metadata2 = new HashMap<>();
+    Resource resource2 =
+        ControllerTestUtils.createResource(
+            deployment, "tosca.nodes.indigo.Qcg.Job", "qcg_job", "2");
+    Map<String, String> metadata2 = new HashMap<>();
     metadata2.put("Job", "{\"Id\": \"2\"}");
     resource2.setMetadata(metadata2);
     List<Resource> resources = new ArrayList<>(deployment.getResources());
@@ -188,12 +169,14 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     when(resourceRepository.findByDeployment_id(deployment.getId())).thenReturn(resources);
     if (!fail) {
       assertThat(qcgService.getDeploymentExtendedInfo(dm).get())
-          .isEqualTo(String.format("[{\"Id\": \"%s\"},{\"Id\": \"%s\"}]",
-              resources.get(0).getIaasId(), resources.get(1).getIaasId()));
+          .isEqualTo(
+              String.format(
+                  "[{\"Id\": \"%s\"},{\"Id\": \"%s\"}]",
+                  resources.get(0).getIaasId(), resources.get(1).getIaasId()));
     } else {
-      when(qcgService.getDeploymentExtendedInfoInternal(dm)).thenThrow(new RuntimeException("test failed"));
-      assertThat(qcgService.getDeploymentExtendedInfo(dm))
-          .isEqualTo(Optional.empty());
+      when(qcgService.getDeploymentExtendedInfoInternal(dm))
+          .thenThrow(new RuntimeException("test failed"));
+      assertThat(qcgService.getDeploymentExtendedInfo(dm)).isEqualTo(Optional.empty());
     }
   }
 
@@ -222,11 +205,13 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     QcgJobsOrderedIterator topologyIterator = mock(QcgJobsOrderedIterator.class);
     dm.setQcgJobsIterator(topologyIterator);
     DeepJob deepJob = new DeepJob(job, "qcg_job");
-    Resource resource1 = ControllerTestUtils.createResource(deployment,
-        "tosca.nodes.indigo.Qcg.Job", "qcg_job", "1");
-    Resource resource2 = ControllerTestUtils.createResource(deployment,
-        "tosca.nodes.indigo.Qcg.Job", "qcg_job", "2");
-    Map<String,String> metadata = new HashMap<>();
+    Resource resource1 =
+        ControllerTestUtils.createResource(
+            deployment, "tosca.nodes.indigo.Qcg.Job", "qcg_job", "1");
+    Resource resource2 =
+        ControllerTestUtils.createResource(
+            deployment, "tosca.nodes.indigo.Qcg.Job", "qcg_job", "2");
+    Map<String, String> metadata = new HashMap<>();
     metadata.put("Job", "{}");
     resource2.setMetadata(metadata);
     List<Resource> resources = new ArrayList<>();
@@ -235,8 +220,8 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     when(deploymentRepository.findOne(deployment.getId())).thenReturn(deployment);
     when(topologyIterator.hasNext()).thenReturn(true, !isLast);
     when(topologyIterator.next()).thenReturn(deepJob);
-    when(resourceRepository.findByToscaNodeNameAndDeployment_id(
-        "qcg_job", deployment.getId())).thenReturn(resources);
+    when(resourceRepository.findByToscaNodeNameAndDeployment_id("qcg_job", deployment.getId()))
+        .thenReturn(resources);
     when(qcg.createJob(job.getDescription())).thenReturn(job);
 
     assertThat(qcgService.doDeploy(dm)).isEqualTo(isLast);
@@ -283,7 +268,6 @@ public class QcgServiceTest extends ToscaParserAwareTest {
       assertThat(result).isEqualTo(isLast);
       assertThat(dm.isSkipPollInterval()).isTrue();
     }
-
   }
 
   @Test
@@ -295,8 +279,7 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     job.setState("FAILED");
     when(qcg.getJob("999")).thenReturn(job);
 
-    assertThatCode(
-        () -> qcgService.checkJobState(job))
+    assertThatCode(() -> qcgService.checkJobState(job))
         .isInstanceOf(DeploymentException.class)
         .hasMessage("Qcg job 999 failed to execute with exit code:2 - message: fail");
   }
@@ -311,8 +294,7 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     description.setExecution(execution);
     job.setDescription(description);
 
-    qcgService
-    	.createJobOnQcg(generateCloudProviderEndpoint(), null, new DeepJob(job, "toscaName"));
+    qcgService.createJobOnQcg(generateCloudProviderEndpoint(), null, new DeepJob(job, "toscaName"));
     verify(qcg, times(1)).createJob(description);
   }
 
@@ -328,8 +310,9 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     doThrow(new QcgException(500, "some message")).when(qcg).createJob(description);
 
     assertThatCode(
-        () -> qcgService
-        .createJobOnQcg(generateCloudProviderEndpoint(), null, new DeepJob(job, "toscaName")))
+            () ->
+                qcgService.createJobOnQcg(
+                    generateCloudProviderEndpoint(), null, new DeepJob(job, "toscaName")))
         .isInstanceOf(DeploymentException.class)
         .hasCauseExactlyInstanceOf(QcgException.class)
         .hasMessage(
@@ -373,13 +356,15 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     deployment.setEndpoint("999");
     DeploymentMessage dm = TestUtil.generateDeployDm(deployment);
 
-    AbstractThrowableAssert<?, ? extends Throwable> assertion = assertThatCode(
-        () -> qcgService.doProviderTimeout(dm));
-    assertion.isInstanceOf(BusinessWorkflowException.class)
+    AbstractThrowableAssert<?, ? extends Throwable> assertion =
+        assertThatCode(() -> qcgService.doProviderTimeout(dm));
+    assertion
+        .isInstanceOf(BusinessWorkflowException.class)
         .hasCauseExactlyInstanceOf(DeploymentException.class)
-        .hasMessage("Error executing request to Qcg service;"
-            + " nested exception is it.reply.orchestrator.exception.service."
-            + "DeploymentException: Qcg service timeout during deployment");
+        .hasMessage(
+            "Error executing request to Qcg service;"
+                + " nested exception is it.reply.orchestrator.exception.service."
+                + "DeploymentException: Qcg service timeout during deployment");
   }
 
   @Test
@@ -405,14 +390,16 @@ public class QcgServiceTest extends ToscaParserAwareTest {
 
     doThrow(new QcgException(statusCode, "someMessage")).when(qcg).deleteJob("999");
 
-    AbstractThrowableAssert<?, ? extends Throwable> assertion = assertThatCode(
-        () -> qcgService
-            .deleteJobsOnQcg(generateCloudProviderEndpoint(), null, "999"));
+    AbstractThrowableAssert<?, ? extends Throwable> assertion =
+        assertThatCode(
+            () -> qcgService.deleteJobsOnQcg(generateCloudProviderEndpoint(), null, "999"));
     if (shouldFail) {
-      assertion.isInstanceOf(DeploymentException.class)
-          .hasCauseExactlyInstanceOf(QcgException.class).hasMessage(
-          "Failed to delete job 999 on Qcg; nested exception is %s (http status: %s)",
-          "someMessage", statusCode);
+      assertion
+          .isInstanceOf(DeploymentException.class)
+          .hasCauseExactlyInstanceOf(QcgException.class)
+          .hasMessage(
+              "Failed to delete job 999 on Qcg; nested exception is %s (http status: %s)",
+              "someMessage", statusCode);
     } else {
       assertion.doesNotThrowAnyException();
     }
@@ -425,10 +412,8 @@ public class QcgServiceTest extends ToscaParserAwareTest {
 
     qcgService.finalizeUndeploy(dm);
 
-    verify(deploymentStatusHelper, times(1))
-        .updateOnSuccess(deployment.getId());
+    verify(deploymentStatusHelper, times(1)).updateOnSuccess(deployment.getId());
   }
-
 
   @Test
   public void finalizeDeployTestUpdateOnSuccess() {
@@ -437,35 +422,38 @@ public class QcgServiceTest extends ToscaParserAwareTest {
 
     qcgService.finalizeDeploy(dm);
 
-    verify(deploymentStatusHelper, times(1))
-        .updateOnSuccess(deployment.getId());
+    verify(deploymentStatusHelper, times(1)).updateOnSuccess(deployment.getId());
   }
 
   @Test
   public void generateJobGraph() throws IOException {
     Deployment deployment = generateDeployment();
     DeploymentMessage dm = generateDeployDmQcg(deployment);
-    QcgService qs = QcgService
-        .qcgBuilder()
-        .endpoint("http://www.example.com/api")
-        .serviceType(CloudService.QCG_COMPUTE_SERVICE)
-        .hostname("www.example.com")
-        .providerId("provider-1")
-        .id("provider-1-service-1")
-        .type(CloudServiceType.COMPUTE)
-        .supportedIdps(new ArrayList<>())
-        .build();
+    QcgService qs =
+        QcgService.qcgBuilder()
+            .endpoint("http://www.example.com/api")
+            .serviceType(CloudService.QCG_COMPUTE_SERVICE)
+            .hostname("www.example.com")
+            .providerId("provider-1")
+            .id("provider-1-service-1")
+            .type(CloudServiceType.COMPUTE)
+            .supportedIdps(new ArrayList<>())
+            .build();
 
-    CloudServicesOrderedIterator csi = new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(qs)));
+    CloudServicesOrderedIterator csi =
+        new CloudServicesOrderedIterator(Lists.newArrayList(new CloudServiceWf(qs)));
     csi.next();
     dm.setCloudServicesOrderedIterator(csi);
 
-    QcgJobsOrderedIterator topologyIterator = qcgService.getJobsTopologicalOrder(
-        dm, deployment);
+    QcgJobsOrderedIterator topologyIterator = qcgService.getJobsTopologicalOrder(dm, deployment);
     topologyIterator.next();
-    assertThat(objectMapper.writer(SerializationFeature.INDENT_OUTPUT)
-        .writeValueAsString(topologyIterator)).isEqualToNormalizingNewlines(TestUtil
-        .getFileContentAsString(ToscaServiceTest.TEMPLATES_BASE_DIR + "qcg_jobs.json").trim());
+    assertThat(
+            objectMapper
+                .writer(SerializationFeature.INDENT_OUTPUT)
+                .writeValueAsString(topologyIterator))
+        .isEqualToNormalizingNewlines(
+            TestUtil.getFileContentAsString(ToscaServiceTest.TEMPLATES_BASE_DIR + "qcg_jobs.json")
+                .trim());
   }
 
   private Deployment generateDeployment() throws IOException {
@@ -473,8 +461,7 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     deployment.getParameters().put("cpus", "1.0");
 
     deployment.setTemplate(
-        TestUtil
-            .getFileContentAsString(ToscaServiceTest.TEMPLATES_BASE_DIR + "qcg_jobs.yaml"));
+        TestUtil.getFileContentAsString(ToscaServiceTest.TEMPLATES_BASE_DIR + "qcg_jobs.yaml"));
 
     Resource job1 = new Resource();
     job1.setDeployment(deployment);
@@ -484,26 +471,24 @@ public class QcgServiceTest extends ToscaParserAwareTest {
     job1.setToscaNodeType("tosca.nodes.indigo.Qcg.Job");
     deployment.getResources().add(job1);
 
-    Mockito
-        .when(resourceRepository.findByToscaNodeNameAndDeployment_id("qcg_job",
-            deployment.getId()))
+    Mockito.when(
+            resourceRepository.findByToscaNodeNameAndDeployment_id("qcg_job", deployment.getId()))
         .thenReturn(Lists.newArrayList(job1));
 
     return deployment;
   }
 
   private DeploymentMessage generateDeployDmQcg(Deployment deployment) {
-	  DeploymentMessage dm = new DeploymentMessage();
-	  dm.setDeploymentId(deployment.getId());
-	  CloudProviderEndpoint chosenCloudProviderEndpoint = CloudProviderEndpoint
-	      .builder()
-	      .cpComputeServiceId(UUID.randomUUID().toString())
-	      .cpEndpoint("http://www.example.com/api")
-	      .iaasType(IaaSType.QCG)
-	      .build();
-	  dm.setChosenCloudProviderEndpoint(chosenCloudProviderEndpoint);
-	  deployment.setCloudProviderEndpoint(chosenCloudProviderEndpoint);
-	  return dm;
+    DeploymentMessage dm = new DeploymentMessage();
+    dm.setDeploymentId(deployment.getId());
+    CloudProviderEndpoint chosenCloudProviderEndpoint =
+        CloudProviderEndpoint.builder()
+            .cpComputeServiceId(UUID.randomUUID().toString())
+            .cpEndpoint("http://www.example.com/api")
+            .iaasType(IaaSType.QCG)
+            .build();
+    dm.setChosenCloudProviderEndpoint(chosenCloudProviderEndpoint);
+    deployment.setCloudProviderEndpoint(chosenCloudProviderEndpoint);
+    return dm;
   }
-
 }

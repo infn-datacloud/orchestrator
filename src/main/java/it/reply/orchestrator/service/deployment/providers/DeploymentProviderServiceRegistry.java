@@ -40,27 +40,29 @@ public class DeploymentProviderServiceRegistry {
    * Creates the DeploymentProviderServiceRegistry from all the DeploymentProviderServices
    * registered in the Spring {@link ApplicationContext}.
    *
-   * @param deploymentRepository
-   *          the deployment repository
-   * @param services
-   *          the registered DeploymentProviderServices
+   * @param deploymentRepository the deployment repository
+   * @param services the registered DeploymentProviderServices
    */
-  public DeploymentProviderServiceRegistry(DeploymentRepository deploymentRepository,
-      DeploymentProviderService[] services) {
+  public DeploymentProviderServiceRegistry(
+      DeploymentRepository deploymentRepository, DeploymentProviderService[] services) {
     this.deploymentRepository = deploymentRepository;
     this.providers = new EnumMap<>(DeploymentProvider.class);
-    Stream.of(services).forEach(service -> {
-      DeploymentProviderQualifier annotation =
-          service.getClass().getAnnotation(DeploymentProviderQualifier.class);
-      Assert.notNull(annotation,
-          String.format("DeploymentProviderService %s not annotated with annotation @%s",
-              service.getClass(), DeploymentProviderQualifier.class));
+    Stream.of(services)
+        .forEach(
+            service -> {
+              DeploymentProviderQualifier annotation =
+                  service.getClass().getAnnotation(DeploymentProviderQualifier.class);
+              Assert.notNull(
+                  annotation,
+                  String.format(
+                      "DeploymentProviderService %s not annotated with annotation @%s",
+                      service.getClass(), DeploymentProviderQualifier.class));
 
-      DeploymentProvider deploymentProvider = annotation.value();
-      Assert.notNull(deploymentProvider, "DeploymentProvider value must not be null");
+              DeploymentProvider deploymentProvider = annotation.value();
+              Assert.notNull(deploymentProvider, "DeploymentProvider value must not be null");
 
-      providers.put(deploymentProvider, service);
-    });
+              providers.put(deploymentProvider, service);
+            });
   }
 
   /**
@@ -77,7 +79,7 @@ public class DeploymentProviderServiceRegistry {
    * getDeploymentProviderService.
    *
    * @param deployment the deployment
-   * @return  the deployment provider service
+   * @return the deployment provider service
    */
   public DeploymentProviderService getDeploymentProviderService(Deployment deployment) {
     return getDeploymentProviderService(deployment.getDeploymentProvider());
@@ -86,15 +88,16 @@ public class DeploymentProviderServiceRegistry {
   /**
    * Returns the {@link DeploymentProviderService} corresponding to the {@link DeploymentProvider}.
    *
-   * @param deploymentProvider
-   *          the DeploymentProvider
+   * @param deploymentProvider the DeploymentProvider
    * @return the DeploymentProviderService
    */
   public DeploymentProviderService getDeploymentProviderService(
       DeploymentProvider deploymentProvider) {
-    return Optional
-        .ofNullable(providers.get(deploymentProvider))
-        .orElseThrow(() -> new OrchestratorException(
-            "No DeploymentProviderService found for deployment provider: " + deploymentProvider));
+    return Optional.ofNullable(providers.get(deploymentProvider))
+        .orElseThrow(
+            () ->
+                new OrchestratorException(
+                    "No DeploymentProviderService found for deployment provider: "
+                        + deploymentProvider));
   }
 }

@@ -34,5 +34,4 @@ public class ValidateAction extends BaseActionCommand {
   protected String getErrorMessagePrefix() {
     return "Error validating action request";
   }
-
 }

@@ -19,7 +19,6 @@ package it.reply.orchestrator.service.commands;
 
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.utils.WorkflowConstants;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
@@ -35,5 +34,4 @@ public class FinalizeUndeploy extends BaseDeployCommand {
   protected String getErrorMessagePrefix() {
     return "Error finalizing undeployment";
   }
-
 }

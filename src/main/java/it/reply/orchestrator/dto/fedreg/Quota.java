@@ -83,5 +83,4 @@ public class Quota {
 
   @JsonProperty("security_group_rules")
   private Integer securityGroupsRules;
-
 }

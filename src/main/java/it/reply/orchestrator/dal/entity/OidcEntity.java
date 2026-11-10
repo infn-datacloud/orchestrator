@@ -23,11 +23,9 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 @Data
@@ -37,14 +35,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Entity
 public class OidcEntity extends UuidIdentifiable {
 
-  @NonNull
-  @NotNull
-  @Embedded
-  private OidcEntityId oidcEntityId;
+  @NonNull @NotNull @Embedded private OidcEntityId oidcEntityId;
 
   @NonNull
   @NotNull
   @Column(name = "organization", nullable = false, updatable = false)
   private String organization;
-
 }

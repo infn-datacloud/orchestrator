@@ -48,15 +48,13 @@ public class SlamServiceV1Impl implements SlamService {
   /**
    * Creates a new SlamServiceV1Impl.
    *
-   * @param slamProperties
-   *          the SlamProperties to use
-   * @param oauth2TokenService
-   *          the OAuth2TokenService to use
-   * @param restTemplateBuilder
-   *          the RestTemplateBuilder to use
+   * @param slamProperties the SlamProperties to use
+   * @param oauth2TokenService the OAuth2TokenService to use
+   * @param restTemplateBuilder the RestTemplateBuilder to use
    */
   public SlamServiceV1Impl(
-      SlamProperties slamProperties, OAuth2TokenService oauth2TokenService,
+      SlamProperties slamProperties,
+      OAuth2TokenService oauth2TokenService,
       RestTemplateBuilder restTemplateBuilder) {
     this.slamProperties = slamProperties;
     this.oauth2TokenService = oauth2TokenService;
@@ -66,28 +64,32 @@ public class SlamServiceV1Impl implements SlamService {
   @Override
   public SlamPreferences getCustomerPreferences(OidcTokenId tokenId, @Nullable String userGroup) {
 
-    String slamCustomer = Optional.ofNullable(userGroup)
-        .orElse(oauth2TokenService.getOrganization(tokenId));
+    String slamCustomer =
+        Optional.ofNullable(userGroup).orElse(oauth2TokenService.getOrganization(tokenId));
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(slamProperties.getUrl() + slamProperties.getCustomerPreferencesPath())
-        .buildAndExpand(slamCustomer)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                slamProperties.getUrl() + slamProperties.getCustomerPreferencesPath())
+            .buildAndExpand(slamCustomer)
+            .normalize()
+            .toUri();
 
     try {
-      return oauth2TokenService.executeWithClientForResult(tokenId,
-          accessToken -> {
-            HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUri);
-            if (accessToken != null) {
-              requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
-            }
-            return restTemplate.exchange(requestBuilder.build(), SlamPreferences.class);
-          }, OAuth2TokenService.restTemplateTokenRefreshEvaluator).getBody();
+      return oauth2TokenService
+          .executeWithClientForResult(
+              tokenId,
+              accessToken -> {
+                HeadersBuilder<?> requestBuilder = RequestEntity.get(requestUri);
+                if (accessToken != null) {
+                  requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+                }
+                return restTemplate.exchange(requestBuilder.build(), SlamPreferences.class);
+              },
+              OAuth2TokenService.restTemplateTokenRefreshEvaluator)
+          .getBody();
     } catch (RestClientException ex) {
       throw new DeploymentException(
           "Error fetching SLA for customer <" + slamCustomer + "> from SLAM.", ex);
     }
   }
-
 }

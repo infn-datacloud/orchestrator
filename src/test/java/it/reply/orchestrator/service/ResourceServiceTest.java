@@ -45,35 +45,33 @@ import org.springframework.data.domain.Pageable;
 
 public class ResourceServiceTest {
 
-  @Mock
-  private ResourceRepository resourceRepository;
+  @Mock private ResourceRepository resourceRepository;
 
-  @Mock
-  private DeploymentRepository deploymentRepository;
+  @Mock private DeploymentRepository deploymentRepository;
 
-  @Mock
-  private DeploymentService deploymentService;
+  @Mock private DeploymentService deploymentService;
 
-  @Mock
-  private OAuth2TokenService oauth2TokenService;
+  @Mock private OAuth2TokenService oauth2TokenService;
 
-  @Mock
-  private RuntimeServiceImpl wfService;
+  @Mock private RuntimeServiceImpl wfService;
 
-  @Mock
-  private ToscaService toscaService;
+  @Mock private ToscaService toscaService;
 
-  @Spy
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Spy @Autowired private ObjectMapper objectMapper;
 
   private ResourceService service;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    service = new ResourceServiceImpl(resourceRepository, deploymentService, objectMapper,
-      oauth2TokenService, wfService, toscaService);
+    service =
+        new ResourceServiceImpl(
+            resourceRepository,
+            deploymentService,
+            objectMapper,
+            oauth2TokenService,
+            wfService,
+            toscaService);
   }
 
   @Test(expected = NotFoundException.class)
@@ -126,12 +124,11 @@ public class ResourceServiceTest {
     Resource expectedResource = ControllerTestUtils.createResource(deployment);
     Mockito.when(deploymentService.getDeployment(deployment.getId())).thenReturn(deployment);
     Mockito.when(
-        resourceRepository.findByIdAndDeployment_id(expectedResource.getId(), deployment.getId()))
+            resourceRepository.findByIdAndDeployment_id(
+                expectedResource.getId(), deployment.getId()))
         .thenReturn(Optional.of(expectedResource));
     Resource actualResource = service.getResource(expectedResource.getId(), deployment.getId());
 
     assertEquals(expectedResource, actualResource);
-
   }
-
 }

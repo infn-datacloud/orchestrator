@@ -18,12 +18,9 @@
 package it.reply.orchestrator.config.properties;
 
 import java.net.URI;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -34,62 +31,37 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class CmdbProperties {
 
-  @NotNull
-  @NonNull
-  private URI url;
+  @NotNull @NonNull private URI url;
 
-  @NotNull
-  @NonNull
-  private String providerByIdPath = "/provider/id/{providerId}?include_docs=true";
+  @NotNull @NonNull private String providerByIdPath = "/provider/id/{providerId}?include_docs=true";
 
-  @NotNull
-  @NonNull
+  @NotNull @NonNull
   private String servicesByProviderIdPath =
       "/provider/id/{providerId}/has_many/services?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String serviceByIdPath = "/service/id/{serviceId}?include_docs=true";
+  @NotNull @NonNull private String serviceByIdPath = "/service/id/{serviceId}?include_docs=true";
 
-  @NotNull
-  @NonNull
+  @NotNull @NonNull
   private String tenantsByServiceIdPath =
       "/service/id/{serviceId}/has_many/tenants?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String tenantsListPath =
-      "/tenant/list?include_docs=true";
+  @NotNull @NonNull private String tenantsListPath = "/tenant/list?include_docs=true";
 
-  @NotNull
-  @NonNull
+  @NotNull @NonNull
   private String tenantsByOrganizationIdPath =
       "/tenant/filters/iam_organisation/{organisationId}?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String tenantByIdPath = "/tenant/id/{tenantId}?include_docs=true";
+  @NotNull @NonNull private String tenantByIdPath = "/tenant/id/{tenantId}?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String imagesByTenantIdPath =
-      "/tenant/id/{tenantId}/has_many/images?include_docs=true";
+  @NotNull @NonNull
+  private String imagesByTenantIdPath = "/tenant/id/{tenantId}/has_many/images?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String imageByIdPath = "/image/id/{imageId}?include_docs=true";
+  @NotNull @NonNull private String imageByIdPath = "/image/id/{imageId}?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String flavorsByTenantIdPath =
-      "/tenant/id/{tenantId}/has_many/flavors?include_docs=true";
+  @NotNull @NonNull
+  private String flavorsByTenantIdPath = "/tenant/id/{tenantId}/has_many/flavors?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String flavorByIdPath = "/flavor/id/{flavorId}?include_docs=true";
+  @NotNull @NonNull private String flavorByIdPath = "/flavor/id/{flavorId}?include_docs=true";
 
-  @NotNull
-  @NonNull
-  private String serviceVersion = "v1";
-
+  @NotNull @NonNull private String serviceVersion = "v1";
 }

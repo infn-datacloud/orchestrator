@@ -20,11 +20,9 @@ package it.reply.orchestrator.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.reply.orchestrator.dto.RankCloudProvidersMessage;
 import it.reply.orchestrator.dto.deployment.DeploymentMessage;
 import it.reply.orchestrator.exception.service.WorkflowException;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.impl.bpmn.helper.ErrorPropagation;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
@@ -35,8 +33,7 @@ import org.springframework.stereotype.Component;
 @Component("WorkflowUtil")
 public class WorkflowUtil {
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   public JsonNode generateRankCloudProvidersMessage(JsonNode jsonDeploymentMessage)
       throws JsonProcessingException {
@@ -47,20 +44,17 @@ public class WorkflowUtil {
   /**
    * Persist a {@link WorkflowException} as workflow parameter and propagate it to its handler.
    *
-   * @param execution
-   *     the current workflow execution
-   * @param exception
-   *     the exception to hadle
+   * @param execution the current workflow execution
+   * @param exception the exception to hadle
    */
-  public static void persistAndPropagateError(DelegateExecution execution,
-      WorkflowException exception) {
+  public static void persistAndPropagateError(
+      DelegateExecution execution, WorkflowException exception) {
     ExecutionEntity parentExecution;
     if (execution instanceof ExecutionEntity) {
       parentExecution = (ExecutionEntity) execution;
     } else {
-      parentExecution = CommandContextUtil
-          .getExecutionEntityManager()
-          .findById(execution.getProcessInstanceId());
+      parentExecution =
+          CommandContextUtil.getExecutionEntityManager().findById(execution.getProcessInstanceId());
     }
     while (parentExecution != null) {
       parentExecution = parentExecution.getProcessInstance();

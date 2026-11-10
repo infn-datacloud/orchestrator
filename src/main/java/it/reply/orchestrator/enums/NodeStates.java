@@ -29,67 +29,41 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public enum NodeStates {
 
-  /**
-   * Node is not yet created. Node only exists as a template definition.
-   */
+  /** Node is not yet created. Node only exists as a template definition. */
   INITIAL(false),
 
-  /**
-   * Node is transitioning from initial state to created state.
-   */
+  /** Node is transitioning from initial state to created state. */
   CREATING(true),
 
-  /**
-   * Node software has been installed.
-   */
+  /** Node software has been installed. */
   CREATED(false),
 
-  /**
-   * Node is transitioning from created state to configured state.
-   */
+  /** Node is transitioning from created state to configured state. */
   CONFIGURING(true),
 
-  /**
-   * Node has been configured prior to being started.
-   */
+  /** Node has been configured prior to being started. */
   CONFIGURED(false),
 
-  /**
-   * Node is transitioning from configured state to started state.
-   */
+  /** Node is transitioning from configured state to started state. */
   STARTING(true),
 
-  /**
-   * Node is started.
-   */
+  /** Node is started. */
   STARTED(false),
 
-  /**
-   * Node is transitioning from its current state to a configured state.
-   */
+  /** Node is transitioning from its current state to a configured state. */
   STOPPING(true),
 
-  /**
-   * Node is stopped.
-   */
+  /** Node is stopped. */
   STOPPED(false),
 
-  /**
-   * Node is transitioning from its current state to one where it is deleted.
-   */
+  /** Node is transitioning from its current state to one where it is deleted. */
   DELETING(true),
 
-  /**
-   * Node is deleted.
-   */
+  /** Node is deleted. */
   DELETED(false),
 
-  /**
-   * Node is in an error state.
-   */
+  /** Node is in an error state. */
   ERROR(false);
 
-  @Getter
-  private final boolean transitional;
-
+  @Getter private final boolean transitional;
 }

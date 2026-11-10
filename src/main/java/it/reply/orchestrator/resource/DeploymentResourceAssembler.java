@@ -37,9 +37,7 @@ import org.springframework.stereotype.Component;
 public class DeploymentResourceAssembler
     extends ResourceAssemblerSupport<Deployment, DeploymentResource> {
 
-  /**
-   * DeploymentResourceAssembler class public constructor.
-   */
+  /** DeploymentResourceAssembler class public constructor. */
   public DeploymentResourceAssembler() {
     super(DeploymentController.class, DeploymentResource.class);
   }
@@ -50,18 +48,20 @@ public class DeploymentResourceAssembler
   }
 
   @SuppressWarnings("rawtypes")
-  private CloudProviderEndpointResource
-      getCloudProviderEndpointResource(CloudProviderEndpoint endpoint) {
+  private CloudProviderEndpointResource getCloudProviderEndpointResource(
+      CloudProviderEndpoint endpoint) {
     if (endpoint != null) {
       Map<String, CloudProviderEndpointResource> hybridCloudProviderEndpointsResource =
           new HashMap<>();
       Iterator it = endpoint.getHybridCloudProviderEndpoints().entrySet().iterator();
       while (it.hasNext()) {
         Map.Entry pair = (Map.Entry) it.next();
-        hybridCloudProviderEndpointsResource.put((String) pair.getKey(),
+        hybridCloudProviderEndpointsResource.put(
+            (String) pair.getKey(),
             getCloudProviderEndpointResource((CloudProviderEndpoint) pair.getValue()));
       }
-      return new CloudProviderEndpointResource(endpoint.getCpEndpoint(),
+      return new CloudProviderEndpointResource(
+          endpoint.getCpEndpoint(),
           endpoint.getRegion().orElse(null),
           endpoint.getCpComputeServiceId(),
           endpoint.getVaultEndpoint(),
@@ -74,20 +74,22 @@ public class DeploymentResourceAssembler
 
   protected DeploymentResource getDeploymentResource(Deployment entity, boolean nested) {
 
-    DeploymentResource resource = DeploymentResource.builder()
-        .uuid(entity.getId())
-        .creationTime(entity.getCreatedAt())
-        .updateTime(entity.getUpdatedAt())
-        .physicalId(entity.getEndpoint())
-        .status(entity.getStatus())
-        .statusReason(entity.getStatusReason())
-        .cloudProviderName(entity.getCloudProviderName())
-        .cloudProviderEndpoint(getCloudProviderEndpointResource(entity.getCloudProviderEndpoint()))
-        .task(entity.getTask())
-        .outputs(entity.getOutputs())
-        .callback(entity.getCallback())
-        .userGroup(entity.getUserGroup())
-        .build();
+    DeploymentResource resource =
+        DeploymentResource.builder()
+            .uuid(entity.getId())
+            .creationTime(entity.getCreatedAt())
+            .updateTime(entity.getUpdatedAt())
+            .physicalId(entity.getEndpoint())
+            .status(entity.getStatus())
+            .statusReason(entity.getStatusReason())
+            .cloudProviderName(entity.getCloudProviderName())
+            .cloudProviderEndpoint(
+                getCloudProviderEndpointResource(entity.getCloudProviderEndpoint()))
+            .task(entity.getTask())
+            .outputs(entity.getOutputs())
+            .callback(entity.getCallback())
+            .userGroup(entity.getUserGroup())
+            .build();
 
     Optional.ofNullable(entity.getOwner())
         .map(OidcEntity::getOidcEntityId)
@@ -96,20 +98,23 @@ public class DeploymentResourceAssembler
     // add hateoas links only if we are inside of a HTTP request otherwise, due to
     // https://github.com/spring-projects/spring-hateoas/issues/408, we'd have an error
     if (CommonUtils.isInHttpRequest() && !nested) {
-      resource.add(ControllerLinkBuilder.linkTo(
-          DummyInvocationUtils.methodOn(DeploymentController.class).getDeployment(entity.getId()))
-          .withSelfRel());
-      resource.add(ControllerLinkBuilder
-          .linkTo(DummyInvocationUtils.methodOn(ResourceController.class, entity.getId())
-              .getResources(entity.getId(), null, null, null))
-          .withRel("resources"));
-      resource.add(ControllerLinkBuilder
-          .linkTo(DummyInvocationUtils.methodOn(TemplateController.class)
-              .getDeploymentTemplate(entity.getId()))
-          .withRel("template"));
+      resource.add(
+          ControllerLinkBuilder.linkTo(
+                  DummyInvocationUtils.methodOn(DeploymentController.class)
+                      .getDeployment(entity.getId()))
+              .withSelfRel());
+      resource.add(
+          ControllerLinkBuilder.linkTo(
+                  DummyInvocationUtils.methodOn(ResourceController.class, entity.getId())
+                      .getResources(entity.getId(), null, null, null))
+              .withRel("resources"));
+      resource.add(
+          ControllerLinkBuilder.linkTo(
+                  DummyInvocationUtils.methodOn(TemplateController.class)
+                      .getDeploymentTemplate(entity.getId()))
+              .withRel("template"));
     }
 
     return resource;
   }
-
 }

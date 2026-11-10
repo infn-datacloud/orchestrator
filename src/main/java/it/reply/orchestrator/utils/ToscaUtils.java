@@ -18,7 +18,6 @@
 package it.reply.orchestrator.utils;
 
 import it.reply.orchestrator.exception.service.ToscaException;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +25,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.experimental.UtilityClass;
-
 import org.alien4cloud.tosca.exceptions.InvalidPropertyValueException;
 import org.alien4cloud.tosca.model.definitions.AbstractPropertyValue;
 import org.alien4cloud.tosca.model.definitions.ComplexPropertyValue;
@@ -46,8 +43,7 @@ public class ToscaUtils {
    * If the object is a {@link PropertyValue}, it returns the wrapped value, otherwise it returns
    * the object itself.
    *
-   * @param wrappedObject
-   *     the wrapped object
+   * @param wrappedObject the wrapped object
    * @return the unwrapped object
    */
   @SuppressWarnings("rawtypes")
@@ -62,8 +58,7 @@ public class ToscaUtils {
   /**
    * It wraps an object inside an {@link AbstractPropertyValue}.
    *
-   * @param v
-   *     the original object
+   * @param v the original object
    * @return the wrapped object
    */
   @SuppressWarnings("unchecked")
@@ -91,18 +86,15 @@ public class ToscaUtils {
    *
    * @param <T> The type of object
    * @param <V> The type of object
-   * @param properties
-   *     the properties map
-   * @param key
-   *     the key of the property
-   * @param clazz
-   *     the {@link IPropertyType} expected
+   * @param properties the properties map
+   * @param key the key of the property
+   * @param clazz the {@link IPropertyType} expected
    * @return the parsed property
    */
   public <T extends IPropertyType<V>, V> Optional<V> extractScalar(
       Map<String, AbstractPropertyValue> properties, String key, Class<T> clazz) {
-    return CommonUtils
-        .<ScalarPropertyValue>optionalCast(CommonUtils.getFromOptionalMap(properties, key))
+    return CommonUtils.<ScalarPropertyValue>optionalCast(
+            CommonUtils.getFromOptionalMap(properties, key))
         .map(ScalarPropertyValue::getValue)
         .map(value -> ToscaUtils.parseScalar(value, clazz));
   }
@@ -112,10 +104,8 @@ public class ToscaUtils {
    *
    * @param <T> The type of object
    * @param <V> The type of object
-   * @param value
-   *     the String to parse
-   * @param clazz
-   *     the {@link IPropertyType} expected
+   * @param value the String to parse
+   * @param clazz the {@link IPropertyType} expected
    * @return the parsed value
    */
   public <T extends IPropertyType<V>, V> V parseScalar(String value, Class<T> clazz) {
@@ -123,13 +113,15 @@ public class ToscaUtils {
     try {
       return propertyParser.parse(value);
     } catch (InvalidPropertyValueException ex) {
-      throw new ToscaException(String.format("Error parsing scalar value <%s> as <%s>",
-          value, propertyParser.getTypeName()), ex);
+      throw new ToscaException(
+          String.format(
+              "Error parsing scalar value <%s> as <%s>", value, propertyParser.getTypeName()),
+          ex);
     }
   }
 
-  public Optional<List<Object>> extractList(Map<String, AbstractPropertyValue> properties,
-      String key) {
+  public Optional<List<Object>> extractList(
+      Map<String, AbstractPropertyValue> properties, String key) {
     return extractList(properties, key, Function.identity());
   }
 
@@ -138,18 +130,15 @@ public class ToscaUtils {
    * every value before returning.
    *
    * @param <V> The type of object
-   * @param properties
-   *     the properties map
-   * @param key
-   *     the key of the property
-   * @param mapper
-   *     the mapping function
+   * @param properties the properties map
+   * @param key the key of the property
+   * @param mapper the mapping function
    * @return the parsed list
    */
-  public <V> Optional<List<V>> extractList(Map<String, AbstractPropertyValue> properties,
-      String key, Function<Object, V> mapper) {
-    return CommonUtils
-        .<ListPropertyValue>optionalCast(CommonUtils.getFromOptionalMap(properties, key))
+  public <V> Optional<List<V>> extractList(
+      Map<String, AbstractPropertyValue> properties, String key, Function<Object, V> mapper) {
+    return CommonUtils.<ListPropertyValue>optionalCast(
+            CommonUtils.getFromOptionalMap(properties, key))
         .map(ListPropertyValue::getValue)
         .map(Collection::stream)
         .map(stream -> stream.map(mapper).collect(Collectors.toList()));
@@ -160,28 +149,25 @@ public class ToscaUtils {
    * every value before returning.
    *
    * @param <V> The type of object
-   * @param properties
-   *     the properties map
-   * @param key
-   *     the key of the property
-   * @param mapper
-   *     the mapping function
+   * @param properties the properties map
+   * @param key the key of the property
+   * @param mapper the mapping function
    * @return the parsed map
    */
-  public <V> Optional<Map<String, V>> extractMap(Map<String, AbstractPropertyValue> properties,
-      String key, Function<Object, V> mapper) {
-    return CommonUtils
-        .<ComplexPropertyValue>optionalCast(CommonUtils.getFromOptionalMap(properties, key))
+  public <V> Optional<Map<String, V>> extractMap(
+      Map<String, AbstractPropertyValue> properties, String key, Function<Object, V> mapper) {
+    return CommonUtils.<ComplexPropertyValue>optionalCast(
+            CommonUtils.getFromOptionalMap(properties, key))
         .map(ComplexPropertyValue::getValue)
         .map(Map::entrySet)
         .map(Collection::stream)
-        .map(stream -> stream
-            .collect(Collectors.toMap(Entry::getKey, mapper.compose(Entry::getValue))));
+        .map(
+            stream ->
+                stream.collect(Collectors.toMap(Entry::getKey, mapper.compose(Entry::getValue))));
   }
 
-  public Optional<Map<String, Object>> extractMap(Map<String, AbstractPropertyValue> properties,
-      String key) {
+  public Optional<Map<String, Object>> extractMap(
+      Map<String, AbstractPropertyValue> properties, String key) {
     return ToscaUtils.extractMap(properties, key, Function.identity());
   }
-
 }

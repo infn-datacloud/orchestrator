@@ -38,5 +38,4 @@ public class ComputeQuota extends Quota {
 
   @JsonProperty("ram")
   private Integer ram;
-
 }

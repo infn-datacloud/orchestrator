@@ -18,10 +18,8 @@
 package it.reply.orchestrator.dal.repository;
 
 import it.reply.orchestrator.dal.entity.Resource;
-
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +36,6 @@ public interface ResourceRepository extends JpaRepository<Resource, String> {
 
   public Optional<Resource> findByIdAndDeployment_id(String uuid, String deploymentId);
 
-  public List<Resource> findByToscaNodeNameAndDeployment_id(String toscaNodeName,
-      String deploymentId);
+  public List<Resource> findByToscaNodeNameAndDeployment_id(
+      String toscaNodeName, String deploymentId);
 }

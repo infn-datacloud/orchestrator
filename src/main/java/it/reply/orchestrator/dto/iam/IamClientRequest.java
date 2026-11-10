@@ -31,11 +31,14 @@ public class IamClientRequest {
   private List<String> grantTypes;
   private List<String> responseTypes;
 
-  /**
-   * Constructor of IAMClientRequest, used to send a request to IAM to create a client.
-   */
-  public IamClientRequest(List<String> redirectUris, String clientName, List<String> contacts,
-      String tokenEndpointAuthMethod, String scope, List<String> grantTypes,
+  /** Constructor of IAMClientRequest, used to send a request to IAM to create a client. */
+  public IamClientRequest(
+      List<String> redirectUris,
+      String clientName,
+      List<String> contacts,
+      String tokenEndpointAuthMethod,
+      String scope,
+      List<String> grantTypes,
       List<String> responseTypes) {
     this.redirectUris = redirectUris;
     this.clientName = clientName;

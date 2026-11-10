@@ -86,34 +86,26 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   private static final Pattern OWNER_PATTERN = Pattern.compile("([^@]+)@([^@]+)");
 
-  @Autowired
-  private DeploymentRepository deploymentRepository;
+  @Autowired private DeploymentRepository deploymentRepository;
 
-  @Autowired
-  private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
+  @Autowired private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
 
-  @Autowired
-  private ResourceRepository resourceRepository;
+  @Autowired private ResourceRepository resourceRepository;
 
-  @Autowired
-  private ToscaService toscaService;
+  @Autowired private ToscaService toscaService;
 
-  @Autowired
-  private RuntimeService wfService;
+  @Autowired private RuntimeService wfService;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
-  @Autowired
-  private OidcProperties oidcProperties;
+  @Autowired private OidcProperties oidcProperties;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   @Override
   @Transactional(readOnly = true)
-  public Page<Deployment> getDeployments(Pageable pageable, String owner, String userGroup,
-      Status[] excludedStatus) {
+  public Page<Deployment> getDeployments(
+      Pageable pageable, String owner, String userGroup, Status[] excludedStatus) {
     if (StringUtils.isEmpty(owner)) {
       if (isAdmin()) {
         OidcEntity requester = oauth2TokenService.generateOidcEntityFromCurrentAuth();
@@ -146,7 +138,7 @@ public class DeploymentServiceImpl implements DeploymentService {
       ownerId.setSubject(matcher.group(1));
       ownerId.setIssuer(matcher.group(2));
       if (!ownerId.getSubject().equals(currentId.getSubject()) && !isAdmin()) {
-        throw new  ForbiddenException("Only admin can retrieve deployments for " + owner);
+        throw new ForbiddenException("Only admin can retrieve deployments for " + owner);
       }
     }
     if (oidcProperties.isEnabled()) {
@@ -161,8 +153,8 @@ public class DeploymentServiceImpl implements DeploymentService {
         if (excludedStatus == null) {
           return deploymentRepository.findAllByOwner(requester, ownerId, userGroup, pageable);
         } else {
-          return deploymentRepository.findAllByOwner(requester, ownerId, userGroup,
-            excludedStatus, pageable);
+          return deploymentRepository.findAllByOwner(
+              requester, ownerId, userGroup, excludedStatus, pageable);
         }
       }
     } else {
@@ -222,31 +214,30 @@ public class DeploymentServiceImpl implements DeploymentService {
   /**
    * Throw exception if the access to the deployment is not authorized.
    *
-   * @param  deployment the deployment object
-  */
+   * @param deployment the deployment object
+   */
   public void throwIfNotOwned(Deployment deployment) {
     if (!isAdmin() && !isOwned(deployment)) {
       throw new ForbiddenException(
-        "Only admin or the owner of the deployment can perform this operation");
+          "Only admin or the owner of the deployment can perform this operation");
     }
   }
 
-  private void populateFromRequestData(DeploymentRequest request,
-      ArchiveRoot parsingResult, DeploymentMessage deploymentMessage) {
-    Map<String, OneData> odRequirements = toscaService
-        .extractOneDataRequirements(parsingResult, request.getParameters());
+  private void populateFromRequestData(
+      DeploymentRequest request, ArchiveRoot parsingResult, DeploymentMessage deploymentMessage) {
+    Map<String, OneData> odRequirements =
+        toscaService.extractOneDataRequirements(parsingResult, request.getParameters());
     deploymentMessage.setOneDataRequirements(odRequirements);
 
-    Map<String, Dynafed> dyanfedRequirements = toscaService
-        .extractDyanfedRequirements(parsingResult, request.getParameters());
+    Map<String, Dynafed> dyanfedRequirements =
+        toscaService.extractDyanfedRequirements(parsingResult, request.getParameters());
     deploymentMessage.setDynafedRequirements(dyanfedRequirements);
 
-    @Nullable
-    Integer timeoutInMins = request.getTimeoutMins();
-    @Nullable
-    Integer providerTimeoutInMins = request.getProviderTimeoutMins();
+    @Nullable Integer timeoutInMins = request.getTimeoutMins();
+    @Nullable Integer providerTimeoutInMins = request.getProviderTimeoutMins();
 
-    if (timeoutInMins != null && providerTimeoutInMins != null
+    if (timeoutInMins != null
+        && providerTimeoutInMins != null
         && providerTimeoutInMins > timeoutInMins) {
       throw new BadRequestException("ProviderTimeout must be <= Timeout");
     }
@@ -263,8 +254,8 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional
-  public Deployment createDeployment(DeploymentRequest request, OidcEntity owner,
-      OidcTokenId requestedWithToken) {
+  public Deployment createDeployment(
+      DeploymentRequest request, OidcEntity owner, OidcTokenId requestedWithToken) {
     Deployment deployment = new Deployment();
     deployment.setStatus(Status.CREATE_IN_PROGRESS);
     deployment.setTask(Task.NONE);
@@ -301,38 +292,39 @@ public class DeploymentServiceImpl implements DeploymentService {
     DeploymentType deploymentType = inferDeploymentType(nodes);
 
     // Build deployment message
-    DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-        requestedWithToken);
+    DeploymentMessage deploymentMessage =
+        buildDeploymentMessage(deployment, deploymentType, requestedWithToken);
 
-    populateFromRequestData(request, parsingResult,  deploymentMessage);
+    populateFromRequestData(request, parsingResult, deploymentMessage);
 
-    Map<String, ToscaPolicy> placementPolicies = toscaService
-        .extractPlacementPolicies(parsingResult);
+    Map<String, ToscaPolicy> placementPolicies =
+        toscaService.extractPlacementPolicies(parsingResult);
     deploymentMessage.setPlacementPolicies(placementPolicies);
     deploymentMessage.setDeploymentType(deploymentType);
 
     boolean isHybrid = toscaService.isHybridDeployment(parsingResult);
     deploymentMessage.setHybrid(isHybrid);
 
-    ProcessInstance pi = wfService
-        .createProcessInstanceBuilder()
-        .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
-        .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
-        .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-            objectMapper.valueToTree(deploymentMessage))
-        .processDefinitionKey(WorkflowConstants.Process.DEPLOY)
-        .businessKey(MdcUtils.toBusinessKey())
-        .start();
+    ProcessInstance pi =
+        wfService
+            .createProcessInstanceBuilder()
+            .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
+            .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
+            .variable(
+                WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
+                objectMapper.valueToTree(deploymentMessage))
+            .processDefinitionKey(WorkflowConstants.Process.DEPLOY)
+            .businessKey(MdcUtils.toBusinessKey())
+            .start();
 
     deployment.addWorkflowReferences(
         new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), owner, Action.CREATE));
     deployment = deploymentRepository.save(deployment);
     return deployment;
-
   }
 
-  protected DeploymentMessage buildDeploymentMessage(Deployment deployment,
-      DeploymentType deploymentType, OidcTokenId requestedWithToken) {
+  protected DeploymentMessage buildDeploymentMessage(
+      Deployment deployment, DeploymentType deploymentType, OidcTokenId requestedWithToken) {
     DeploymentMessage deploymentMessage = new DeploymentMessage();
     deploymentMessage.setRequestedWithToken(requestedWithToken);
     deploymentMessage.setDeploymentId(deployment.getId());
@@ -348,8 +340,8 @@ public class DeploymentServiceImpl implements DeploymentService {
         return DeploymentType.MARATHON;
       } else if (toscaService.isOfToscaType(node, ToscaConstants.Nodes.Types.QCG)) {
         return DeploymentType.QCG;
-      } else if (toscaService.isOfToscaType(node,
-          ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART)) {
+      } else if (toscaService.isOfToscaType(
+          node, ToscaConstants.Nodes.Types.KUBERNETES_HELM_CHART)) {
         return DeploymentType.KUBERNETES_HELM_CHART;
       }
     }
@@ -381,30 +373,36 @@ public class DeploymentServiceImpl implements DeploymentService {
         .onlyProcessInstanceExecutions()
         .variableValueEquals(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
         .list()
-        .forEach(execution -> wfService.deleteProcessInstance(execution.getProcessInstanceId(),
-            "Process deleted by user with request " + MdcUtils.getRequestId()));
+        .forEach(
+            execution ->
+                wfService.deleteProcessInstance(
+                    execution.getProcessInstanceId(),
+                    "Process deleted by user with request " + MdcUtils.getRequestId()));
 
     String pid;
 
     if (deployment.getDeploymentProvider() != null) {
-      DeploymentType deploymentType = DeploymentService.inferDeploymentType(
-          deployment.getDeploymentProvider());
+      DeploymentType deploymentType =
+          DeploymentService.inferDeploymentType(deployment.getDeploymentProvider());
 
       // Build deployment message
-      DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-          requestedWithToken);
+      DeploymentMessage deploymentMessage =
+          buildDeploymentMessage(deployment, deploymentType, requestedWithToken);
 
       deploymentMessage.setForce(Boolean.valueOf(force));
 
-      pid = wfService
-          .createProcessInstanceBuilder()
-          .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
-          .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
-          .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-              objectMapper.valueToTree(deploymentMessage))
-          .processDefinitionKey(WorkflowConstants.Process.UNDEPLOY)
-          .businessKey(MdcUtils.toBusinessKey())
-          .start().getId();
+      pid =
+          wfService
+              .createProcessInstanceBuilder()
+              .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
+              .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
+              .variable(
+                  WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
+                  objectMapper.valueToTree(deploymentMessage))
+              .processDefinitionKey(WorkflowConstants.Process.UNDEPLOY)
+              .businessKey(MdcUtils.toBusinessKey())
+              .start()
+              .getId();
     } else {
       // no deployment provider -> no resources created -> no need for undeployment workflow
       // deploymentRepository.delete(deployment); // old behaviour,delete deployment entry from db
@@ -420,8 +418,8 @@ public class DeploymentServiceImpl implements DeploymentService {
 
   @Override
   @Transactional
-  public void updateDeployment(String id, DeploymentRequest request,
-      OidcTokenId requestedWithToken) {
+  public void updateDeployment(
+      String id, DeploymentRequest request, OidcTokenId requestedWithToken) {
     Deployment deployment = getDeployment(id);
     MdcUtils.setDeploymentId(deployment.getId());
     LOG.info("Updating deployment with template\n{}", request.getTemplate());
@@ -430,15 +428,15 @@ public class DeploymentServiceImpl implements DeploymentService {
     if (providerType == DeploymentProvider.CHRONOS
         || providerType == DeploymentProvider.MARATHON
         || providerType == DeploymentProvider.QCG) {
-      throw new BadRequestException(String.format("%s deployments cannot be updated.",
-      providerType.toString()));
+      throw new BadRequestException(
+          String.format("%s deployments cannot be updated.", providerType.toString()));
     }
     Status deploymentStatus = deployment.getStatus();
     if (!(deploymentStatus == Status.CREATE_COMPLETE
         || deploymentStatus == Status.UPDATE_COMPLETE
         || deploymentStatus == Status.UPDATE_FAILED)) {
-      throw new ConflictException(String.format("Cannot update a deployment in %s state",
-        deploymentStatus.toString()));
+      throw new ConflictException(
+          String.format("Cannot update a deployment in %s state", deploymentStatus.toString()));
     }
 
     deployment.setStatus(Status.UPDATE_IN_PROGRESS);
@@ -453,8 +451,8 @@ public class DeploymentServiceImpl implements DeploymentService {
     DeploymentType deploymentType = DeploymentService.inferDeploymentType(providerType);
 
     // Build deployment message
-    DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-        requestedWithToken);
+    DeploymentMessage deploymentMessage =
+        buildDeploymentMessage(deployment, deploymentType, requestedWithToken);
 
     // Check if the new template is valid: parse, validate structure and user's inputs,
     // replace user's inputs
@@ -468,23 +466,24 @@ public class DeploymentServiceImpl implements DeploymentService {
         toscaService.extractPlacementPolicies(parsingResult);
     deploymentMessage.setPlacementPolicies(placementPolicies);
 
-    populateFromRequestData(request, parsingResult,  deploymentMessage);
+    populateFromRequestData(request, parsingResult, deploymentMessage);
 
-    ProcessInstance pi = wfService
-        .createProcessInstanceBuilder()
-        .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
-        .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
-        .variable(WorkflowConstants.Param.TOSCA_TEMPLATE, request.getTemplate())
-        .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-            objectMapper.valueToTree(deploymentMessage))
-        .processDefinitionKey(WorkflowConstants.Process.UPDATE)
-        .businessKey(MdcUtils.toBusinessKey())
-        .start();
+    ProcessInstance pi =
+        wfService
+            .createProcessInstanceBuilder()
+            .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
+            .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
+            .variable(WorkflowConstants.Param.TOSCA_TEMPLATE, request.getTemplate())
+            .variable(
+                WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
+                objectMapper.valueToTree(deploymentMessage))
+            .processDefinitionKey(WorkflowConstants.Process.UPDATE)
+            .businessKey(MdcUtils.toBusinessKey())
+            .start();
 
     OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
     deployment.addWorkflowReferences(
         new WorkflowReference(pi.getId(), MdcUtils.getRequestId(), requester, Action.UPDATE));
-
   }
 
   @Override
@@ -498,12 +497,13 @@ public class DeploymentServiceImpl implements DeploymentService {
     Status resetStatus = Status.valueOf(status);
     if (resetStatus != Status.DELETE_FAILED) {
       throw new BadRequestException(
-        String.format("Cannot reset deployment: illegal status %s.", status));
+          String.format("Cannot reset deployment: illegal status %s.", status));
     }
 
     if (deployment.getStatus() != Status.DELETE_IN_PROGRESS) {
-      throw new ConflictException(String.format("Cannot reset a deployment in %s state",
-                 deployment.getStatus().toString()));
+      throw new ConflictException(
+          String.format(
+              "Cannot reset a deployment in %s state", deployment.getStatus().toString()));
     }
 
     deployment.setStatus(resetStatus);
@@ -511,7 +511,6 @@ public class DeploymentServiceImpl implements DeploymentService {
     deployment.setTask(Task.NONE);
 
     deployment = deploymentRepository.save(deployment);
-
   }
 
   private void createResources(Deployment deployment, Map<String, NodeTemplate> nodes) {
@@ -527,35 +526,40 @@ public class DeploymentServiceImpl implements DeploymentService {
     // Map with all the resources created for each node
     Map<NodeTemplate, Set<Resource>> resourcesMap = new HashMap<>();
 
-    CommonUtils.iteratorToStream(nodeIterator).forEachOrdered(node -> {
-      Set<RelationshipTemplate> relationships = graph.incomingEdgesOf(node);
+    CommonUtils.iteratorToStream(nodeIterator)
+        .forEachOrdered(
+            node -> {
+              Set<RelationshipTemplate> relationships = graph.incomingEdgesOf(node);
 
-      // Get all the parents
-      List<NodeTemplate> parentNodes =
-          relationships.stream().map(graph::getEdgeSource).collect(Collectors.toList());
+              // Get all the parents
+              List<NodeTemplate> parentNodes =
+                  relationships.stream().map(graph::getEdgeSource).collect(Collectors.toList());
 
-      long nodeCount = toscaService.getCount(node).orElse(1L);
-      Set<Resource> resources = LongStream
-          .range(0, nodeCount)
-          .mapToObj(i -> {
+              long nodeCount = toscaService.getCount(node).orElse(1L);
+              Set<Resource> resources =
+                  LongStream.range(0, nodeCount)
+                      .mapToObj(
+                          i -> {
+                            Resource tmpResource = new Resource();
+                            tmpResource.setDeployment(deployment);
+                            tmpResource.setState(NodeStates.INITIAL);
+                            tmpResource.setToscaNodeName(node.getName());
+                            tmpResource.setToscaNodeType(node.getType());
 
-            Resource tmpResource = new Resource();
-            tmpResource.setDeployment(deployment);
-            tmpResource.setState(NodeStates.INITIAL);
-            tmpResource.setToscaNodeName(node.getName());
-            tmpResource.setToscaNodeType(node.getType());
+                            Resource resource = resourceRepository.save(tmpResource);
 
-            Resource resource = resourceRepository.save(tmpResource);
-
-            // bind parents resources with child resource
-            parentNodes.forEach(
-                parentNode -> resourcesMap.get(parentNode).forEach(resource::addRequiredResource));
-            return resource;
-          })
-          .collect(Collectors.toSet());
-      // add all the resources created for this node
-      resourcesMap.put(node, resources);
-    });
+                            // bind parents resources with child resource
+                            parentNodes.forEach(
+                                parentNode ->
+                                    resourcesMap
+                                        .get(parentNode)
+                                        .forEach(resource::addRequiredResource));
+                            return resource;
+                          })
+                      .collect(Collectors.toSet());
+              // add all the resources created for this node
+              resourcesMap.put(node, resources);
+            });
   }
 
   @Override
@@ -565,15 +569,15 @@ public class DeploymentServiceImpl implements DeploymentService {
     LOG.info("Retrieving infrastructure log for deployment {}", id);
     throwIfNotOwned(deployment);
 
-    DeploymentType deploymentType = DeploymentService.inferDeploymentType(
-        deployment.getDeploymentProvider());
+    DeploymentType deploymentType =
+        DeploymentService.inferDeploymentType(deployment.getDeploymentProvider());
 
     // Build deployment message
-    DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-        requestedWithToken);
+    DeploymentMessage deploymentMessage =
+        buildDeploymentMessage(deployment, deploymentType, requestedWithToken);
 
-    DeploymentProviderService ds = deploymentProviderServiceRegistry
-        .getDeploymentProviderService(id);
+    DeploymentProviderService ds =
+        deploymentProviderServiceRegistry.getDeploymentProviderService(id);
 
     Optional<String> log = ds.getDeploymentLog(deploymentMessage);
 
@@ -592,15 +596,15 @@ public class DeploymentServiceImpl implements DeploymentService {
     LOG.info("Retrieving infrastructure extra info for deployment {}", id);
     throwIfNotOwned(deployment);
 
-    DeploymentType deploymentType = DeploymentService.inferDeploymentType(
-        deployment.getDeploymentProvider());
+    DeploymentType deploymentType =
+        DeploymentService.inferDeploymentType(deployment.getDeploymentProvider());
 
     // Build deployment message
-    DeploymentMessage deploymentMessage = buildDeploymentMessage(deployment, deploymentType,
-        requestedWithToken);
+    DeploymentMessage deploymentMessage =
+        buildDeploymentMessage(deployment, deploymentType, requestedWithToken);
 
-    DeploymentProviderService ds = deploymentProviderServiceRegistry
-        .getDeploymentProviderService(id);
+    DeploymentProviderService ds =
+        deploymentProviderServiceRegistry.getDeploymentProviderService(id);
 
     Optional<String> info = ds.getDeploymentExtendedInfo(deploymentMessage);
 
@@ -610,5 +614,4 @@ public class DeploymentServiceImpl implements DeploymentService {
       return "[]";
     }
   }
-
 }

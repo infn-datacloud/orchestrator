@@ -20,14 +20,12 @@ package it.reply.orchestrator.service.commands;
 import it.reply.orchestrator.dal.entity.Deployment;
 import it.reply.orchestrator.dal.repository.DeploymentRepository;
 import it.reply.orchestrator.dto.deployment.BaseWorkflowMessage;
-
 import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseWorkflowCommand<M extends BaseWorkflowMessage> extends BaseJavaDelegate {
 
-  @Autowired
-  private DeploymentRepository deploymentRepository;
+  @Autowired private DeploymentRepository deploymentRepository;
 
   protected abstract M getMessage(DelegateExecution execution);
 
@@ -45,5 +43,4 @@ public abstract class BaseWorkflowCommand<M extends BaseWorkflowMessage> extends
   protected Deployment getDeployment(M message) {
     return deploymentRepository.findOne(message.getDeploymentId());
   }
-
 }

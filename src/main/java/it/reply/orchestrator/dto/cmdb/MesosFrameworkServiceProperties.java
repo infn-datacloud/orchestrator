@@ -18,18 +18,13 @@
 package it.reply.orchestrator.dto.cmdb;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import it.reply.orchestrator.exception.service.ToscaException;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,8 +53,7 @@ public class MesosFrameworkServiceProperties {
   /**
    * Generate the local volume path.
    *
-   * @param deploymentId
-   *     the deployment ID
+   * @param deploymentId the deployment ID
    * @return the path
    */
   public String generateLocalVolumesHostPath(String deploymentId) {

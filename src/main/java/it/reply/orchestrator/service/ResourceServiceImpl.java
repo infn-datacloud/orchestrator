@@ -61,17 +61,13 @@ public class ResourceServiceImpl implements ResourceService {
 
   private DeploymentService deploymentservice;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
-  @Autowired
-  private RuntimeService wfService;
+  @Autowired private RuntimeService wfService;
 
-  @Autowired
-  private ToscaService toscaService;
+  @Autowired private ToscaService toscaService;
 
   @Override
   @Transactional(readOnly = true)
@@ -93,14 +89,18 @@ public class ResourceServiceImpl implements ResourceService {
     // parse the tosca template and get context
     ArchiveRoot ar = toscaService.parse(deployment.getTemplate());
     // get the list of template nodes that match or derive from the specified tosca type
-    List<String> nodeNames = ar.getTopology().getNodeTemplates().entrySet().stream()
-                               .filter(n -> ToscaTypeUtils.isOfType(ToscaContext.get(
-                                      NodeType.class, n.getValue().getType()), type))
-                               .map(n -> n.getKey()).collect(Collectors.toList());
+    List<String> nodeNames =
+        ar.getTopology().getNodeTemplates().entrySet().stream()
+            .filter(
+                n ->
+                    ToscaTypeUtils.isOfType(
+                        ToscaContext.get(NodeType.class, n.getValue().getType()), type))
+            .map(n -> n.getKey())
+            .collect(Collectors.toList());
     // filter the deployment resources that match with the names computed above
-    return resources.stream().filter(r -> nodeNames.contains(r.getToscaNodeName()))
-                    .collect(Collectors.toList());
-
+    return resources.stream()
+        .filter(r -> nodeNames.contains(r.getToscaNodeName()))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -109,21 +109,29 @@ public class ResourceServiceImpl implements ResourceService {
     // check if deploymentExists
     Deployment deployment = deploymentservice.getDeployment(deploymentId);
     MdcUtils.setDeploymentId(deployment.getId());
-    return resourceRepository.findByIdAndDeployment_id(uuid, deploymentId)
-        .orElseThrow(() -> new NotFoundException(String
-            .format("The resource <%s> in deployment <%s> doesn't exist", uuid, deploymentId)));
+    return resourceRepository
+        .findByIdAndDeployment_id(uuid, deploymentId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format(
+                        "The resource <%s> in deployment <%s> doesn't exist", uuid, deploymentId)));
   }
 
   @Override
   @Transactional
-  public boolean doAction(String deploymentId, String resourceId,
-      String action, OidcTokenId requestedWithToken) {
+  public boolean doAction(
+      String deploymentId, String resourceId, String action, OidcTokenId requestedWithToken) {
     Deployment deployment = deploymentservice.getDeployment(deploymentId);
     deploymentservice.throwIfNotOwned(deployment);
 
-    resourceRepository.findByIdAndDeployment_id(resourceId, deploymentId)
-                        .orElseThrow(() -> new BadRequestException(String.format(
-                          "Resource <%s> not found in deployment <%s>", resourceId, deploymentId)));
+    resourceRepository
+        .findByIdAndDeployment_id(resourceId, deploymentId)
+        .orElseThrow(
+            () ->
+                new BadRequestException(
+                    String.format(
+                        "Resource <%s> not found in deployment <%s>", resourceId, deploymentId)));
 
     MdcUtils.setDeploymentId(deployment.getId());
     LOG.debug("Performing action {} on deployment with id\n{}", action, deploymentId);
@@ -131,46 +139,54 @@ public class ResourceServiceImpl implements ResourceService {
     if (deployment.getDeploymentProvider() == DeploymentProvider.CHRONOS
         || deployment.getDeploymentProvider() == DeploymentProvider.MARATHON
         || deployment.getDeploymentProvider() == DeploymentProvider.QCG) {
-      throw new BadRequestException(String.format("%s deployment: actions not supported yet.",
-          deployment.getDeploymentProvider().toString()));
+      throw new BadRequestException(
+          String.format(
+              "%s deployment: actions not supported yet.",
+              deployment.getDeploymentProvider().toString()));
     }
 
     if (!(deployment.getStatus() == Status.CREATE_COMPLETE
         || deployment.getStatus() == Status.UPDATE_COMPLETE
         || deployment.getStatus() == Status.UPDATE_FAILED)) {
-      throw new ConflictException(String.format("Cannot perform actions on deployment in %s state",
-          deployment.getStatus().toString()));
+      throw new ConflictException(
+          String.format(
+              "Cannot perform actions on deployment in %s state",
+              deployment.getStatus().toString()));
     }
 
-    DeploymentType deploymentType = DeploymentService.inferDeploymentType(
-        deployment.getDeploymentProvider());
+    DeploymentType deploymentType =
+        DeploymentService.inferDeploymentType(deployment.getDeploymentProvider());
 
     // Build Action message
-    ActionMessage actionMessage = buildActionMessage(deployment, deploymentType, resourceId, action,
-        requestedWithToken);
+    ActionMessage actionMessage =
+        buildActionMessage(deployment, deploymentType, resourceId, action, requestedWithToken);
 
     String requestId = MdcUtils.getRequestId();
 
-    ProcessInstance pi = wfService
-        .createProcessInstanceBuilder()
-        .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
-        .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
-        .variable(WorkflowConstants.Param.DEPLOYMENT_MESSAGE,
-            objectMapper.valueToTree(actionMessage))
-        .processDefinitionKey(WorkflowConstants.Process.OPERATE_RESOURCES)
-        .businessKey(MdcUtils.toBusinessKey())
-        .start();
+    ProcessInstance pi =
+        wfService
+            .createProcessInstanceBuilder()
+            .variable(WorkflowConstants.Param.DEPLOYMENT_ID, deployment.getId())
+            .variable(WorkflowConstants.Param.REQUEST_ID, MdcUtils.getRequestId())
+            .variable(
+                WorkflowConstants.Param.DEPLOYMENT_MESSAGE, objectMapper.valueToTree(actionMessage))
+            .processDefinitionKey(WorkflowConstants.Process.OPERATE_RESOURCES)
+            .businessKey(MdcUtils.toBusinessKey())
+            .start();
 
     OidcEntity requester = oauth2TokenService.getOrGenerateOidcEntityFromCurrentAuth();
     deployment.addWorkflowReferences(
         new WorkflowReference(pi.getId(), requestId, requester, Action.EXECUTE));
 
     return true;
-
   }
 
-  private ActionMessage buildActionMessage(Deployment deployment, DeploymentType deploymentType,
-      String resourceId, String action, OidcTokenId requestedWithToken) {
+  private ActionMessage buildActionMessage(
+      Deployment deployment,
+      DeploymentType deploymentType,
+      String resourceId,
+      String action,
+      OidcTokenId requestedWithToken) {
     ActionMessage actionMessage = new ActionMessage(resourceId);
     actionMessage.setAction(action);
     actionMessage.setRequestedWithToken(requestedWithToken);
@@ -178,5 +194,4 @@ public class ResourceServiceImpl implements ResourceService {
     actionMessage.setDeploymentType(deploymentType);
     return actionMessage;
   }
-
 }

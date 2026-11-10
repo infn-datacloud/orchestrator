@@ -18,10 +18,8 @@
 package it.reply.orchestrator.config.properties;
 
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
@@ -33,7 +31,5 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class ToscaProperties {
 
-  @NotNull
-  @NonNull
-  private Resource definitionsFolder;
+  @NotNull @NonNull private Resource definitionsFolder;
 }

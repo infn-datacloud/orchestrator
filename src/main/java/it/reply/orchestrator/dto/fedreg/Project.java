@@ -71,5 +71,4 @@ public class Project {
   @JsonProperty("networks")
   @Builder.Default
   private List<Network> networks = new ArrayList<>();
-
 }

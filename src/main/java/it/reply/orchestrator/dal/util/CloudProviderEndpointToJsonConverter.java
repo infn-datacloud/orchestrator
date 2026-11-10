@@ -18,11 +18,8 @@
 package it.reply.orchestrator.dal.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import it.reply.orchestrator.dto.CloudProviderEndpoint;
-
 import javax.persistence.Converter;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Converter
@@ -30,8 +27,7 @@ public class CloudProviderEndpointToJsonConverter
     extends AbstractToJsonConverter<@Nullable CloudProviderEndpoint> {
 
   private static final TypeReference<@Nullable CloudProviderEndpoint> REFERENCE =
-      new TypeReference<@Nullable CloudProviderEndpoint>() {
-      };
+      new TypeReference<@Nullable CloudProviderEndpoint>() {};
 
   public CloudProviderEndpointToJsonConverter() {
     super(REFERENCE);

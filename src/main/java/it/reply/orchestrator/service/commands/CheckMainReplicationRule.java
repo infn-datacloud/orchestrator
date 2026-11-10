@@ -31,8 +31,7 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.CHECK_MAIN_REPLICATION_RULE)
 public class CheckMainReplicationRule extends BaseDeployCommand {
 
-  @Autowired
-  private RucioService rucioService;
+  @Autowired private RucioService rucioService;
 
   @Override
   protected void execute(DelegateExecution execution, DeploymentMessage message) {
@@ -44,7 +43,8 @@ public class CheckMainReplicationRule extends BaseDeployCommand {
         message.setMainReplicationRuleCompleted(true);
         break;
       case STUCK:
-        throw new BusinessWorkflowException(WorkflowConstants.ErrorCode.RUNTIME_ERROR,
+        throw new BusinessWorkflowException(
+            WorkflowConstants.ErrorCode.RUNTIME_ERROR,
             "Error while checking main replication rule",
             new DeploymentException("Main Replication rule is stuck: " + rule.getStatusReason()));
       default:

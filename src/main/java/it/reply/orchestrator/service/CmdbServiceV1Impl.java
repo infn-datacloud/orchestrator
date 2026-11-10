@@ -48,49 +48,33 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
 
   private static final ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>
-      PROVIDER_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>() {
-      };
+      PROVIDER_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbDataWrapper<CloudProvider>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<CloudService>>
       CLOUD_SERVICES_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<CloudService>>() {
-      };
+          new ParameterizedTypeReference<CmdbHasManyList<CloudService>>() {};
 
   private static final ParameterizedTypeReference<CmdbDataWrapper<CloudService>>
       CLOUD_SERVICE_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<CloudService>>() {
-      };
+          new ParameterizedTypeReference<CmdbDataWrapper<CloudService>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Image>>
-      IMAGES_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Image>>() {
-      };
+      IMAGES_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Image>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Image>>
-      IMAGE_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Image>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Image>> IMAGE_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Image>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Flavor>>
-      FLAVORS_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Flavor>>() {
-      };
+      FLAVORS_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Flavor>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Flavor>>
-      FLAVOR_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Flavor>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Flavor>> FLAVOR_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Flavor>>() {};
 
   private static final ParameterizedTypeReference<CmdbHasManyList<Tenant>>
-      TENANTS_LIST_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbHasManyList<Tenant>>() {
-      };
+      TENANTS_LIST_RESPONSE_TYPE = new ParameterizedTypeReference<CmdbHasManyList<Tenant>>() {};
 
-  private static final ParameterizedTypeReference<CmdbDataWrapper<Tenant>>
-      TENANT_RESPONSE_TYPE =
-      new ParameterizedTypeReference<CmdbDataWrapper<Tenant>>() {
-      };
+  private static final ParameterizedTypeReference<CmdbDataWrapper<Tenant>> TENANT_RESPONSE_TYPE =
+      new ParameterizedTypeReference<CmdbDataWrapper<Tenant>>() {};
 
   private CmdbProperties cmdbProperties;
 
@@ -108,20 +92,14 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
     return unwrapped;
   }
 
-  private <T extends CmdbIdentifiable> T get(URI from,
-      ParameterizedTypeReference<CmdbDataWrapper<T>> type) {
-    return unwrap(restTemplate
-        .exchange(from, HttpMethod.GET, null, type)
-        .getBody());
+  private <T extends CmdbIdentifiable> T get(
+      URI from, ParameterizedTypeReference<CmdbDataWrapper<T>> type) {
+    return unwrap(restTemplate.exchange(from, HttpMethod.GET, null, type).getBody());
   }
 
-  private <T extends CmdbIdentifiable> List<T> getAll(URI from,
-      ParameterizedTypeReference<CmdbHasManyList<T>> type) {
-    return restTemplate
-        .exchange(from, HttpMethod.GET, null, type)
-        .getBody()
-        .getRows()
-        .stream()
+  private <T extends CmdbIdentifiable> List<T> getAll(
+      URI from, ParameterizedTypeReference<CmdbHasManyList<T>> type) {
+    return restTemplate.exchange(from, HttpMethod.GET, null, type).getBody().getRows().stream()
         .map(CmdbRow::getDoc)
         .map(this::unwrap)
         .collect(Collectors.toList());
@@ -130,11 +108,12 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public CloudProvider getProviderById(String providerId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getProviderByIdPath())
-        .buildAndExpand(providerId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getProviderByIdPath())
+            .buildAndExpand(providerId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, PROVIDER_RESPONSE_TYPE);
@@ -147,29 +126,30 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public CloudService getServiceById(String serviceId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getServiceByIdPath())
-        .buildAndExpand(serviceId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getServiceByIdPath())
+            .buildAndExpand(serviceId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, CLOUD_SERVICE_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for service <" + serviceId + "> from CMDB.",
-          ex);
+          "Error loading info for service <" + serviceId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<CloudService> getServicesByProvider(String providerId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getServicesByProviderIdPath())
-        .buildAndExpand(providerId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getServicesByProviderIdPath())
+            .buildAndExpand(providerId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, CLOUD_SERVICES_LIST_RESPONSE_TYPE);
@@ -182,28 +162,30 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public Image getImageById(String imageId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getImageByIdPath())
-        .buildAndExpand(imageId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getImageByIdPath())
+            .buildAndExpand(imageId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, IMAGE_RESPONSE_TYPE);
     } catch (RestClientException ex) {
-      throw new DeploymentException("Error loading info for image <" + imageId + "> from CMDB.",
-          ex);
+      throw new DeploymentException(
+          "Error loading info for image <" + imageId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<Image> getImagesByTenant(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getImagesByTenantIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getImagesByTenantIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, IMAGES_LIST_RESPONSE_TYPE);
@@ -216,29 +198,30 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public Flavor getFlavorById(String flavorId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getFlavorByIdPath())
-        .buildAndExpand(flavorId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getFlavorByIdPath())
+            .buildAndExpand(flavorId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, FLAVOR_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for flavor <" + flavorId + "> from CMDB.",
-          ex);
+          "Error loading info for flavor <" + flavorId + "> from CMDB.", ex);
     }
   }
 
   @Override
   public List<Flavor> getFlavorsByTenant(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getFlavorsByTenantIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getFlavorsByTenantIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, FLAVORS_LIST_RESPONSE_TYPE);
@@ -251,11 +234,12 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public List<Tenant> getTenantsByService(String serviceId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsByServiceIdPath())
-        .buildAndExpand(serviceId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsByServiceIdPath())
+            .buildAndExpand(serviceId)
+            .normalize()
+            .toUri();
 
     try {
       return getAll(requestUri, TENANTS_LIST_RESPONSE_TYPE);
@@ -284,23 +268,28 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   */
 
   /**
-   * Temporary hack: cmdbProperties.getTenantsByOrganizationIdPath() does not work with
-   * organization names that contain slash, e.g. kube/users. Therefore, as a workaround
-   * here we first get the full list of tenants and then we filter the list
+   * Temporary hack: cmdbProperties.getTenantsByOrganizationIdPath() does not work with organization
+   * names that contain slash, e.g. kube/users. Therefore, as a workaround here we first get the
+   * full list of tenants and then we filter the list
    */
   @Override
   public List<Tenant> getTenantsByOrganisation(String organisationId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
-        .build()
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantsListPath())
+            .build()
+            .normalize()
+            .toUri();
 
     try {
       List<Tenant> tenants = getAll(requestUri, TENANTS_LIST_RESPONSE_TYPE);
-      return tenants.stream().filter(t -> Objects.nonNull(t.getIamOrganisation())
-                  && t.getIamOrganisation().equals(organisationId)).collect(Collectors.toList());
+      return tenants.stream()
+          .filter(
+              t ->
+                  Objects.nonNull(t.getIamOrganisation())
+                      && t.getIamOrganisation().equals(organisationId))
+          .collect(Collectors.toList());
     } catch (RestClientException ex) {
       throw new DeploymentException(
           "Error loading tenant list for organisation <" + organisationId + "> from CMDB.", ex);
@@ -310,19 +299,18 @@ public class CmdbServiceV1Impl extends AbstractCmdbServiceImpl {
   @Override
   public Tenant getTenantById(String tenantId) {
 
-    URI requestUri = UriComponentsBuilder
-        .fromHttpUrl(cmdbProperties.getUrl() + cmdbProperties.getTenantByIdPath())
-        .buildAndExpand(tenantId)
-        .normalize()
-        .toUri();
+    URI requestUri =
+        UriComponentsBuilder.fromHttpUrl(
+                cmdbProperties.getUrl() + cmdbProperties.getTenantByIdPath())
+            .buildAndExpand(tenantId)
+            .normalize()
+            .toUri();
 
     try {
       return get(requestUri, TENANT_RESPONSE_TYPE);
     } catch (RestClientException ex) {
       throw new DeploymentException(
-          "Error loading info for tenant <" + tenantId + "> from CMDB.",
-          ex);
+          "Error loading info for tenant <" + tenantId + "> from CMDB.", ex);
     }
   }
-
 }

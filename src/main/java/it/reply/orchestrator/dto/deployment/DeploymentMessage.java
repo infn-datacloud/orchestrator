@@ -43,30 +43,25 @@ public class DeploymentMessage extends BaseWorkflowMessage {
   private static final Integer MAX_PROVIDER_TIMEOUT = 14400;
   private static final String TIME_FORMAT = "PT%dM";
 
-  @NonNull
-  @NotNull
-  private String timeout = MAX_TIMEOUT.toString();
+  @NonNull @NotNull private String timeout = MAX_TIMEOUT.toString();
 
   /**
    * Sets the Deployment timeout.
    *
-   * @param timeoutMins
-   *          the timeout in Minutes
+   * @param timeoutMins the timeout in Minutes
    */
   public void setTimeoutInMins(Integer timeoutMins) {
-    this.timeout = Optional
-        .ofNullable(timeoutMins)
-        .map(value -> Instant.now().plus(Duration.ofMinutes(value)))
-        .filter(value -> value.isBefore(MAX_TIMEOUT))
-        .orElse(MAX_TIMEOUT)
-        .toString();
+    this.timeout =
+        Optional.ofNullable(timeoutMins)
+            .map(value -> Instant.now().plus(Duration.ofMinutes(value)))
+            .filter(value -> value.isBefore(MAX_TIMEOUT))
+            .orElse(MAX_TIMEOUT)
+            .toString();
   }
 
-  @Nullable
-  private QcgJobsOrderedIterator qcgJobsIterator;
+  @Nullable private QcgJobsOrderedIterator qcgJobsIterator;
 
-  @Nullable
-  private ChronosJobsOrderedIterator chronosJobsIterator;
+  @Nullable private ChronosJobsOrderedIterator chronosJobsIterator;
 
   private boolean createComplete;
   private boolean deleteComplete;
@@ -74,45 +69,38 @@ public class DeploymentMessage extends BaseWorkflowMessage {
   private boolean skipPollInterval;
   private boolean actionComplete;
 
-  @NonNull
-  @NotNull
+  @NonNull @NotNull
   private String providerTimeout = String.format(TIME_FORMAT, MAX_PROVIDER_TIMEOUT);
 
   /**
    * Sets the Deployment per provider timeout.
    *
-   * @param timeoutMins
-   *          the timeout in Minutes
+   * @param timeoutMins the timeout in Minutes
    */
   public void setProviderTimeoutInMins(Integer timeoutMins) {
-    this.providerTimeout = Optional
-        .ofNullable(timeoutMins)
-        .map(value -> String.format(TIME_FORMAT, value))
-        .orElse(String.format(TIME_FORMAT, MAX_PROVIDER_TIMEOUT));
+    this.providerTimeout =
+        Optional.ofNullable(timeoutMins)
+            .map(value -> String.format(TIME_FORMAT, value))
+            .orElse(String.format(TIME_FORMAT, MAX_PROVIDER_TIMEOUT));
   }
 
-  @Nullable
-  private CloudServicesOrderedIterator cloudServicesOrderedIterator;
+  @Nullable private CloudServicesOrderedIterator cloudServicesOrderedIterator;
 
-  @Nullable
-  private CloudProviderEndpoint chosenCloudProviderEndpoint;
+  @Nullable private CloudProviderEndpoint chosenCloudProviderEndpoint;
 
-  @NonNull
-  private Map<String, OneData> oneDataParameters = new HashMap<>();
+  @NonNull private Map<String, OneData> oneDataParameters = new HashMap<>();
 
-  @Nullable
-  private Integer maxProvidersRetry;
+  @Nullable private Integer maxProvidersRetry;
 
   private boolean keepLastAttempt = false;
 
   private boolean force = false;
 
-  private String  mainReplicationRuleId;
+  private String mainReplicationRuleId;
 
   private boolean mainReplicationRuleCompleted = false;
 
-  private String  tempReplicationRuleId;
+  private String tempReplicationRuleId;
 
   private boolean tempReplicationRuleCompleted = false;
-
 }

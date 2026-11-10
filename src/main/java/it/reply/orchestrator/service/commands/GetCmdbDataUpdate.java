@@ -36,11 +36,9 @@ import org.springframework.stereotype.Component;
 @Component(WorkflowConstants.Delegate.GET_CMDB_DATA_UPDATE)
 public class GetCmdbDataUpdate extends BaseDeployCommand {
 
-  @Autowired
-  private CmdbService cmdbService;
+  @Autowired private CmdbService cmdbService;
 
-  @Autowired
-  private OAuth2TokenService oauth2TokenService;
+  @Autowired private OAuth2TokenService oauth2TokenService;
 
   @Override
   public void execute(DelegateExecution execution, DeploymentMessage deploymentMessage) {
@@ -48,17 +46,21 @@ public class GetCmdbDataUpdate extends BaseDeployCommand {
     deploymentMessage.setChosenCloudProviderEndpoint(deployment.getCloudProviderEndpoint());
 
     OidcTokenId requestedWithToken = deploymentMessage.getRequestedWithToken();
-    String organisation = Optional.ofNullable(deployment.getUserGroup())
-        .orElse(oauth2TokenService.getOrganization(requestedWithToken));
+    String organisation =
+        Optional.ofNullable(deployment.getUserGroup())
+            .orElse(oauth2TokenService.getOrganization(requestedWithToken));
     RankCloudProvidersMessage rankCloudProvidersMessage = new RankCloudProvidersMessage();
     rankCloudProvidersMessage.setRequestedWithToken(requestedWithToken);
 
-    CloudProvider cloudProvider = cmdbService.getUpdatedCloudProviderInfo(deployment, organisation,
-        rankCloudProvidersMessage);
+    CloudProvider cloudProvider =
+        cmdbService.getUpdatedCloudProviderInfo(
+            deployment, organisation, rankCloudProvidersMessage);
 
     CloudServicesOrderedIterator cloudServicesOrderedIterator =
-        new CloudServicesOrderedIterator(cloudProvider.getServices().values().stream()
-            .map(CloudServiceWf::new).collect(Collectors.toList()));
+        new CloudServicesOrderedIterator(
+            cloudProvider.getServices().values().stream()
+                .map(CloudServiceWf::new)
+                .collect(Collectors.toList()));
     cloudServicesOrderedIterator.next();
     deploymentMessage.setCloudServicesOrderedIterator(cloudServicesOrderedIterator);
   }

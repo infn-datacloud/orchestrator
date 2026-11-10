@@ -18,23 +18,18 @@
 package it.reply.orchestrator.dal.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import java.util.Map;
-
 import javax.persistence.Converter;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Converter
 public class ResourceMetadataToJsonConverter
-    extends AbstractToJsonConverter<@Nullable Map<String,String>> {
+    extends AbstractToJsonConverter<@Nullable Map<String, String>> {
 
-  private static final TypeReference<@Nullable Map<String,String>> REFERENCE =
-      new TypeReference<@Nullable Map<String,String>>() {
-      };
+  private static final TypeReference<@Nullable Map<String, String>> REFERENCE =
+      new TypeReference<@Nullable Map<String, String>>() {};
 
   public ResourceMetadataToJsonConverter() {
     super(REFERENCE);
   }
-
 }

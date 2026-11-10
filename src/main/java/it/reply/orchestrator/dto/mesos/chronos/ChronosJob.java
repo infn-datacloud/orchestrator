@@ -19,7 +19,6 @@ package it.reply.orchestrator.dto.mesos.chronos;
 
 import it.reply.orchestrator.dto.mesos.MesosTask;
 import it.reply.orchestrator.utils.ToscaConstants;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -41,5 +40,4 @@ public class ChronosJob extends MesosTask<ChronosJob> {
   public final String getToscaNodeName() {
     return ToscaConstants.Nodes.Types.CHRONOS;
   }
-
 }

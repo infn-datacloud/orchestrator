@@ -25,15 +25,12 @@ import it.reply.orchestrator.exception.VaultJwtTokenExpiredException;
 import it.reply.orchestrator.exception.VaultSecretNotFoundException;
 import it.reply.orchestrator.exception.VaultServiceNotAvailableException;
 import it.reply.orchestrator.service.security.OAuth2TokenService;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -58,14 +55,12 @@ public class VaultServiceImpl implements VaultService {
   /**
    * Creates a new {@link VaultServiceImpl}.
    *
-   * @param vaultProperties
-   *     the vaultProperties
-   * @param oauth2TokenService
-   *     the oauth2TokenService
-   * @param restTemplateBuilder
-   *     the restTemplateBuilder
+   * @param vaultProperties the vaultProperties
+   * @param oauth2TokenService the oauth2TokenService
+   * @param restTemplateBuilder the restTemplateBuilder
    */
-  public VaultServiceImpl(VaultProperties vaultProperties,
+  public VaultServiceImpl(
+      VaultProperties vaultProperties,
       OAuth2TokenService oauth2TokenService,
       RestTemplateBuilder restTemplateBuilder) {
     this.vaultProperties = vaultProperties;
@@ -74,8 +69,7 @@ public class VaultServiceImpl implements VaultService {
   }
 
   private URI getSystemVaultUri() {
-    return getServiceUri()
-        .orElseThrow(() -> new VaultServiceNotAvailableException());
+    return getServiceUri().orElseThrow(() -> new VaultServiceNotAvailableException());
   }
 
   @Override
@@ -88,8 +82,8 @@ public class VaultServiceImpl implements VaultService {
   }
 
   @Override
-  public VaultResponse writeSecret(URI uri, ClientAuthentication token, String path,
-      Object secret) {
+  public VaultResponse writeSecret(
+      URI uri, ClientAuthentication token, String path, Object secret) {
     return getTemplate(uri, token).write(path, secret);
   }
 
@@ -146,9 +140,7 @@ public class VaultServiceImpl implements VaultService {
     return this.listSecrets(getSystemVaultUri(), token, path);
   }
 
-  /**
-   * Retrieve the vault token from the IAM token using passed Vault server URI.
-   */
+  /** Retrieve the vault token from the IAM token using passed Vault server URI. */
   @Override
   public TokenAuthenticationExtended retrieveToken(URI uri, String accessToken) {
     uri = VaultEndpoint.from(uri).createUri("auth/jwt/login");
@@ -156,8 +148,8 @@ public class VaultServiceImpl implements VaultService {
     login.put("jwt", accessToken);
     login.put("role", vaultProperties.getRole());
     try {
-      VaultTokenResponseExtended token = restTemplate
-          .postForObject(uri, login, VaultTokenResponseExtended.class);
+      VaultTokenResponseExtended token =
+          restTemplate.postForObject(uri, login, VaultTokenResponseExtended.class);
       return new TokenAuthenticationExtended(token.getToken(), token.getEntityId());
     } catch (HttpClientErrorException ex) {
       if (ex.getRawStatusCode() == 400) {
@@ -175,17 +167,13 @@ public class VaultServiceImpl implements VaultService {
     }
   }
 
-  /**
-   * Retrieve the vault token from the IAM token.
-   */
+  /** Retrieve the vault token from the IAM token. */
   @Override
   public TokenAuthenticationExtended retrieveToken(String accessToken) {
     return retrieveToken(getSystemVaultUri(), accessToken);
   }
 
-  /**
-   * Retrieve the vault token from the IAM token identifier using passed Vault server URI.
-   */
+  /** Retrieve the vault token from the IAM token identifier using passed Vault server URI. */
   @Override
   public TokenAuthenticationExtended retrieveToken(URI uri, OidcTokenId oidcTokenId) {
     return oauth2TokenService.executeWithClientForResult(
@@ -194,20 +182,15 @@ public class VaultServiceImpl implements VaultService {
         VaultJwtTokenExpiredException.class::isInstance);
   }
 
-  /**
-   * Retrieve the vault token from the IAM token identifier.
-   */
+  /** Retrieve the vault token from the IAM token identifier. */
   @Override
   public TokenAuthenticationExtended retrieveToken(OidcTokenId oidcTokenId) {
     return this.retrieveToken(getSystemVaultUri(), oidcTokenId);
   }
 
-  /**
-   * Retrieve the vault path.
-   */
+  /** Retrieve the vault path. */
   @Override
   public String getServicePath() {
     return vaultProperties.getPath();
   }
-
 }

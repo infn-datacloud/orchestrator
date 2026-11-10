@@ -31,7 +31,6 @@ public interface ResourceService {
 
   public Resource getResource(String uuid, String deploymentId);
 
-  public boolean doAction(String deploymentId, String resourceId,
-      String action, OidcTokenId requestedWithToken);
-
+  public boolean doAction(
+      String deploymentId, String resourceId, String action, OidcTokenId requestedWithToken);
 }

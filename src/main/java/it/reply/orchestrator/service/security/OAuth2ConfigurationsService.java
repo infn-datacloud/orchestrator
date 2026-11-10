@@ -20,9 +20,7 @@ package it.reply.orchestrator.service.security;
 import it.reply.orchestrator.config.properties.OidcProperties;
 import it.reply.orchestrator.config.properties.OidcProperties.IamProperties;
 import it.reply.orchestrator.exception.OrchestratorException;
-
 import java.util.Optional;
-
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.mitre.oauth2.model.RegisteredClient;
 import org.mitre.openid.connect.client.service.ClientConfigurationService;
@@ -42,8 +40,8 @@ public class OAuth2ConfigurationsService {
   private ClientConfigurationService clientConfigurationService;
 
   @Autowired
-  protected OAuth2ConfigurationsService(@NonNull OidcProperties oidcProperties,
-      @NonNull ApplicationContext applicationContext) {
+  protected OAuth2ConfigurationsService(
+      @NonNull OidcProperties oidcProperties, @NonNull ApplicationContext applicationContext) {
     this.oidcProperties = oidcProperties;
 
     if (oidcProperties.isEnabled()) {
@@ -55,37 +53,39 @@ public class OAuth2ConfigurationsService {
   /**
    * Get a server configuration.
    *
-   * @param issuer
-   *          the issuer of the server
+   * @param issuer the issuer of the server
    * @return the server configuration
    */
   public ServerConfiguration getServerConfiguration(String issuer) {
     oidcProperties.throwIfSecurityDisabled();
     return Optional.ofNullable(serverConfigurationService.getServerConfiguration(issuer))
-        .orElseThrow(() -> new OrchestratorException(
-            "No server configuration found for IAM with issuer " + issuer));
+        .orElseThrow(
+            () ->
+                new OrchestratorException(
+                    "No server configuration found for IAM with issuer " + issuer));
   }
 
   /**
    * Get a client configuration.
    *
-   * @param serverConfiguration
-   *          the server configuration on which the client has been registered
+   * @param serverConfiguration the server configuration on which the client has been registered
    * @return the client configuration
    */
   public RegisteredClient getClientConfiguration(ServerConfiguration serverConfiguration) {
     oidcProperties.throwIfSecurityDisabled();
-    return Optional
-        .ofNullable(clientConfigurationService.getClientConfiguration(serverConfiguration))
-        .orElseThrow(() -> new OrchestratorException(
-            "No client configuration found for IAM with iss" + serverConfiguration.getIssuer()));
+    return Optional.ofNullable(
+            clientConfigurationService.getClientConfiguration(serverConfiguration))
+        .orElseThrow(
+            () ->
+                new OrchestratorException(
+                    "No client configuration found for IAM with iss"
+                        + serverConfiguration.getIssuer()));
   }
 
   /**
    * Get a client configuration.
    *
-   * @param issuer
-   *          the issuer of the server on which the client has been registered
+   * @param issuer the issuer of the server on which the client has been registered
    * @return the client configuration
    */
   public RegisteredClient getClientConfiguration(String issuer) {
@@ -97,8 +97,7 @@ public class OAuth2ConfigurationsService {
   /**
    * Get audience.
    *
-   * @param issuer
-   *          the issuer of the server on which the client has been registered
+   * @param issuer the issuer of the server on which the client has been registered
    * @return the audience UUID
    */
   public String getAudience(String issuer) {
@@ -106,8 +105,9 @@ public class OAuth2ConfigurationsService {
     return oidcProperties
         .getIamConfiguration(issuer)
         .map(IamProperties::getAudience)
-        .orElseThrow(() -> new OrchestratorException(
-            "No audience configuration found for IAM with iss" + issuer));
+        .orElseThrow(
+            () ->
+                new OrchestratorException(
+                    "No audience configuration found for IAM with iss" + issuer));
   }
-
 }

@@ -78,5 +78,4 @@ public class Flavor {
   @JsonProperty("uid")
   @NotNull
   private String uid;
-
 }

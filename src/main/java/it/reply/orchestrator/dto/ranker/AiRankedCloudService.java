@@ -130,5 +130,3 @@ public class AiRankedCloudService {
   @JsonProperty("vcpus_usage")
   private float vcpusUsage;
 }
-
-

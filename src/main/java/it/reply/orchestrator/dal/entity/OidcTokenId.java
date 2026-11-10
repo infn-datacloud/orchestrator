@@ -43,8 +43,5 @@ public class OidcTokenId implements Serializable {
   @Convert(converter = ListStringToJsonConverter.class)
   private List<String> clientsId = new ArrayList<>();
 
-  @NotNull
-  @NonNull
-  @Embedded
-  private OidcEntityId oidcEntityId;
+  @NotNull @NonNull @Embedded private OidcEntityId oidcEntityId;
 }

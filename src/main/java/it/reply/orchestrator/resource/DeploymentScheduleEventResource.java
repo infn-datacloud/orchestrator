@@ -40,11 +40,10 @@ public class DeploymentScheduleEventResource extends AbstractResource {
 
   private String name;
 
-  @Nullable
-  private String replicationStatus;
+  @Nullable private String replicationStatus;
 
   /**
-   *  Create a new DeploymentScheduleEventResource.
+   * Create a new DeploymentScheduleEventResource.
    *
    * @param uuid the uuid
    * @param creationTime the creation time
@@ -55,14 +54,18 @@ public class DeploymentScheduleEventResource extends AbstractResource {
    * @param replicationStatus the replication status
    */
   @Builder
-  public DeploymentScheduleEventResource(@NonNull String uuid, @Nullable Date creationTime,
-      @Nullable Date updateTime, DeploymentResource deployment,
-      String scope, String name, @Nullable String replicationStatus) {
+  public DeploymentScheduleEventResource(
+      @NonNull String uuid,
+      @Nullable Date creationTime,
+      @Nullable Date updateTime,
+      DeploymentResource deployment,
+      String scope,
+      String name,
+      @Nullable String replicationStatus) {
     super(uuid, creationTime, updateTime, null);
     this.deployment = deployment;
     this.scope = scope;
     this.name = name;
     this.replicationStatus = replicationStatus;
   }
-
 }

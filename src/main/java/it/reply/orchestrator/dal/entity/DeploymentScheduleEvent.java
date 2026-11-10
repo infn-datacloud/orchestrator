@@ -32,9 +32,7 @@ import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
-@Table(indexes = {
-    @Index(columnList = "deployment_schedule_id, scope, name", unique = true)
-})
+@Table(indexes = {@Index(columnList = "deployment_schedule_id, scope, name", unique = true)})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,34 +52,21 @@ public class DeploymentScheduleEvent extends AbstractResourceEntity {
   @JoinColumn(name = "deployment_id")
   private Deployment deployment;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "owner_id")
   @Nullable
   private OidcEntity owner;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "main_replication_rule_id")
   @Nullable
   private ReplicationRule mainReplicationRule;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "temp_replication_rule_id")
   @Nullable
   private ReplicationRule tempReplicationRule;
-
 }

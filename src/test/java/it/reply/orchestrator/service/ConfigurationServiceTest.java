@@ -17,6 +17,9 @@
 
 package it.reply.orchestrator.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import it.reply.orchestrator.config.properties.CmdbProperties;
 import it.reply.orchestrator.config.properties.CprProperties;
 import it.reply.orchestrator.config.properties.ImProperties;
@@ -25,13 +28,8 @@ import it.reply.orchestrator.config.properties.RucioProperties;
 import it.reply.orchestrator.config.properties.SlamProperties;
 import it.reply.orchestrator.config.properties.VaultProperties;
 import it.reply.orchestrator.dto.SystemEndpoints;
-import junitparams.JUnitParamsRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.net.URI;
-
+import junitparams.JUnitParamsRunner;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,32 +50,23 @@ public class ConfigurationServiceTest {
   private static final URI VAULT_URL = URI.create("https://vault.test.it:8200");
   private static final URI RUCIO_URL = URI.create("https://rucio.test.it:8100");
 
-  @Rule
-  public MockitoRule rule = MockitoJUnit.rule();
+  @Rule public MockitoRule rule = MockitoJUnit.rule();
 
-  @InjectMocks
-  private ConfigurationServiceImpl configurationService;
+  @InjectMocks private ConfigurationServiceImpl configurationService;
 
-  @Mock
-  private CmdbProperties cmdbProperties;
+  @Mock private CmdbProperties cmdbProperties;
 
-  @Mock
-  private CprProperties cprProperties;
+  @Mock private CprProperties cprProperties;
 
-  @Mock
-  private ImProperties imProperties;
+  @Mock private ImProperties imProperties;
 
-  @Mock
-  private MonitoringProperties monitoringProperties;
+  @Mock private MonitoringProperties monitoringProperties;
 
-  @Mock
-  private SlamProperties slamProperties;
+  @Mock private SlamProperties slamProperties;
 
-  @Mock
-  private VaultProperties vaultProperties;
+  @Mock private VaultProperties vaultProperties;
 
-  @Mock
-  private RucioProperties rucioProperties;
+  @Mock private RucioProperties rucioProperties;
 
   @Before
   public void setup() {
@@ -95,21 +84,18 @@ public class ConfigurationServiceTest {
 
     SystemEndpoints endpoints = createTestEndpoint();
 
-    assertThat(configurationService.getConfiguration())
-        .isEqualTo(endpoints);
+    assertThat(configurationService.getConfiguration()).isEqualTo(endpoints);
   }
 
   private SystemEndpoints createTestEndpoint() {
-    return SystemEndpoints
-      .builder()
-      .cprUrl(CPR_URL)
-      .slamUrl(SLAM_URL)
-      .cmdbUrl(CMDB_URL)
-      .imUrl(IM_URL)
-      .monitoringUrl(MONITORING_URL)
-      .vaultUrl(VAULT_URL)
-      .rucioUrl(RUCIO_URL)
-      .build();
+    return SystemEndpoints.builder()
+        .cprUrl(CPR_URL)
+        .slamUrl(SLAM_URL)
+        .cmdbUrl(CMDB_URL)
+        .imUrl(IM_URL)
+        .monitoringUrl(MONITORING_URL)
+        .vaultUrl(VAULT_URL)
+        .rucioUrl(RUCIO_URL)
+        .build();
   }
-
 }

@@ -36,9 +36,7 @@ import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Entity
-@Table(indexes = {
-    @Index(columnList = "rucioId", unique = true)
-})
+@Table(indexes = {@Index(columnList = "rucioId", unique = true)})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -63,10 +61,7 @@ public class ReplicationRule extends AbstractResourceEntity {
   @Column(nullable = false)
   private ReplicationRuleStatus status;
 
-  @Lob
-  @Basic
-  @Nullable
-  private String statusReason;
+  @Lob @Basic @Nullable private String statusReason;
 
   @Column(nullable = false)
   private String replicationExpression;
@@ -74,12 +69,8 @@ public class ReplicationRule extends AbstractResourceEntity {
   @Column(nullable = false)
   private Integer numberOfReplicas;
 
-  @ManyToOne(cascade = {
-      CascadeType.DETACH,
-      CascadeType.MERGE,
-      CascadeType.PERSIST,
-      CascadeType.REFRESH
-  })
+  @ManyToOne(
+      cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinColumn(name = "owner_id")
   @Nullable
   private OidcEntity owner;

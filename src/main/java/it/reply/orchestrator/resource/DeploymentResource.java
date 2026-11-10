@@ -41,39 +41,37 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeploymentResource extends AbstractResource {
 
-  @Nullable
-  private Status status;
+  @Nullable private Status status;
 
-  @Nullable
-  private String statusReason;
+  @Nullable private String statusReason;
 
-  @NotNull
-  @NonNull
-  private Map<String, Object> outputs = new HashMap<>();
+  @NotNull @NonNull private Map<String, Object> outputs = new HashMap<>();
 
-  @Nullable
-  private Task task;
+  @Nullable private Task task;
 
-  @Nullable
-  private String callback;
+  @Nullable private String callback;
 
-  @Nullable
-  private String userGroup;
+  @Nullable private String userGroup;
 
-  @Nullable
-  private String cloudProviderName;
+  @Nullable private String cloudProviderName;
 
-  @Nullable
-  private CloudProviderEndpointResource cloudProviderEndpoint;
+  @Nullable private CloudProviderEndpointResource cloudProviderEndpoint;
 
-  @Nullable
-  private OidcEntityId createdBy;
+  @Nullable private OidcEntityId createdBy;
 
   @Builder
-  protected DeploymentResource(@NonNull String uuid, @Nullable Date creationTime,
-      @Nullable Date updateTime, @Nullable String physicalId, @Nullable Status status,
-      @Nullable String statusReason, @Nullable Map<String, Object> outputs, @Nullable Task task,
-      @Nullable String callback, @Nullable String userGroup, @Nullable String cloudProviderName,
+  protected DeploymentResource(
+      @NonNull String uuid,
+      @Nullable Date creationTime,
+      @Nullable Date updateTime,
+      @Nullable String physicalId,
+      @Nullable Status status,
+      @Nullable String statusReason,
+      @Nullable Map<String, Object> outputs,
+      @Nullable Task task,
+      @Nullable String callback,
+      @Nullable String userGroup,
+      @Nullable String cloudProviderName,
       @Nullable CloudProviderEndpointResource cloudProviderEndpoint,
       @Nullable OidcEntityId createdBy) {
     super(uuid, creationTime, updateTime, physicalId);
@@ -87,5 +85,4 @@ public class DeploymentResource extends AbstractResource {
     this.cloudProviderEndpoint = cloudProviderEndpoint;
     this.createdBy = createdBy;
   }
-
 }

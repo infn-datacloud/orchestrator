@@ -26,12 +26,10 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.URI;
-
 import it.reply.orchestrator.dto.SystemEndpoints;
 import it.reply.orchestrator.service.ConfigurationService;
+import java.net.URI;
 import junitparams.JUnitParamsRunner;
-
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,58 +46,53 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 @WebMvcTest(controllers = ConfigurationController.class, secure = false)
 @RunWith(JUnitParamsRunner.class)
 @AutoConfigureRestDocs("target/generated-snippets")
 @Import(HateoasAwareSpringDataWebConfiguration.class)
 public class ConfigurationControllerTest {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  private ConfigurationService configurationService;
+  @MockBean private ConfigurationService configurationService;
 
   @Test
   public void getConfiguration() throws Exception {
 
     Mockito.when(configurationService.getConfiguration())
-    .thenReturn(SystemEndpoints
-        .builder()
-        .cprUrl(URI.create("http://deep-cpr.test.infn.it:8080"))
-        .slamUrl(URI.create("https://deep-slam.test.infn.it:8443/rest/slam"))
-        .cmdbUrl(URI.create("https://deep-paas-dev.test.infn.it/cmdb"))
-        .imUrl(URI.create("https://deep-paas.test.infn.it/im"))
-        .monitoringUrl(URI.create("https://deep-paas.test.infn.it/monitoring"))
-        .vaultUrl(URI.create("https://vault.test.infn.it:8200"))
-        .build());
+        .thenReturn(
+            SystemEndpoints.builder()
+                .cprUrl(URI.create("http://deep-cpr.test.infn.it:8080"))
+                .slamUrl(URI.create("https://deep-slam.test.infn.it:8443/rest/slam"))
+                .cmdbUrl(URI.create("https://deep-paas-dev.test.infn.it/cmdb"))
+                .imUrl(URI.create("https://deep-paas.test.infn.it/im"))
+                .monitoringUrl(URI.create("https://deep-paas.test.infn.it/monitoring"))
+                .vaultUrl(URI.create("https://vault.test.infn.it:8200"))
+                .build());
 
-    this.mockMvc.perform(get("/configuration")
-        .accept(MediaType.APPLICATION_JSON))
+    this.mockMvc
+        .perform(get("/configuration").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andDo(document("configuration", preprocessRequest(prettyPrint()),
-            preprocessResponse(prettyPrint()),
-            responseFields(
-                fieldWithPath("cpr_url").description(
-                    "The URI of the Cloud Provider Ranker"),
-                fieldWithPath("slam_url").description(
-                    "The URI of the SLAM (Service Level Agreement Manager)"),
-                fieldWithPath("cmdb_url").description(
-                    "The URI of the CMDB (Change Management DataBase)"),
-                fieldWithPath("im_url").description(
-                    "The URI of the IM (Infrastructure Manager)"),
-                fieldWithPath("monitoring_url").description(
-                    "The URI of the Monitoring Service"),
-                fieldWithPath("vault_url").description(
-                    "The URI of the Vault Server (optional)"))));
-
+        .andDo(
+            document(
+                "configuration",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
+                responseFields(
+                    fieldWithPath("cpr_url").description("The URI of the Cloud Provider Ranker"),
+                    fieldWithPath("slam_url")
+                        .description("The URI of the SLAM (Service Level Agreement Manager)"),
+                    fieldWithPath("cmdb_url")
+                        .description("The URI of the CMDB (Change Management DataBase)"),
+                    fieldWithPath("im_url")
+                        .description("The URI of the IM (Infrastructure Manager)"),
+                    fieldWithPath("monitoring_url")
+                        .description("The URI of the Monitoring Service"),
+                    fieldWithPath("vault_url")
+                        .description("The URI of the Vault Server (optional)"))));
   }
-
 }

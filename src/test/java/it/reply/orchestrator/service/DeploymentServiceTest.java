@@ -17,6 +17,10 @@
 
 package it.reply.orchestrator.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import alien4cloud.tosca.model.ArchiveRoot;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
@@ -42,6 +46,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.alien4cloud.tosca.model.definitions.ScalarPropertyValue;
 import org.alien4cloud.tosca.model.templates.Capability;
 import org.alien4cloud.tosca.model.templates.NodeTemplate;
@@ -69,52 +75,34 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 @JsonTest
 @RunWith(JUnitParamsRunner.class)
 public class DeploymentServiceTest {
 
-  @ClassRule
-  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+  @ClassRule public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
 
-  @Rule
-  public final SpringMethodRule springMethodRule = new SpringMethodRule();
+  @Rule public final SpringMethodRule springMethodRule = new SpringMethodRule();
 
-  @InjectMocks
-  private DeploymentService deploymentService = new DeploymentServiceImpl();
+  @InjectMocks private DeploymentService deploymentService = new DeploymentServiceImpl();
 
-  @Mock
-  private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
+  @Mock private DeploymentProviderServiceRegistry deploymentProviderServiceRegistry;
 
-  @Mock
-  private ImServiceImpl imService;
+  @Mock private ImServiceImpl imService;
 
-  @Mock
-  private DeploymentRepository deploymentRepository;
+  @Mock private DeploymentRepository deploymentRepository;
 
-  @Mock
-  private ResourceRepository resourceRepository;
+  @Mock private ResourceRepository resourceRepository;
 
-  @Spy
-  private ToscaServiceImpl toscaService = new ToscaServiceImpl();
+  @Spy private ToscaServiceImpl toscaService = new ToscaServiceImpl();
 
-  @Mock
-  private RuntimeServiceImpl wfService;
+  @Mock private RuntimeServiceImpl wfService;
 
-  @Mock
-  private OAuth2TokenService oauth2TokenService;
+  @Mock private OAuth2TokenService oauth2TokenService;
 
-  @Mock
-  private OidcProperties oidcProperties;
+  @Mock private OidcProperties oidcProperties;
 
-  @Spy
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Spy @Autowired private ObjectMapper objectMapper;
 
   private static final String nodeTypeCompute = "tosca.nodes.indigo.Compute";
 
@@ -122,14 +110,12 @@ public class DeploymentServiceTest {
   public void getDeploymentsSuccessful() throws Exception {
     List<Deployment> deployments = ControllerTestUtils.createDeployments(5);
 
-    Mockito
-        .when(deploymentRepository.findAllByOwner((OidcEntityId)null, (Pageable) null))
+    Mockito.when(deploymentRepository.findAllByOwner((OidcEntityId) null, (Pageable) null))
         .thenReturn(new PageImpl<Deployment>(deployments));
 
     Page<Deployment> pagedDeployment = deploymentService.getDeployments(null, null, null, null);
 
     assertThat(pagedDeployment.getContent()).isEqualTo(deployments);
-
   }
 
   @Test
@@ -137,8 +123,7 @@ public class DeploymentServiceTest {
     Pageable pageable = new PageRequest(0, 10);
     List<Deployment> deployments = ControllerTestUtils.createDeployments(10);
 
-    Mockito
-        .when(deploymentRepository.findAllByOwner((OidcEntityId)null,pageable))
+    Mockito.when(deploymentRepository.findAllByOwner((OidcEntityId) null, pageable))
         .thenReturn(new PageImpl<Deployment>(deployments));
 
     Page<Deployment> pagedDeployment = deploymentService.getDeployments(pageable, null, null, null);
@@ -179,11 +164,12 @@ public class DeploymentServiceTest {
     if (ispresent) {
       Mockito.when(imService.getDeploymentExtendedInfo(Mockito.any()))
           .thenReturn(Optional.of("extendedinfo"));
-      assertThat(deploymentService.getDeploymentExtendedInfo(deployment.getId(), null)).isEqualTo("extendedinfo");
+      assertThat(deploymentService.getDeploymentExtendedInfo(deployment.getId(), null))
+          .isEqualTo("extendedinfo");
     } else {
-      Mockito.when(imService.getDeploymentExtendedInfo(Mockito.any()))
-          .thenReturn(Optional.empty());
-      assertThat(deploymentService.getDeploymentExtendedInfo(deployment.getId(), null)).isEqualTo("[]");
+      Mockito.when(imService.getDeploymentExtendedInfo(Mockito.any())).thenReturn(Optional.empty());
+      assertThat(deploymentService.getDeploymentExtendedInfo(deployment.getId(), null))
+          .isEqualTo("[]");
     }
   }
 
@@ -198,16 +184,18 @@ public class DeploymentServiceTest {
     if (ispresent) {
       Mockito.when(imService.getDeploymentLog(Mockito.any()))
           .thenReturn(Optional.of("deploymentlog"));
-      assertThat(deploymentService.getDeploymentLog(deployment.getId(), null)).isEqualTo("deploymentlog");
+      assertThat(deploymentService.getDeploymentLog(deployment.getId(), null))
+          .isEqualTo("deploymentlog");
     } else {
-      Mockito.when(imService.getDeploymentLog(Mockito.any()))
-          .thenReturn(Optional.empty());
-      assertThat(deploymentService.getDeploymentLog(deployment.getId(), null)).isEqualTo("deployment error");
+      Mockito.when(imService.getDeploymentLog(Mockito.any())).thenReturn(Optional.empty());
+      assertThat(deploymentService.getDeploymentLog(deployment.getId(), null))
+          .isEqualTo("deployment error");
     }
   }
 
- private Deployment basecreateDeploymentSuccessful(DeploymentRequest deploymentRequest,
-      Map<String, NodeTemplate> nodeTemplates) throws Exception {
+  private Deployment basecreateDeploymentSuccessful(
+      DeploymentRequest deploymentRequest, Map<String, NodeTemplate> nodeTemplates)
+      throws Exception {
 
     if (nodeTemplates == null) {
       nodeTemplates = Maps.newHashMap();
@@ -217,28 +205,28 @@ public class DeploymentServiceTest {
     parsingResult.setTopology(new Topology());
     parsingResult.getTopology().setNodeTemplates(nodeTemplates);
 
-    Mockito.doReturn(parsingResult).when(toscaService).prepareTemplate(
-        deploymentRequest.getTemplate(),
-        deploymentRequest.getParameters());
+    Mockito.doReturn(parsingResult)
+        .when(toscaService)
+        .prepareTemplate(deploymentRequest.getTemplate(), deploymentRequest.getParameters());
 
-    Mockito
-        .when(deploymentRepository.save(Mockito.any(Deployment.class)))
-        .thenAnswer(y -> {
-          Deployment deployment = (Deployment) y.getArguments()[0];
-          deployment.setId(UUID.randomUUID().toString());
-          return deployment;
-        });
+    Mockito.when(deploymentRepository.save(Mockito.any(Deployment.class)))
+        .thenAnswer(
+            y -> {
+              Deployment deployment = (Deployment) y.getArguments()[0];
+              deployment.setId(UUID.randomUUID().toString());
+              return deployment;
+            });
 
-    Mockito.when(resourceRepository.save(Mockito.any(Resource.class))).thenAnswer(y -> {
-      Resource res = (Resource) y.getArguments()[0];
-      res.getDeployment().getResources().add(res);
-      return res;
-    });
+    Mockito.when(resourceRepository.save(Mockito.any(Resource.class)))
+        .thenAnswer(
+            y -> {
+              Resource res = (Resource) y.getArguments()[0];
+              res.getDeployment().getResources().add(res);
+              return res;
+            });
 
     ProcessInstanceBuilder builder = Mockito.spy(new ProcessInstanceBuilderImpl(wfService));
-    Mockito
-        .when(wfService.createProcessInstanceBuilder())
-        .thenReturn(builder);
+    Mockito.when(wfService.createProcessInstanceBuilder()).thenReturn(builder);
     Mockito.when(builder.start()).thenReturn(Mockito.mock(ProcessInstance.class));
 
     return deploymentService.createDeployment(deploymentRequest, null, null);
@@ -250,10 +238,7 @@ public class DeploymentServiceTest {
     String nodeName1 = "server1";
     String nodeName2 = "server2";
 
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     Map<String, Capability> capabilities = Maps.newHashMap();
 
@@ -278,10 +263,12 @@ public class DeploymentServiceTest {
     assertThat(returneDeployment.getResources())
         .extracting(Resource::getToscaNodeName)
         .containsExactlyInAnyOrder(nodeName1, nodeName2);
-    assertThat(returneDeployment.getResources()).allSatisfy(resource -> {
-      assertThat(resource.getToscaNodeType()).isEqualTo(nodeTypeCompute);
-      assertThat(resource.getState()).isEqualTo(NodeStates.INITIAL);
-    });
+    assertThat(returneDeployment.getResources())
+        .allSatisfy(
+            resource -> {
+              assertThat(resource.getToscaNodeType()).isEqualTo(nodeTypeCompute);
+              assertThat(resource.getState()).isEqualTo(NodeStates.INITIAL);
+            });
 
     returneDeployment
         .getResources()
@@ -292,10 +279,7 @@ public class DeploymentServiceTest {
 
   @Test
   public void createComputeScalableDeploymentSuccessful() throws Exception {
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     Capability capability = new Capability();
     capability.setProperties(Maps.newHashMap());
@@ -317,10 +301,7 @@ public class DeploymentServiceTest {
 
   @Test
   public void createComputeScalableWithCountDeploymentSuccessful() throws Exception {
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     String nodeName = "server";
 
@@ -343,25 +324,23 @@ public class DeploymentServiceTest {
     Deployment returneDeployment = basecreateDeploymentSuccessful(deploymentRequest, nts);
 
     assertThat(returneDeployment.getResources()).hasSize(2);
-    assertThat(returneDeployment.getResources()).allSatisfy(resource -> {
-      assertThat(resource.getToscaNodeName()).isEqualTo(nodeName);
-      assertThat(resource.getToscaNodeType()).isEqualTo(nodeTypeCompute);
-    });
+    assertThat(returneDeployment.getResources())
+        .allSatisfy(
+            resource -> {
+              assertThat(resource.getToscaNodeName()).isEqualTo(nodeName);
+              assertThat(resource.getToscaNodeType()).isEqualTo(nodeTypeCompute);
+            });
 
     returneDeployment
         .getResources()
         .forEach(resource -> Mockito.verify(resourceRepository).save(resource));
-
   }
 
   @Test
   public void createDeploymentWithCallbackSuccessful() throws Exception {
     String callback = "http://localhost:8080";
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .callback(callback)
-        .build();
+    DeploymentRequest deploymentRequest =
+        DeploymentRequest.builder().template("template").callback(callback).build();
 
     Deployment returneDeployment = basecreateDeploymentSuccessful(deploymentRequest, null);
 
@@ -370,22 +349,24 @@ public class DeploymentServiceTest {
 
   @Test
   @Parameters({"nul,nul", "nul,1", "1,nul", "1,1", "1,2", "2,1"})
-  public void createDeploymentWithTimeoutValuesError(String timeout,
-      String providerTimeout) throws Exception {
+  public void createDeploymentWithTimeoutValuesError(String timeout, String providerTimeout)
+      throws Exception {
     @Nullable Integer iTimeout = (timeout.compareTo("nul") == 0 ? null : Integer.parseInt(timeout));
-    @Nullable Integer iProviderTimeout = (providerTimeout.compareTo("nul") == 0 ? null : Integer.parseInt(providerTimeout));
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .timeoutMins(iTimeout)
-        .providerTimeoutMins(iProviderTimeout)
-        .build();
+    @Nullable
+    Integer iProviderTimeout =
+        (providerTimeout.compareTo("nul") == 0 ? null : Integer.parseInt(providerTimeout));
+    DeploymentRequest deploymentRequest =
+        DeploymentRequest.builder()
+            .template("template")
+            .timeoutMins(iTimeout)
+            .providerTimeoutMins(iProviderTimeout)
+            .build();
 
-    AbstractThrowableAssert<?, ? extends Throwable> assertion = assertThatCode(
-        () -> basecreateDeploymentSuccessful(deploymentRequest, null));
-    if (iTimeout != null && iProviderTimeout != null
-        && iProviderTimeout > iTimeout) {
-      assertion.isInstanceOf(BadRequestException.class)
+    AbstractThrowableAssert<?, ? extends Throwable> assertion =
+        assertThatCode(() -> basecreateDeploymentSuccessful(deploymentRequest, null));
+    if (iTimeout != null && iProviderTimeout != null && iProviderTimeout > iTimeout) {
+      assertion
+          .isInstanceOf(BadRequestException.class)
           .hasMessage("ProviderTimeout must be <= Timeout");
     } else {
       assertion.doesNotThrowAnyException();
@@ -394,10 +375,7 @@ public class DeploymentServiceTest {
 
   @Test
   public void createChronosDeploymentSuccessful() throws Exception {
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     String nodeName1 = "job1";
     String nodeName2 = "job2";
@@ -419,9 +397,11 @@ public class DeploymentServiceTest {
     assertThat(returneDeployment.getResources())
         .extracting(Resource::getToscaNodeName)
         .containsExactlyInAnyOrder(nodeName1, nodeName2);
-    assertThat(returneDeployment.getResources()).allSatisfy(resource -> {
-      assertThat(resource.getToscaNodeType()).isEqualTo(nodeType);
-    });
+    assertThat(returneDeployment.getResources())
+        .allSatisfy(
+            resource -> {
+              assertThat(resource.getToscaNodeType()).isEqualTo(nodeType);
+            });
 
     returneDeployment
         .getResources()
@@ -430,10 +410,7 @@ public class DeploymentServiceTest {
 
   @Test
   public void createQcgDeploymentSuccessful() throws Exception {
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     String nodeName1 = "job1";
     String nodeType = "tosca.nodes.indigo.Qcg.Job";
@@ -449,15 +426,16 @@ public class DeploymentServiceTest {
     assertThat(returneDeployment.getResources())
         .extracting(Resource::getToscaNodeName)
         .containsExactlyInAnyOrder(nodeName1);
-    assertThat(returneDeployment.getResources()).allSatisfy(resource -> {
-      assertThat(resource.getToscaNodeType()).isEqualTo(nodeType);
-    });
+    assertThat(returneDeployment.getResources())
+        .allSatisfy(
+            resource -> {
+              assertThat(resource.getToscaNodeType()).isEqualTo(nodeType);
+            });
 
     returneDeployment
         .getResources()
         .forEach(resource -> Mockito.verify(resourceRepository).save(resource));
   }
-
 
   @Test
   public void deleteDeploymentNotFound() throws Exception {
@@ -469,9 +447,7 @@ public class DeploymentServiceTest {
   }
 
   @Test
-  @Parameters({
-      "DELETE_IN_PROGRESS",
-      "DELETE_COMPLETE" })
+  @Parameters({"DELETE_IN_PROGRESS", "DELETE_COMPLETE"})
   public void deleteDeploymentFailForConflict(Status status) throws Exception {
     Deployment deployment = ControllerTestUtils.createDeployment();
     deployment.setStatus(status);
@@ -485,14 +461,15 @@ public class DeploymentServiceTest {
 
   @Test
   @Parameters({
-      "CREATE_IN_PROGRESS",
-      "CREATE_COMPLETE",
-      "CREATE_FAILED",
-      "UPDATE_IN_PROGRESS",
-      "UPDATE_COMPLETE",
-      "UPDATE_FAILED",
-      "DELETE_FAILED",
-      "UNKNOWN" })
+    "CREATE_IN_PROGRESS",
+    "CREATE_COMPLETE",
+    "CREATE_FAILED",
+    "UPDATE_IN_PROGRESS",
+    "UPDATE_COMPLETE",
+    "UPDATE_FAILED",
+    "DELETE_FAILED",
+    "UNKNOWN"
+  })
   public void deleteDeploymentSuccesfulNoProvider(Status status) throws Exception {
 
     Deployment deployment = ControllerTestUtils.createDeployment();
@@ -512,14 +489,15 @@ public class DeploymentServiceTest {
 
   @Test
   @Parameters({
-      "CREATE_IN_PROGRESS",
-      "CREATE_COMPLETE",
-      "CREATE_FAILED",
-      "UPDATE_IN_PROGRESS",
-      "UPDATE_COMPLETE",
-      "UPDATE_FAILED",
-      "DELETE_FAILED",
-      "UNKNOWN" })
+    "CREATE_IN_PROGRESS",
+    "CREATE_COMPLETE",
+    "CREATE_FAILED",
+    "UPDATE_IN_PROGRESS",
+    "UPDATE_COMPLETE",
+    "UPDATE_FAILED",
+    "DELETE_FAILED",
+    "UNKNOWN"
+  })
   public void deleteDeploymentSuccesfulWithProvider(Status status) throws Exception {
 
     Deployment deployment = ControllerTestUtils.createDeployment();
@@ -529,9 +507,7 @@ public class DeploymentServiceTest {
     Mockito.when(deploymentRepository.save(deployment)).thenReturn(deployment);
 
     ProcessInstanceBuilderImpl builder = Mockito.spy(new ProcessInstanceBuilderImpl(wfService));
-    Mockito
-        .when(wfService.createProcessInstanceBuilder())
-        .thenReturn(builder);
+    Mockito.when(wfService.createProcessInstanceBuilder()).thenReturn(builder);
     Mockito.when(builder.start()).thenReturn(Mockito.mock(ProcessInstance.class));
 
     ExecutionQueryImpl executionQueryImpl = Mockito.spy(new ExecutionQueryImpl());
@@ -549,23 +525,16 @@ public class DeploymentServiceTest {
   // TO-DO
 
   @Test
-  @Parameters({
-      "CHRONOS",
-      "MARATHON",
-      "QCG"})
+  @Parameters({"CHRONOS", "MARATHON", "QCG"})
   public void updateDeploymentBadRequest(DeploymentProvider provider) throws Exception {
 
     String id = UUID.randomUUID().toString();
     Deployment deployment = ControllerTestUtils.createDeployment(id);
     deployment.setDeploymentProvider(provider);
     Mockito.when(deploymentRepository.findOne(id)).thenReturn(deployment);
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
     assertThatThrownBy(() -> deploymentService.updateDeployment(id, deploymentRequest, null))
         .isInstanceOf(BadRequestException.class);
-
   }
 
   @Test
@@ -578,38 +547,30 @@ public class DeploymentServiceTest {
 
   @Test
   @Parameters({
-      "CREATE_FAILED",
-      "CREATE_IN_PROGRESS",
-      "DELETE_IN_PROGRESS",
-      "DELETE_FAILED",
-      "DELETE_COMPLETE",
-      "UPDATE_IN_PROGRESS",
-      "UNKNOWN" })
+    "CREATE_FAILED",
+    "CREATE_IN_PROGRESS",
+    "DELETE_IN_PROGRESS",
+    "DELETE_FAILED",
+    "DELETE_COMPLETE",
+    "UPDATE_IN_PROGRESS",
+    "UNKNOWN"
+  })
   public void updateDeploymentConflict(Status status) throws Exception {
     String id = UUID.randomUUID().toString();
     Deployment deployment = ControllerTestUtils.createDeployment(id);
     deployment.setDeploymentProvider(DeploymentProvider.HEAT);
     deployment.setStatus(status);
     Mockito.when(deploymentRepository.findOne(id)).thenReturn(deployment);
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
 
     assertThatThrownBy(() -> deploymentService.updateDeployment(id, deploymentRequest, null))
         .isInstanceOf(ConflictException.class);
   }
 
   @Test
-  @Parameters({
-      "CREATE_COMPLETE",
-      "UPDATE_FAILED",
-      "UPDATE_COMPLETE" })
+  @Parameters({"CREATE_COMPLETE", "UPDATE_FAILED", "UPDATE_COMPLETE"})
   public void updateDeploymentSuccess(Status status) throws Exception {
-    DeploymentRequest deploymentRequest = DeploymentRequest
-        .builder()
-        .template("template")
-        .build();
+    DeploymentRequest deploymentRequest = DeploymentRequest.builder().template("template").build();
     Map<String, NodeTemplate> nts = getNodeTemplates();
 
     // case create complete

@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 public @interface ServiceVersion {
 
   /**
@@ -34,5 +34,4 @@ public @interface ServiceVersion {
    * @return the version
    */
   String value();
-
 }

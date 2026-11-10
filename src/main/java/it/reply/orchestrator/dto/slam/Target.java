@@ -42,5 +42,4 @@ public class Target {
   @JsonProperty("restrictions")
   @Nullable
   private Restrictions restrictions;
-
 }
