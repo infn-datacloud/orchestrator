@@ -66,8 +66,8 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.2</jacoco-maven-plugin.version>
-    <checkstyle-plugin.version>3.1.0</checkstyle-plugin.version>
-    <puppycrawl-tools-checkstyle.version>8.24</puppycrawl-tools-checkstyle.version>
+    <spotless-maven-plugin.version>2.30.0</spotless-maven-plugin.version>
+    <google-java-format.version>1.7</google-java-format.version>
     <editorconfig-maven-plugin.version>0.0.10</editorconfig-maven-plugin.version>
 
     <!-- Dependencies -->
@@ -662,37 +662,24 @@
           </execution>
         </executions>
       </plugin>
+      <!-- Run spotless:apply or spotless:check explicitly; Java 8 compatible. -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${puppycrawl-tools-checkstyle.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>checkstyle</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless-maven-plugin.version}</version>
         <configuration>
-          <consoleOutput>true</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <failOnViolation>true</failOnViolation>
-          <violationSeverity>warning</violationSeverity>
-          <configLocation>
-            ${project.basedir}/tools/maven-checkstyle-plugin/google_checks.xml
-          </configLocation>
-          <excludes>
-            it/reply/orchestrator/dto/kubernetes/fluxcd/**
-          </excludes>
+          <java>
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+            </includes>
+            <excludes>
+              <exclude>src/main/java/it/reply/orchestrator/dto/kubernetes/fluxcd/**</exclude>
+            </excludes>
+            <googleJavaFormat>
+              <version>${google-java-format.version}</version>
+            </googleJavaFormat>
+          </java>
         </configuration>
       </plugin>
       <plugin>
